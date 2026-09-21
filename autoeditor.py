@@ -637,7 +637,7 @@ def ia_gemini(cheie, model, prompt, cadre_b64):
     return json.loads(txt)
 
 
-def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript):
+def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
     """Creierul: pentru fiecare candidat, AI-ul vede 2 cadre + ce s-a vorbit si
     da scor (0-10) + titlu personalizat. Fara AI bun in zona = candidatul cade."""
     ramase = []
@@ -835,7 +835,7 @@ def main():
         else:
             model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
             print(f"   MOD AI ACTIV ({model}): {len(episoade)} candidati judecati semantic...")
-            episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript)
+            episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript, baza)
             print(f"   AI a pastrat {len(episoade)} episoade (cele cu scor mic au cazut)")
     print(f"   plan: {len(episoade)} episoade ({sum(1 for e in episoade if e['tip']=='poveste')} in modul poveste)")
 
