@@ -644,7 +644,18 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript):
     for e in episoade:
         varf = e["varf"]
         txt = " ".join(t for a, b, t in transcript if varf - 25 <= a <= varf + 15)[:400] if transcript else "(fara transcript)"
+        # CREIERUL: contextul complet al canalului + titluri vechi (evita repetitiile)
+        creier = ""
+        p_creier = os.path.join(baza, "cunoastere", "canal.md")
+        if os.path.exists(p_creier):
+            creier = open(p_creier, encoding="utf-8").read()[:3000] + "\n\n"
+        p_titluri = os.path.join(baza, "cunoastere", "titluri_folosite.txt")
+        vechi_t = ""
+        if os.path.exists(p_titluri):
+            randuri = [r.strip() for r in open(p_titluri, encoding="utf-8") if r.strip()]
+            vechi_t = "TITLURI DEJA FOLOSITE (nu le repeta, gaseste unghiuri noi): " + " | ".join(randuri[-25:]) + "\n\n"
         prompt = (
+            creier + vechi_t +
             'Esti editor AI pentru canalul "PokeCity" (Minecraft + Pokemon, COPII 6-13 ani, Romania). '
             'Judeci un moment dintr-un live. Ce s-a vorbit in jur: "' + txt + '". '
              'Vezi 6 cadre din joc (Minecraft/Pixelmon pe serverul PokeCity). Analizeaza CE SE INTAMPLA '
@@ -807,6 +818,14 @@ def main():
         else:
             transcript = tr
             print(f"   transcript AI: {len(tr)} replici")
+            # MEMORIA: transcriptul fiecarui live intra in cunoastere/ (si in repo)
+            cu_dir = os.path.join(baza, "cunoastere", "transcripte")
+            os.makedirs(cu_dir, exist_ok=True)
+            nume = datetime.now().strftime("LIVE_%Y-%m-%d_%H%M") + ".json"
+            json.dump({"data": datetime.now().isoformat(), "sursa": os.path.basename(opt.video),
+                       "replici": tr}, open(os.path.join(cu_dir, nume), "w", encoding="utf-8"),
+                      ensure_ascii=False)
+            print(f"   memorie: {nume} salvat in cunoastere/transcripte/")
 
     if opt.ai:
         cheie = citeste_cheie_gemini(baza)
@@ -897,6 +916,14 @@ def main():
             print("   " + c)
 
     if facute:
+        try:
+            os.makedirs(os.path.join(baza, "cunoastere", "rapoarte"), exist_ok=True)
+            rap_complet = open(os.path.join(folder, "RAPORT.md"), encoding="utf-8").read()
+            open(os.path.join(baza, "cunoastere", "rapoarte",
+                 "RAPORT_" + datetime.now().strftime("%Y-%m-%d_%H%M") + ".md"), "w",
+                encoding="utf-8").write(rap_complet)
+        except Exception:
+            pass
         chk = ["", "## CHECKLIST (tot ce trebuie sa aiba un episod bun)"]
         for k, e, out in facute:
             chk.append(
@@ -915,6 +942,12 @@ def main():
         print("Subtitrari: transcriptul nu e disponibil (instalezi faster-whisper si rerulezi)")
 
     # ═══ KIT DE UPLOAD: tot ce lipuiesti in Studio, gata per episod ═══
+    # MEMORIA: titluri in istoric + raport in cunoastere/
+    titluri_noi = [e.get("ai_titlu") for e in episoade if e.get("ai_titlu")]
+    if titluri_noi:
+        with open(os.path.join(baza, "cunoastere", "titluri_folosite.txt"), "a", encoding="utf-8") as f:
+            for t in titluri_noi:
+                f.write(t + "\n")
     print("KIT de upload: miniaturi editate (din cadre REALE) + titlu/descriere/tag-uri...")
     TAGURI = ("nocivanu, nocivanu pokecity, nocivanu pokemon, pokecity, nocivanu minecraft, nociv, "
               "pokecity seria, minecraft cu pokemoni, pixelmon, minecraft pokemon mod, nocivanu extra, "
