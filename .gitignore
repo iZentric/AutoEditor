@@ -1,0 +1,12 @@
+# media generat (nu in repo — e greu si local)
+episodes/
+prindere/
+__pycache__/
+*.mp4
+*.wav
+*.log
+*.jpg
+!assets/efecte/confeti.webm
+# secrete — NICIODATA in repo
+.env
+client_secret.json
