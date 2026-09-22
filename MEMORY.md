@@ -672,3 +672,8 @@
 - UNDE SUNT: episodes/ = EP01.mp4 (2K urcat, fix confeti în lotul curent) + scene_tmp/ cache · liveuri/live_curent.mp4 = sursa 4,4GB (nu se comită)
 - COMENZI NOI: rapid.py URL [N] = lanț unic descărcare→randare→2K · urca_2k.py = urcă toate EP*.mp4 la 2560x1440 lanczos+unsharp (îl rulează singur după randare) · v3.15.5 = 786eb0d→(fix confeti commit nou)
 - LEȚIE: verifică PIX_FMT pe orice asset „transparent" (yuva420p vs yuv420p) + cadre VIZUAL din ieșirea FINALĂ, nu doar din surse.
+
+## 22.09 — STOP GENERAL (comanda user)
+- User: „opreste tot" → toate procesele omorâte (0 rulări), workspace curat 33MB.
+- STAREA: v3.16 pe GitHub (cd14d03) = pipeline GITHUB ACTIONS gata (episod.yml + pipeline_github.py, poarta 0.6, max 2 implicit, Release automat). EP01 local = corupt, ȘTERS. EPISOADE FINALIZATE: 0 — următoarea rundă se rulează de pe GitHub Actions (user: Actions → Episod din live → Run workflow + URL) sau la cerere.
+- Secret pt titluri AI pe Actions: GEMINI_API_KEY (opțional).
