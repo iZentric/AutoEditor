@@ -1402,7 +1402,14 @@ def main():
         try:
             if os.path.exists(cadru):
                 p = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura.jpg"), titlu_full, logo, sageata=(820, 240))
-                print(f"   miniatura: {os.path.basename(p)}")
+                print(f"   miniatura A: {os.path.basename(p)}")
+                for suf, sageata2 in (("B", (400, 600)), ("C", (640, 140))):
+                    try:
+                        p2 = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura_{suf}.jpg"),
+                                          titlu_full, logo, sageata=sageata2)
+                        print(f"   miniatura {suf}: {os.path.basename(p2)}")
+                    except Exception:
+                        pass
         except ImportError:
             print("   ! pt miniaturi instalezi: pip install pillow")
         desc = titlu_full + "\n\n"
