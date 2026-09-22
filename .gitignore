@@ -10,3 +10,4 @@ __pycache__/
 # secrete — NICIODATA in repo
 .env
 client_secret.json
+*.zip
