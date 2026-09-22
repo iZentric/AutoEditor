@@ -617,3 +617,12 @@
 - TESTE: E2E complet cu meme în RAPORT ✓ · chromakey izolat 74% transparent/26% alb ✓ · pipeline real 17%/0% ✓ · py_compile verde.
 - Pe git: v3.14 (f07b8ab).
 - TABELUL COMPLET cerut de user = livrat în răspuns (capabilități automate + ce-i lipsesc: meme-uri reale greenscreen de downloadat, logo.png, muzică licențiată, faster-whisper pt subtitrări pe PC).
+
+## 22.09 — THREAD 70: v3.15 CUVINTE-IMPACT (stil ZIAR) + SUNETE DE ATMOSFERĂ — LIVRAT+VIZUAL CONFIRMAT
+- User (cu link JH la t=5s): „copiază tot ce are în video: la început mini-subtitrări mari, cuvinte pe video, sunete gen bătături de ușă dacă e nevoie".
+- ANALIZĂ VIZUALĂ a lui JH (28 cadre la 1fps descărcate+citite): stil confirmat = cuvinte-soc în cutie mare rotunjită CENTRAT (ex „ZIAR" la 20s, ~0.8s) pe obiecte/evenimente · facecam sus-stânga (el o are în OBS — recomandat userului să-și pună webcam în scena OBS) · gameplay în „televizor" la început (intro compus).
+- v3.15 autoeditor.py: scrie_ass(..., impact_words) + Style IMPACT (Arial 96, BorderStyle 3 = cutie, Alignment 5 implicit, \pos(960,400)) + cuvinte din sfx_rand mapate pe categorie: hit→PUM! cadere→PAH! fericit→WOW! speriat→HOP! generic→BAM! (clasifica_sunet pe fișier).
+- 5 SUNETE SINTETIZATE în sunete_mele/ (python+ffmpeg, caleti profesionale): „bataie usa.mp3" (3 lovituri 115Hz amortizate) · „usa tranta.mp3" (70Hz+zdranganie) · „whoosh trecere.mp3" (lowpass+arc) · „boom adanc.mp3" (90→40Hz) · „riser tensiune.mp3" (200→900Hz crescendo).
+- **BUG CRITIC PRINS+FIX**: _ts() trunchea la int → impact words cu durata 0.00 (30.8→30.00 = invizibil!) → _ts rescris cu CENTISECUNDE reale (0:00:30.80). Verificat vizual: „BAM!" în cutie pe ecran la 30.4s ✓ (prima captura veche fără fix = fără text, a doua cu fix = text).
+- Rămâne valid: subtitrările mari sunt deja în pipeline (--subtitrari, faster-whisper pe PC).
+- Pe git: v3.15 (88a00bd). Tabel capabilități v3.14 rămâne; +2 rânduri (cuvinte-impact, sunete atmosferă sintetizate).
