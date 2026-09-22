@@ -91,15 +91,48 @@ def upload_fisier(cheie, cale):
     return uri, mime
 
 
-def cere(cheie, model, parts):
+def cere(cheie, model, parts, incercari=4):
     cerere = urllib.request.Request(
         GEN.format(model=model),
         data=json.dumps({"contents": [{"parts": parts}]}).encode(),
         method="POST",
         headers={"x-goog-api-key": cheie, "Content-Type": "application/json"})
-    with urllib.request.urlopen(cerere, timeout=900) as r:
-        d = json.load(r)
-    return d["candidates"][0]["content"]["parts"][0]["text"]
+    for i in range(incercari):
+        try:
+            with urllib.request.urlopen(cerere, timeout=900) as r:
+                d = json.load(r)
+            return d["candidates"][0]["content"]["parts"][0]["text"]
+        except urllib.error.HTTPError as ex:
+            if ex.code in (503, 429, 500) and i < incercari - 1:
+                pauza = 20 * (i + 1)
+                print(f"   (model ocupat {ex.code}; astept {pauza}s si reincerc {i+2}/{incercari})")
+                time.sleep(pauza)
+                continue
+            corp = ex.read().decode()[:400]
+            raise RuntimeError(f"Eroare API {ex.code}: {corp}") from None
+    raise RuntimeError("API neraspuns dupa retry")
+
+
+DEFAULT_MODELE = "gemini-3.8-flash,gemini-3.5-flash,gemini-flash-latest"
+
+
+def modele_din_env():
+    return [m.strip() for m in os.environ.get("GEMINI_MODEL", DEFAULT_MODELE).split(",") if m.strip()]
+
+
+def cere_fallback(cheie, parts):
+    """Incearca modelele in ordine (GEMINI_MODEL poate fi lista cu virgule).
+    Daca unul e aglomerat (503) sau depaseste cota, trece automat la urmatorul."""
+    modele = modele_din_env()
+    per = 4 if len(modele) == 1 else 2
+    ultima = None
+    for model in modele:
+        try:
+            return model, cere(cheie, model, parts, incercari=per)
+        except Exception as ex:
+            print(f"   ! {model} n-a raspuns ({str(ex)[:70]})")
+            ultima = ex
+    raise ultima if ultima else RuntimeError("Niciun model configurat")
 
 
 def prompt_complet():
@@ -130,7 +163,6 @@ def main():
         sys.exit(1)
     sursa = sys.argv[1]
     cheie = citeste_cheie()
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
     prompt = prompt_complet()
 
     if sursa.startswith("http"):
@@ -145,7 +177,7 @@ def main():
 
     print(f"2/3 Gemini ({model}) vizioneaza TOT... (poate dura 1-5 min pentru ore de material)")
     try:
-        text = cere(cheie, model, parts)
+        model, text = cere_fallback(cheie, parts)
     except urllib.error.HTTPError as ex:
         corp = ""
         if hasattr(ex, "read"):

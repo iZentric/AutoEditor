@@ -45,7 +45,7 @@ def descarca_vod(url):
     return out
 
 
-def momente_cu_gemini(cheie, model, video):
+def momente_cu_gemini(cheie, video):
     """Gemini VIDEAZA tot materialul si intoarce momentele in JSON structurat."""
     creier = ""
     for fis, plafon in (("canal.md", 2500), ("reguli.md", 1200)):
@@ -66,7 +66,7 @@ def momente_cu_gemini(cheie, model, video):
         uri, mime = pr.upload_fisier(cheie, os.path.abspath(video))
         parts = [{"file_data": {"mime_type": mime, "file_uri": uri}}, {"text": prompt}]
     print("2/4 Gemini vizioneaza TOT si alege momentele...")
-    text = pr.cere(cheie, model, parts)
+    _, text = pr.cere_fallback(cheie, parts)
     txt = text.strip()
     if txt.startswith("```"):
         txt = txt.strip("`")
@@ -121,9 +121,8 @@ def main():
     if not opt.fara_ai:
         cheie = ae.citeste_cheie_gemini(BASE)
         if cheie:
-            model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
             try:
-                momente = momente_cu_gemini(cheie, model, video)[:opt.max]
+                momente = momente_cu_gemini(cheie, video)[:opt.max]
             except Exception as ex:
                 print(f"   ! Gemini a esuat ({str(ex)[:80]}) -> trec pe selectia pe energie")
         else:

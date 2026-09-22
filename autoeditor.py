@@ -886,7 +886,7 @@ def main():
             print("   MOD AI OPRIT: lipseste cheia. Gratis, 1 min: aistudio.google.com/apikey -> Get API key")
             print("   -> creezi fisier autoeditor/.env cu linia:  GEMINI_API_KEY=cheia_ta")
         else:
-            model = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+            model = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
             print(f"   MOD AI ACTIV ({model}): {len(episoade)} candidati judecati semantic...")
             episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript, baza)
             print(f"   AI a pastrat {len(episoade)} episoade (cele cu scor mic au cazut)")

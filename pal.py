@@ -41,7 +41,7 @@ def intrebare_gemini(k, prompt):
     import urllib.request
     req = urllib.request.Request(
         f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{os.environ.get('GEMINI_MODEL', 'gemini-2.0-flash')}:generateContent",
+        f"{os.environ.get('GEMINI_MODEL', 'gemini-3.8-flash')}:generateContent",
         data=body, method="POST",
         headers={"Content-Type": "application/json", "x-goog-api-key": k})
     with urllib.request.urlopen(req, timeout=90) as r:
