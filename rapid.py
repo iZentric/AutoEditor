@@ -15,10 +15,15 @@ def sh(cmd, env=None):
 sh([sys.executable, "-m", "yt_dlp", "-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio",
     "--merge-output-format", "mp4", "--concurrent-fragments", "8",
     "-o", "liveuri/live_curent.%(ext)s", "--no-playlist", URL])
-surse = sorted(glob.glob("liveuri/live_curent.*mp4"))
-if not surse:
-    print("!! niciun fisier descărcat", flush=True); sys.exit(1)
-src = surse[0]
+if not os.path.exists("liveuri/live_curent.mp4"):
+    # fuziunea a lipsit (ffmpeg era absent la inceput) -> fuzioneaza acum lossless
+    v, a = "liveuri/live_curent.f299.mp4", "liveuri/live_curent.f140.m4a"
+    if os.path.exists(v) and os.path.exists(a):
+        subprocess.run(["ffmpeg", "-y", "-i", v, "-i", a, "-c:v", "copy", "-c:a", "copy",
+                        "-shortest", "liveuri/live_curent.mp4"], check=True)
+src = "liveuri/live_curent.mp4"
+if not os.path.exists(src):
+    print("!! nu exista live_curent.mp4", flush=True); sys.exit(1)
 print("SURSA:", src, os.path.getsize(src) // (1024*1024), "MB", flush=True)
 
 # 2) RANDARE 1080p30 (calea PROBATĂ pe 2GB RAM; 2K direct pica)

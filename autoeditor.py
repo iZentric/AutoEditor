@@ -536,8 +536,23 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
                     for t, cale, _ in (sfx_rand or [])]
     ass = scrie_ass(os.path.join(folder, f"EP{nr:02d}.ass"), durata, poveste, impact_words)
     cmd = [ff, "-y"]
-    for start, lung in poveste["scene"]:
-        cmd += ["-ss", str(max(0, start)), "-t", str(lung), "-i", video]
+    # sursa MARE (live intreg 2h+): 6+ decodatoare simultane pe acelasi fisier = RAM explosion.
+    # pre-taiem fiecare scena o data in clip mic (refolosibil la rerulare) si randam din clipuri.
+    big = os.path.getsize(video) > 200 * 1024 * 1024
+    tmp_sc = os.path.join(folder, "scene_tmp")
+    if big:
+        os.makedirs(tmp_sc, exist_ok=True)
+    for i, (start, lung) in enumerate(poveste["scene"]):
+        if big:
+            clip = os.path.join(tmp_sc, f"EP{nr:02d}_s{i}.mp4")
+            if not os.path.exists(clip):
+                print(f"   pre-taie scena {i+1}/{len(poveste['scene'])} ({int(lung)}s)...", flush=True)
+                subprocess.run([ff, "-y", "-ss", str(max(0, start)), "-t", str(lung), "-i", video,
+                                "-r", "30", "-c:v", "libx264", "-preset", "ultrafast", "-crf", "18",
+                                "-c:a", "aac", "-b:a", "192k", clip], capture_output=True)
+            cmd += ["-i", clip]
+        else:
+            cmd += ["-ss", str(max(0, start)), "-t", str(lung), "-i", video]
     filtre, n = [], len(poveste["scene"])
     # concat vrea perechi INTERLEAVED per segment: [0:v][0:a][1:v][1:a]...
     concat_in = "".join(f"[{i}:v][{i}:a]" for i in range(n))
@@ -616,7 +631,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
         ci = n + (1 if logo else 0)
         # confeti.webm = 2s cu fundal transparent; tpad=clone (transparent) pana la moment, apoi overlay
         intarziere = max(0, durata - 8)
-        filtre.append(f"[{ci}:v]scale=-2:{h_out},tpad=start_duration={intarziere}:start_mode=clone[cf]")
+        filtre.append(f"[{ci}:v]scale=-2:{h_out},chromakey=0x000000:0.15:0.02,tpad=start_duration={intarziere}:start_mode=clone[cf]")
         filtre.append(f"{vmap}[cf]overlay=0:0:eof_action=pass[vfin]")
         vmap = "[vfin]"
     harta_a = "[ac]"
@@ -679,6 +694,10 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=folder)
     if r.returncode != 0 or not os.path.exists(os.path.join(folder, out)):
         print(f"  ! EP{nr:02d}: ffmpeg a esuat: {(r.stderr or '')[-800:]}")
+        try:
+            open(os.path.join(folder, f"EROARE_EP{nr:02d}.log"), "w", encoding="utf-8").write(r.stderr or "")
+        except Exception:
+            pass
         open(os.path.join(folder, "err.txt"), "w").write("CMD: " + " ".join(cmd) + "\n\nSTDERR:\n" + (r.stderr or ""))
         return None
     return out

@@ -2,7 +2,7 @@
 import os, subprocess, sys, glob
 import imageio_ffmpeg
 ff = imageio_ffmpeg.get_ffmpeg_exe()
-for ep in sorted(glob.glob("episodes/EP*_*.mp4")):
+for ep in sorted(glob.glob("episodes/EP[0-9][0-9]*.mp4")):
     if "_2K" in ep or os.path.exists(ep.replace(".mp4", "_2K.mp4")):
         continue
     out = ep.replace(".mp4", "_2K.mp4")
