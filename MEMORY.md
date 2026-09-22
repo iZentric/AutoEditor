@@ -626,3 +626,10 @@
 - **BUG CRITIC PRINS+FIX**: _ts() trunchea la int → impact words cu durata 0.00 (30.8→30.00 = invizibil!) → _ts rescris cu CENTISECUNDE reale (0:00:30.80). Verificat vizual: „BAM!" în cutie pe ecran la 30.4s ✓ (prima captura veche fără fix = fără text, a doua cu fix = text).
 - Rămâne valid: subtitrările mari sunt deja în pipeline (--subtitrari, faster-whisper pe PC).
 - Pe git: v3.15 (88a00bd). Tabel capabilități v3.14 rămâne; +2 rânduri (cuvinte-impact, sunete atmosferă sintetizate).
+
+## 22.09 — THREAD 71: v3.15.1 MFK-SAFE (COPPA) + VERIFICARE COMPLETĂ „suntem gata pt Minecraft copii" — LIVRAT
+- User: „avem tot ce trebuie pentru video-urile de Minecraft pentru copii? caută bine".
+- CERCETARE (7 surse 2026): ①**COPPA: conținut pt <13 ani = OBLIGATORIU „Made for Kids"** la upload (FTC amendă până la 42.530$/video!) → MFK închide automat: comentarii, ads personalizate, end screens, cards, SuperChat → RPM copii 1-3$ vs 5-15$ (licențiere Moonbug/WildBrain = varianta de viitor) ②pacing copii 9-12: shot length 3-6s, muzică 110-130 BPM, culori vii, audio-cues repetitive (CUVINTELE-IMPACT = exact asta ✓) ③YouTube Kids app = algoritm separat mai strict (metadata/thumbnails să treacă ecranele lor) ④program de upload constant = încrederea părinților (avem: Lun/Mar/Vin/Dum 11:30) ⑤NICIO colectare date personale de la copii.
+- v3.15.1 FIX-uri: INTREBARE_TEXT „Ghicește și Vezi mai departe" + CTA_TEXT „LIKE + ABONEAZĂ-TE" (fără comentarii — imposibile pe MFK!) + kit upload cu ⚠️ instructiunea MFK obligatorie.
+- VERDICT GATA pt Minecraft copii: DA — cu checklist-ul complet livrat în răspuns (ce avem automat vs ce-i opțional de la user: meme-uri, logo, muzică NCS, program constant, LIVE-urile reale pt calibrare).
+- Pe git: v3.15.1 (4024bfe).
