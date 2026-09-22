@@ -648,3 +648,7 @@
 - CE AM DEJA PENTRU EL (pipeline = identic editorial cu JH): FLOW 9 schimbări/min, cuvinte-impact, sunete pe evenimente, titluri patterne RO trending, -14 LUFS, meme slots, zoom, kit upload, Releases, autopilot.
 - PLAN REALIST 90 ZILE (descris în răspuns user): cadență 2 video-uri/săpt din LIVE-uri (Joi-Dum) + hit-machine PokeCity (episoade serializate) + colab Nocivanu (outlier 2.2x, +61K/3z) + shorts Lun/Mar/Vin/Dum. OBIECTIV: 10K ab în 90z, primul 100K video.
 - Pe git: t73 în memorie.
+
+## 22.09 — THREAD 74: CONFIRMARE FINALĂ STRATEGIE — LIVRAT
+- User: „deci facem tot doar că în stilul în care canalul meu poate crește, video-urile de 3 minute și etc, da?" → CONFIRMARE: DA. Tot sistemul (v3.15.2) = calibrat pe canalul lui: episoade 3 min (170s, final elastic min 90s), public 8-15 RO non-MFK, FLOW MrBeast, cuvinte-impact, sunetele lui, -14 LUFS, titluri patterne trending RO, autopilot vegheaza→flux→Releases, memoria în repo.
+- AȘTEPT GO pentru primul episod real. Nimic nou de construit — doar rulare + calibrare pe material real.
