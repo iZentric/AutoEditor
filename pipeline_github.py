@@ -11,9 +11,17 @@ def sh(cmd, env=None):
         sys.exit(f"!! A PICAT: {' '.join(cmd[:4])}")
 
 # 1) descarcare 1080p60 H.264 (runner ARE ffmpeg -> fuziunea merge nativ)
-sh([sys.executable, "-m", "yt_dlp", "-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio",
-    "--merge-output-format", "mp4", "--concurrent-fragments", "8",
-    "-o", "live_curent.%(ext)s", "--no-playlist", URL])
+# YouTube blocheaza IP-urile de datacenter ("Sign in to confirm you're not a bot"):
+#  - clientul android_vr/tv trece de obicei fara cookies
+#  - daca exista cookies.txt (Secret COOKIES_YT) -> folosim cookies = garantat
+cmd = [sys.executable, "-m", "yt_dlp", "--merge-output-format", "mp4",
+       "--concurrent-fragments", "8", "-o", "live_curent.%(ext)s", "--no-playlist"]
+if os.path.exists("cookies.txt"):
+    print("folosesc cookies.txt (Secret COOKIES_YT)", flush=True)
+    cmd += ["--cookies", "cookies.txt"]
+cmd += ["--extractor-args", "youtube:player_client=android_vr,tv",
+        "-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio", URL]
+sh(cmd)
 src = "live_curent.mp4"
 if not os.path.exists(src):
     v, a = "live_curent.f299.mp4", "live_curent.f140.m4a"
