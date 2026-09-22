@@ -1078,7 +1078,17 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             '{"scor": 0-10 (cat de tare e momentul pentru copii), '
             '"de_ce": "o propozitie scurta", '
             '"titlu": "titlu YouTube max 60 caractere, stil MrBeast: PRIMELE 3 CUVINTE = soc/FOMO '
-            '(AM GASIT, L-AM PRINS, NIMENI NU STIE, PRIMUL DIN...), apoi misterul; cuvintele-cheie in MAJUSCULE; romaneste. PATTERNE care merg ACUM in trending RO gaming: «CE am gasit in X..», «DE CE este ASTA in X?», «Am gasit TOATE SECRETELE din X!», «X distruge TOT!», «Testez MITURI SECRETE in X..»", '
+            '(AM GASIT, L-AM PRINS, NIMENI NU STIE, PRIMUL DIN...), apoi misterul; cuvintele-cheie in MAJUSCULE; romaneste. "
+            "STILUL EXACT iSilent + JocuriHorror (top 2 RO, analizati pe 60 de titluri reale) — formulele lor de aur: "
+            "«CE am gasit in X..» · «NU Cumpara din ACEST X..» / «NU sta in X..» (NU + verb + ACEST) · «CUM am FURAT cel mai RAR OU ?» "
+            "(CUM + verb perfect + substantiv SUPERLATIV) · «L-am TROLLAT si a PLANS 😂» (actiune + CONSECINTA emotionala) · "
+            "«ERA SA MOR...» / «NU m-am ENERVAT..» (reactie stoica, final misterios) · «CINE-I CRIMINALUL ?» / «CINE se ASCUNDE mai BINE pe X ?» "
+            "(intrebare CINE) · «Sunt SKINWALKER ?» / «Te Ascunzi ?» (intrebare scurta 2-3 cuvinte) · «Te rog NU BEA asta.. 💀» · "
+            "«Am gasit CAT in the HAT in Lumea MEA..» (RECURENT: acelasi personaj/joc in serii — pt noi: POKECITY in fiecare titlu de epilog) · "
+            "«Am SCHIMBAT Nota La TEST din 3 in 10..» (transformare CU NUMERE). "
+            "REGLE DE FORMAT obligatorii: max ~55 caractere · 0-1 emoji (😂/😭/💀/😱 doar daca se potriveste) · «..» la final = mister "
+            "· substantivele-cheie in MAJUSCULE (POKECITY, LEGENDAR, RAR) · NICIODATA clickbait minciunos — titlul promite EXACT ce e in video · "
+            "varianta poate fi si intrebare. Scrie 3 variante: una CE am gasit, una intrebare scurta, una cu consecinta emotionala.", '
             '"promite": ["ce promite titlul, max 3 lucruri"], '
             '"livrat": true/false — TRUE doar daca TOT ce promite titlul chiar se vede/se aude in moment}. '
             'REGULA DE AUR: titlul descrie DOAR ce chiar se intampla in moment (vezi cadrele + ce s-a vorbit). '
