@@ -46,9 +46,9 @@ MUZICA_VOLUME = 0.12  # volum muzica de fundal
 COLD_OPEN = 8         # secunde de reactie la inceput (teaserul momentului maxim)
 P1 = 55               # SETUP (scena 1)
 P2 = 55               # DESFASURARE (scena 2)
-INTREBARE_TEXT = "CE CREZI CĂ SE INTÂMPLĂ? Ghicește și Vezi mai departe!"
+INTREBARE_TEXT = "CE CREZI CĂ SE INTÂMPLĂ? Scrie în comentarii!"
 HYPE_TEXT = "ATENTIE! ACUM VINE MOMENTUL CEL MAI TARE!"
-CTA_TEXT = "LIKE + ABONEAZĂ-TE ca să nu pierzi următorul episod!"
+CTA_TEXT = "LIKE + scrie în comentarii ce vrei în episodul următor!"
 NUME_CANAL = "iZentric"
 # SLOTURI DE EFECTE: pui sunetul in assets/efecte/ cu numele de mai jos si e automat
 # pe TOATE episoadele, pentru totdeauna. Zero configurare per video.
@@ -1032,7 +1032,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             vechi_t = "TITLURI DEJA FOLOSITE (nu le repeta, gaseste unghiuri noi): " + " | ".join(randuri[-25:]) + "\n\n"
         prompt = (
             creier + vechi_t +
-            'Esti editor AI pentru canalul "PokeCity" (Minecraft + Pokemon, COPII 6-13 ani, Romania). '
+            'Esti editor AI pentru canalul "PokeCity" (Minecraft + Pokemon, COPII 8-15 ani (public general), Romania). '
             'Judeci un moment dintr-un live. Ce s-a vorbit in jur: "' + txt + '". '
              'Vezi 6 cadre din joc (Minecraft/Pixelmon pe serverul PokeCity). Analizeaza CE SE INTAMPLA '
             'IN JOC: ce face jucatorul (lupta, prinde pokemon, construieste, exploreaza, moare, raid, '
@@ -1041,7 +1041,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             '{"scor": 0-10 (cat de tare e momentul pentru copii), '
             '"de_ce": "o propozitie scurta", '
             '"titlu": "titlu YouTube max 60 caractere, stil MrBeast: PRIMELE 3 CUVINTE = soc/FOMO '
-            '(AM GASIT, L-AM PRINS, NIMENI NU STIE, PRIMUL DIN...), apoi misterul; cuvintele-cheie in MAJUSCULE; romaneste", '
+            '(AM GASIT, L-AM PRINS, NIMENI NU STIE, PRIMUL DIN...), apoi misterul; cuvintele-cheie in MAJUSCULE; romaneste. PATTERNE care merg ACUM in trending RO gaming: «CE am gasit in X..», «DE CE este ASTA in X?», «Am gasit TOATE SECRETELE din X!», «X distruge TOT!», «Testez MITURI SECRETE in X..»", '
             '"promite": ["ce promite titlul, max 3 lucruri"], '
             '"livrat": true/false — TRUE doar daca TOT ce promite titlul chiar se vede/se aude in moment}. '
             'REGULA DE AUR: titlul descrie DOAR ce chiar se intampla in moment (vezi cadrele + ce s-a vorbit). '
@@ -1231,7 +1231,7 @@ def main():
             rap.append(f"- SETUP din {_ts(sc[1][0])} (cum a pornit totul — inceputul live-ului)")
             rap.append(f"- DESFASURARE din {_ts(sc[2][0])} (actiunea creste — mijlocul)")
             rap.append(f"- MOMENTUL MAXIM din {_ts(sc[3][0])} (explozia completa)")
-            rap.append(f"- Pe ecran: intrebare la 0:12 · hype la {_ts(START_P3-10)} · LIKE+ABONEAZA (MFK-safe) la final")
+            rap.append(f"- Pe ecran: intrebare la 0:12 · hype la {_ts(START_P3-10)} · LIKE+comentariu la final (comentariile DESCHISE, public 9-15)")
         else:
             rap.append(f"## EP{k:02d} — CLASIC (scor {e['scor']})")
             rap.append(f"- Incepe la {_ts(e['scene'][0][0])} · explozie la {_ts(e['varf'])}")
@@ -1371,9 +1371,9 @@ def main():
                  "#minecraft #pokemon #pokecity\n")
         open(os.path.join(folder, f"EP{k:02d}_upload.txt"), "w", encoding="utf-8").write(
             f"TITLU:\n{titlu_full}\n\nDESCRIERE:\n{desc}\nTAG-URI (lipești în câmpul Tag-uri):\n{TAGURI}\n"
-               "⚠️ OBLIGATORIU (legea COPPA): la Upload bifează «DA, e făcut pentru copii» "
-               "(conținutul e pentru 6-13 ani). Săritura = risc amendă FTC (până la 42.530$/video).\n"
-               "(MFK închide comentariile automat - de-asta episoadele NU mai cer comentarii)\n")
+               "PUBLIC: copii MAI MARI (9-15), stil trending RO gaming (JocuriHorror/Klorna/Silver).\n"
+               "La upload lasa «NU e facut pentru copii» (implicit) = comentariile raman DESCHISE.\n"
+               "NU cere niciodata date personale de la privitori minori (nume, adrese, conturi).\n")
 
     print(f"\nGATA: {len(facute)} episoade in autoeditor/episodes/")
     print("URMATOR PAS: vizioneaza-le pe TOATE inainte de upload. Tu esti filtrul de calitate.")

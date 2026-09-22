@@ -53,7 +53,7 @@ def momente_cu_gemini(cheie, video):
         if os.path.exists(p):
             creier += open(p, encoding="utf-8").read()[:plafon] + "\n\n"
     prompt = (creier +
-        "Esti PAL, editorul AI al canalului PokeCity (iZentric, Minecraft+Pokemon RO, copii 6-13). "
+        "Esti PAL, editorul AI al canalului PokeCity (iZentric, Minecraft+Pokemon RO, copii 8-15 (public general, non-MFK)). "
         "VIDEAZA INTREGUL material si alege CELE MAI BUNE momente pentru episoade de ~3 minute. "
         "Raspunzi DOAR cu JSON in forma exacta:\n"
         '{"momente": [{"start": "m:ss", "scor": 0-10, "descriere": "ce se vede+ce se spune, 1-2 propozitii", '

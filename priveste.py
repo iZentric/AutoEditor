@@ -144,14 +144,14 @@ def prompt_complet():
     if os.path.exists(p2):
         creier += "REGULI INVATATE DE LA CREATOR:\n" + open(p2, encoding="utf-8").read()[:1200] + "\n\n"
     return (creier +
-        "Esti PAL, editorul AI al canalului PokeCity (iZentric, Minecraft+Pokemon RO, copii 6-13). "
+        "Esti PAL, editorul AI al canalului PokeCity (iZentric, Minecraft+Pokemon RO, copii 8-15 (public general, non-MFK)). "
         "VIDEAZA INTREGUL material (audio + imagine) si scrie o analiza completa in romana, in felul urmator:\n\n"
         "# ANALIZA COMPLETA\n"
         "## 1. DESPRE CE E VORBA (5 randuri)\n"
         "## 2. CE SE VEDE IN JOC (evenimentele mari, cu minute: prinderi, lupte, caderi, raiduri)\n"
         "## 3. CE SE SPUNE (rezumat pe sectiuni cu minute)\n"
         "## 4. TOP MOMENTE PENTRU EPISOADE (3-8 bucati; pentru fiecare: minut start, minut explozie, "
-        "CE SE VEDE + CE SE SPUNE acolo, scor 0-10 pentru copii 6-13, si daca are MOTIV de exista fata de celelalte)\n"
+        "CE SE VEDE + CE SE SPUNE acolo, scor 0-10 pentru copii 8-15 (public general, non-MFK), si daca are MOTIV de exista fata de celelalte)\n"
         "## 5. TITLURI (pentru fiecare moment de sus: max 60 chars, promit doar ce se vede)\n"
         "## 6. RISCURI (limbaj/gesturi de verificat inainte de upload, cu minute exacte)\n"
         "Fii CONCRET cu minutele (ex: 1:08). Nu inventa nimic ce nu apare in material.")

@@ -233,6 +233,13 @@ Arunca fisierul .mp3/.wav DIRECT in `sunete_mele/` cu nume natural in romana —
 Optional/avansat: folder sau nume INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL = loc fix in episod.
 Detalii in `sunete_mele/CITESTE-MA.txt` · Secretile de editare MrBeast: `SECRETE_EDITARE.md`.
 
+## 🎯 POZIȚIONARE: copii MAI MARI (9-15), stil trending RO (v3.15.2)
+
+- episoadele NU sunt «made for kids» → comentariile rămân DESCHISE (CTA cu comentarii, ca iSilent)
+- titlurile AI folosesc patternele care merg ACUM în trending RO: «CE am gasit in X..»,
+  «DE CE este ASTA in X?», «Am gasit TOATE SECRETELE din X!», «Testez MITURI SECRETE in X..»
+- la upload: lasi implicit («NU e facut pentru copii») · nu ceri niciodata date personale de la privitori
+
 ## 💥 CUVINTE-IMPACT PE ECRAN (v3.15, pornite — stil JocuriHorror)
 
 Pe fiecare sunet al tau apare automat un cuvant-soc in cutie, centrat, 0.8s:
