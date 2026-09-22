@@ -677,3 +677,9 @@
 - User: „opreste tot" → toate procesele omorâte (0 rulări), workspace curat 33MB.
 - STAREA: v3.16 pe GitHub (cd14d03) = pipeline GITHUB ACTIONS gata (episod.yml + pipeline_github.py, poarta 0.6, max 2 implicit, Release automat). EP01 local = corupt, ȘTERS. EPISOADE FINALIZATE: 0 — următoarea rundă se rulează de pe GitHub Actions (user: Actions → Episod din live → Run workflow + URL) sau la cerere.
 - Secret pt titluri AI pe Actions: GEMINI_API_KEY (opțional).
+
+## 22.09 — REGULĂ FIRMĂ: ZERO VIDEO ÎN SANDBOX (comandă user repetată de 2×)
+- User a cerut de 2 ori: „opreste tot si fa tot pe github, sa nu mai vad problema Workspace over budget".
+- DECIZIE PERMANENTĂ: în /home/user NU se mai descarcă/randeză NICIODATĂ video (fără yt-dlp, fără ffmpeg pe surse reale). TOT ce e greu = GitHub Actions (episod.yml). Livrare = Releases. Sandbox = doar cod, analiză, strategie.
+- Stare finală: 0 procese · workspace 27MB (doar cod+assets mici, max 390KB/fișier) · repo curat (198 fișiere, fără zip/mp4) · v3.16 (cd14d03) cu pipeline complet pe runner.
+- PENTRU SUNETELE LUI PE GITHUB: sunetele proprii (13) NU sunt în repo (doar cele 5 sintetizate) → user le urcă o dată pe github.com: sunete_mele/ → Add file → Upload files.
