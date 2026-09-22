@@ -220,6 +220,20 @@ Vizionezi TOATE episoadele înainte de upload (10 min/episod). De ce nu sari pes
 | `CTA_TEXT` | LIKE + comentarii | Textul de final |
 | `NUME_CANAL` | iZentric | Semnătura în colț |
 
+## 💬 PAL — vorbesti cu AI-ul inainte de randare (`pal.py`)
+
+```
+python pal.py prindere/live_full.mp4
+TU:  vreau clip cu caderea din casuta, aia cu rasete
+PAL: am gasit caderea la minutul 1:08 (scor mare) si cea de la 2:36.
+     Recomand 1:08 — acolo zici „AM MAJORAT!" si rade toata echipa.
+     Comanda: python autoeditor.py live.mp4 --momente momente.txt
+TU:  fa asa
+```
+- PAL stie regulile canalului (creierul din cunoastere/), vede momentele cu scoruri
+- cu faster-whisper activ, iti si CITEȘTE ce ai zis in jurul fiecarui moment
+- îi ceri ce clip vrei, el îți arată minutele exacte + îți dă comanda gata
+
 ## 🧠 MODUL AI (cel mai bun) — `--ai`
 
 ```
