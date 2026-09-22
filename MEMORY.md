@@ -585,3 +585,10 @@
 - TESTE: auto-aranjare după nume 5/5 · slot din rădăcină ✓ · 6 lovituri→2 bambus ✓ · sunetele lui reale ✓ · py_compile verde.
 - TITLURI: automate în EP{k}_upload.txt + RAPORT, acum cu reguli MrBeast; dovadă reală: „AM GASIT PRIMUL POKEMON LEGENDAR DE PE POKECITY!".
 - Pe git: v3.10 (push OK după rebase peste upload-urile lui).
+
+## 22.09 — THREAD 66: v3.11 ARANJATOR AUTOMAT + sunetele lui REALE integrate — LIVRAT+TESTAT
+- User a uploadat pe GitHub web 13 sunete în sunete_mele/ (pumm, faaa, Bamboo Hit AnimeCartoon Bonk, bonk, metal_lovitura, anime-wow, vine-boom, basina, pop, Awkward Moment 2, Awkward Pause) și a zis: „unele sunt mai multe într-una, ai grijă că le-am pus".
+- v3.11 aranjeaza_sunete_mele() chemat AUTOMAT la fiecare randare: ①duplicat MD5 șters (prioritate: copia din SUBFOLDER categorizat câștigă — BUG prins+fixat: inițial rădăcina câștiga și pierdea categoria) ②multi-în-unu DESPICAT cu silencedetect (-35dB, 0.4s, bucăți ≥0.8s) → Awkward Pause 9.3s → 3 sunete separate ③„bonk" adăugat la hit ④flexiuni RO la CATEG_SFX hit (lovesc/loveste/lovire/sabia/pumnul/atac) — prins: „il lovesc cu sabia" nu declanșa hit.
+- STAREA FINALĂ a sunetelelor lui: cadere=OASE_RUPTE/pumm · speriat=SPERIAT/faaa · hit=3 (Bamboo, bonk, metal_lovitura) · fericit=anime-wow · generic=7 comice (Awkward Moment + Pause 1/2/3, basina, pop, vine-boom).
+- TEST FINAL 4/4 evenimente reale: cădere→pumm · „ce e asta stai ce"→faaa · „il lovesc cu sabia"→Bamboo Hit · „L-AM PRINS wow"→anime-wow ✓✓✓✓ (push: d705c9d + e6147f0).
+- AȘTEPT: „avem tot, pornește" (regula t65: NU pornesc video fără GO).
