@@ -688,3 +688,8 @@
 - User a dat cheia GEMINI_API_KEY în chat → scrisă în .env (gitignored, confirmat check-ignore) · TESTATĂ LIVE: gemini-3.5-flash răspunde OK (curl REST).
 - Cheia NU poate fi pusă de agent în GitHub Secrets (token fine-grained are doar Contents+Issues, fără secrets write) → ULTIMUL PAS rămâne la USER: Settings → Secrets and variables → Actions → New repository secret: GEMINI_API_KEY.
 - De acum: chei DOAR prin .env/Secrets, nu în chat.
+
+## 22.09 — VERIFICARE FINALĂ „e destul de deștept?" — TESTE REALE PASS
+- TEST 1 grupeaza_cu_ai cu Gemini simulat: PASS — tema 'oul rar' leagă momentele 585s+3690s+5398s într-un episod-poveste; momentele fără temă rămân separate (assert-uri).
+- TEST 2 chromakey confetti: PASS numeric — pixel centru (66,0,253) lum 106 (>40), jocul se vede prin confetti, nu mai e negru. Test în /tmp (3s, șters după; zero impact workspace).
+- Rămâne NEVERIFICAT până la primul Run din Actions: lanțul complet în cloud cu AI real + faster-whisper + Release. Tot restul e probat component-cu-componentă.
