@@ -1,54 +1,65 @@
-# PIPELINE GITHUB ACTIONS: sursa (Drive SAU YouTube) -> episoade 2K -> Release
+# PIPELINE GITHUB ACTIONS: sursa (Studio SAU Drive SAU YouTube) -> episoade 2K -> Release
 import os, sys, subprocess
 
 URL = sys.argv[1]
 MAXN = sys.argv[2] if len(sys.argv) > 2 else "2"
 
 def sh(cmd, env=None):
-    print(">>", " ".join(cmd), flush=True)
+    print(">>", " ".join(cmd[:6]), "...", flush=True)
     r = subprocess.run(cmd, env=env)
     if r.returncode != 0:
         sys.exit(f"!! A PICAT: {' '.join(cmd[:4])}")
 
-# 1) SURSA: Google Drive (calitate originala, zero blocari — RECOMANDAT)
-if "pixeldrain.com" in URL:
-    # pixeldrain: drag&drop, fara cont, pana la 20GB — cel mai rapid pentru creator
-    print(">> sursa: pixeldrain", flush=True)
-    fid = URL.rstrip("/").split("/u/")[1].split("/")[0] if "/u/" in URL else URL.rstrip("/").split("/")[-1]
-    sh(["curl", "-L", "-o", "live_curent.mp4", f"https://pixeldrain.com/api/file/{fid}?download"])
-    if not os.path.exists("live_curent.mp4") or os.path.getsize("live_curent.mp4") < 10_000_000:
-        sys.exit("!! download pixeldrain a esuat")
+def merge_video_audio():
+    v, a = "live_curent.f299.mp4", "live_curent.f140.m4a"
+    if os.path.exists(v) and os.path.exists(a) and not os.path.exists("live_curent.mp4"):
+        subprocess.run(["ffmpeg", "-y", "-i", v, "-i", a, "-c", "copy", "-shortest",
+                        "live_curent.mp4"], check=True)
+
+def sursa_gata():
+    if os.path.exists("live_curent.mp4") and os.path.getsize("live_curent.mp4") > 50_000_000:
+        print("SURSA:", os.path.getsize("live_curent.mp4") // (1024 * 1024), "MB", flush=True)
+        return True
+    return False
+
+# ── 1a) LINK DE STUDIO (download_my_video) + cookies COMPLETE = descarcare oficiala ──
+if "download_my_video" in URL and os.path.exists("cookies.txt"):
+    if "SAPISID" not in open("cookies.txt").read():
+        sys.exit("!! cookies.txt nu are SAPISID -> re-exporta cookies de pe studio.youtube.com")
+    print(">> descarcare oficiala din Studio...", flush=True)
+    sh(["curl", "-sS", "-L", "-b", "cookies.txt",
+        "-A", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+        "-o", "live_curent.mp4", URL])
+    cap = open("live_curent.mp4", "rb").read(300) if os.path.exists("live_curent.mp4") else b""
+    if cap.startswith(b"<"):
+        sys.exit("!! Studio a trimis pagina de login -> cookies expirate: re-exporta si re-pune COOKIES_YT")
+    print("STUDIO OK:", os.path.getsize("live_curent.mp4") // (1024 * 1024), "MB", flush=True)
+
+# ── 1b) GOOGLE DRIVE (calitate originala, zero blocari) ──
 elif "drive.google.com" in URL or "docs.google.com" in URL:
-    print(">> sursa: Google Drive (upload de la creator)", flush=True)
+    print(">> sursa: Google Drive", flush=True)
     sh([sys.executable, "-m", "pip", "install", "-q", "gdown"])
     if "/d/" in URL:
         fid = URL.split("/d/")[1].split("/")[0]
     elif "id=" in URL:
         fid = URL.split("id=")[1].split("&")[0]
     else:
-        sys.exit("!! link Drive fara id (foloseste 'Share -> Anyone with the link' -> copiaza link-ul)")
+        sys.exit("!! link Drive fara id")
     sh([sys.executable, "-m", "gdown", "--fuzzy",
         f"https://drive.google.com/uc?id={fid}", "-O", "live_curent.mp4"])
-    if not os.path.exists("live_curent.mp4") or os.path.getsize("live_curent.mp4") < 10_000_000:
-        sys.exit("!! download Drive a esuat (verifica: 'Anyone with the link' pe fisier)")
+    if not sursa_gata():
+        sys.exit("!! download Drive a esuat (verifica 'Anyone with the link')")
+
+# ── 1c) PIXELDRAIN (drag&drop fara cont) ──
+elif "pixeldrain.com" in URL:
+    print(">> sursa: pixeldrain", flush=True)
+    fid = URL.rstrip("/").split("/u/")[1].split("/")[0] if "/u/" in URL else URL.rstrip("/").split("/")[-1]
+    sh(["curl", "-L", "-o", "live_curent.mp4", f"https://pixeldrain.com/api/file/{fid}?download"])
+    if not sursa_gata():
+        sys.exit("!! download pixeldrain a esuat")
+
+# ── 1d) YOUTUBE clasic: strategii (riscanta pe servere; caz ca totusi merge) ──
 else:
-    # 1a) LINK DE STUDIO (download_my_video): cu cookies COMPLETE = descarcare oficiala, calitate maxima
-    if "download_my_video" in URL and os.path.exists("cookies.txt"):
-        are_logare = "SAPISID" in open("cookies.txt").read()
-        if are_logare:
-            print(">> incerc descarcarea oficiala din Studio (link download_my_video)...", flush=True)
-            sh(["curl", "-sS", "-L", "-b", "cookies.txt",
-                "-A", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-                "-o", "live_curent.mp4", URL])
-            cap = open("live_curent.mp4", "rb").read(300) if os.path.exists("live_curent.mp4") else b""
-            if cap.startswith(b"<") or os.path.getsize("live_curent.mp4") < 50_000_000:
-                print("   link Studio picat (cookies vechi/incomplete) -> strategii normale", flush=True)
-                os.remove("live_curent.mp4")
-            else:
-                print("STUDIO OK:", os.path.getsize("live_curent.mp4") // (1024*1024), "MB", flush=True)
-        else:
-            print("!! cookies.txt NU are SAPISID -> export incomplet, nu pot folosi link-ul de Studio", flush=True)
-    # 1b) YouTube clasic: lanț de strategii (poate ceda)
     strategii = []
     if os.path.exists("cookies.txt"):
         strategii += [["--cookies", "cookies.txt", "--extractor-args", "youtube:player_client=web_safari"],
@@ -61,30 +72,24 @@ else:
                "--concurrent-fragments", "8", "-o", "live_curent.%(ext)s", "--no-playlist"] + s + \
               ["-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio", URL]
         print(">> strategie descarcare:", " ".join(s) or "default", flush=True)
-        if subprocess.run(cmd).returncode == 0:
+        if subprocess.run(cmd).returncode == 0 and sursa_gata():
             gata = True
             break
         print("   strategie picata, incerc urmatoarea...", flush=True)
     if not gata:
-        sys.exit("!! toate strategiile de descarcare au picat -> UPLOADEAZA VOD-ul pe Drive si ruleaza cu link-ul Drive")
+        sys.exit("!! descarcarea YouTube a picat -> foloseste link Studio download_my_video, Drive sau pixeldrain")
+    merge_video_audio()
 
-    src = "live_curent.mp4"
-    if not os.path.exists(src):
-        v, a = "live_curent.f299.mp4", "live_curent.f140.m4a"
-        if os.path.exists(v) and os.path.exists(a):
-            subprocess.run(["ffmpeg", "-y", "-i", v, "-i", a, "-c", "copy", "-shortest", src], check=True)
+if not sursa_gata():
+    sys.exit("!! nicio sursa disponibila")
 
-if not os.path.exists("live_curent.mp4"):
-    sys.exit("!! descarcarea a esuat")
-print("SURSA:", "live_curent.mp4", os.path.getsize("live_curent.mp4") // (1024 * 1024), "MB", flush=True)
-
-# 2) randare (runner 7GB RAM = fara AE_USOR) + poarta STRICTA: doar ce chiar merita
+# ── 2) RANDARE (runner 7GB) + poarta STRICTA: doar ce chiar merita ──
 env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.6"))
 cmd = [sys.executable, "autoeditor.py", "live_curent.mp4", "--calitate", "1080p", "--max", MAXN]
 if os.environ.get("SUBTITRARI", "0") == "1":   # whisper pe live 2h = ~10 min; default OFF pt viteza
     cmd += ["--subtitrari"]
 sh(cmd, env=env)
 
-# 3) urcare 2K (2560x1440 lanczos+unsharp)
+# ── 3) URCARE 2K (2560x1440 lanczos+unsharp) ──
 sh([sys.executable, "urca_2k.py"])
 print("PIPELINE GITHUB GATA", flush=True)
