@@ -220,6 +220,22 @@ Vizionezi TOATE episoadele înainte de upload (10 min/episod). De ce nu sari pes
 | `CTA_TEXT` | LIKE + comentarii | Textul de final |
 | `NUME_CANAL` | iZentric | Semnătura în colț |
 
+## 🚀 FLUX — AUTOPILOT COMPLET, o singura comanda (`flux.py`)
+
+```
+python flux.py https://www.youtube.com/watch?v=XXXX      <- VOD-ul tau de pe canal
+python flux.py prindere/live_full.mp4                     <- sau fisierul local
+```
+1. INGHITE live-ul (descarca singur VOD-ul cu yt-dlp / sau ia fisierul local)
+2. VIDEAZA TOT: Gemini analizeaza materialul intreg (sau selectie pe energie cu --fara-ai)
+3. ALEGE singur momentele (regula ta: doar cele cu motiv de exista, 3-8 max)
+4. SCRIE momente_auto.txt si LANSEAZA autoeditorul (2K + subtitrari + AI)
+5. PRIMESTI in episodes/: episoade editate + titluri + miniaturi + kit upload
+
+TU ai facut live-ul. De aici incolo e automat. (echivalentul „Ask Studio"-ului
+din YT Studio — dar care SI CONSTRUIESTE episoadele, nu doar le analizeaza)
+Testat E2E: o comanda -> moment ales -> episod randat ✓
+
 ## 👁️ PRIVESTE — Gemini VIDEAZA tot materialul (`priveste.py`)
 
 ```
