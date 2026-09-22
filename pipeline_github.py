@@ -1,8 +1,11 @@
-# PIPELINE GITHUB ACTIONS: sursa (Studio SAU Drive SAU YouTube) -> episoade 2K -> Release
+# PIPELINE GITHUB ACTIONS: sursa (Studio SAU Drive SAU pixeldrain SAU fisier direct) -> episoade 2K -> Release
 import os, sys, subprocess
 
-URL = sys.argv[1]
+URL = sys.argv[1] if len(sys.argv) > 1 else ""
 MAXN = sys.argv[2] if len(sys.argv) > 2 else "2"
+if not URL:
+    print("Release de episoade (ep-*) - nimic de procesat", flush=True)
+    sys.exit(0)
 
 def sh(cmd, env=None):
     print(">>", " ".join(cmd[:6]), "...", flush=True)
@@ -58,7 +61,19 @@ elif "pixeldrain.com" in URL:
     if not sursa_gata():
         sys.exit("!! download pixeldrain a esuat")
 
-# ── 1d) YOUTUBE clasic: strategii (riscanta pe servere; caz ca totusi merge) ──
+# ── 1d) FISIER DIRECT (release GitHub = drag&drop in browser, sau orice link .mp4) ──
+elif ("/releases/" in URL and "github" in URL) or URL.lower().split("?")[0].endswith(
+        (".mp4", ".mkv", ".mov", ".avi", ".webm", ".ts", ".flv", ".m4v")):
+    print(">> sursa: fisier direct (release/upload)", flush=True)
+    cmd = (["curl", "-sS", "-L", "-H", f"Authorization: Bearer {os.environ['ASSET_TOKEN']}",
+            "-H", "Accept: application/octet-stream", "-o", "live_curent.mp4", URL]
+           if os.environ.get("ASSET_TOKEN") else
+           ["curl", "-sS", "-L", "-o", "live_curent.mp4", URL])
+    sh(cmd)
+    if not sursa_gata():
+        sys.exit("!! download fisier a esuat sau fisier prea mic")
+
+# ── 1e) YOUTUBE clasic: strategii (riscanta pe servere; caz ca totusi merge) ──
 else:
     strategii = []
     if os.path.exists("cookies.txt"):

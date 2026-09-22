@@ -12,6 +12,8 @@ on:
         description: 'Max episoade (doar ce CHIAR merita; implicit 2)'
         default: '2'
         type: string
+  release:
+    types: [published]
 
 concurrency:
   group: episod
@@ -31,8 +33,24 @@ jobs:
         run: pip install yt-dlp google-genai pillow imageio-ffmpeg faster-whisper
       - name: yt-dlp FRESH (build master — YouTube se schimba saptamanal)
         run: pip install --force-reinstall --no-deps https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
-      - name: Aflare sursa (input SAU declansa/live.txt)
+      - name: Aflare sursa (input SAU declansa/live.txt SAU fisier din Release)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+            case "$TAG" in
+              ep-*) echo "Release de EPISOADE ($TAG) - nu reprocesam"; exit 0;;
+            esac
+            ASSET_ID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
+              | python3 -c "import json,sys; a=json.load(sys.stdin).get('assets',[]); print(a[0]['id'] if a else '')")
+            if [ -z "$ASSET_ID" ]; then echo "!! release-ul $TAG nu are fisier atasat"; exit 1; fi
+            echo "URL=https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID" >> "$GITHUB_ENV"
+            echo "ASSET_TOKEN=$GH_TOKEN" >> "$GITHUB_ENV"
+            echo "Sursa: fisierul din release $TAG (asset $ASSET_ID)"
+            exit 0
+          fi
           URL="${{ inputs.live_url }}"
           if [ -z "$URL" ] && [ -f declansa/live.txt ]; then URL=$(tr -d '[:space:]' < declansa/live.txt); fi
           if [ -z "$URL" ]; then echo "nicio sursa"; exit 1; fi
@@ -50,11 +68,15 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
+          ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
         run: python3 pipeline_github.py "$URL" "${{ inputs.max_episoade || 2 }}"
       - name: Publica in Releases (gata de download)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          shopt -s nullglob
+          files=(episodes/EP*.mp4)
+          if [ ${#files[@]} -eq 0 ]; then echo "nu sunt episoade de publicat"; exit 0; fi
           TAG="ep-$(date -u +%Y%m%d-%H%M)"
           gh release create "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura.jpg episodes/EP*_upload.txt episodes/*.srt \
             --title "Episoade $TAG" --notes "Episoade 2K gata de upload pe YouTube. Vezi EP*_upload.txt pentru titlu/descriere/tag-uri."
