@@ -25,18 +25,31 @@ def sursa_gata():
         return True
     return False
 
-# ── 1a) LINK DE STUDIO (download_my_video) + cookies COMPLETE = descarcare oficiala ──
-if "download_my_video" in URL and os.path.exists("cookies.txt"):
-    if "SAPISID" not in open("cookies.txt").read():
-        sys.exit("!! cookies.txt nu are SAPISID -> re-exporta cookies de pe studio.youtube.com")
+# ── 1a) YOUTUBE: cookies + token de download extras AUTOMAT din pagina Studio ──
+import re
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
+yt = ("youtube.com" in URL or "youtu.be" in URL or "download_my_video" in URL)
+if yt and os.path.exists("cookies.txt") and "SAPISID" in open("cookies.txt").read():
+    dl = URL
+    if "download_my_video" not in URL:  # orice link/id YouTube -> scoatem tokenul noi insine
+        vid = (URL.split("v=")[1].split("&")[0] if "v=" in URL
+               else URL.rstrip("/").split("/")[-1])
+        print(f">> extragem token de download din Studio pt {vid}...", flush=True)
+        sh(["curl", "-sS", "-L", "-b", "cookies.txt", "-A", UA,
+            "-o", "studio_page.html", f"https://studio.youtube.com/video/{vid}/edit"])
+        pg = open("studio_page.html", encoding="utf-8", errors="ignore").read()
+        m = re.search(r'download_my_video\?v=([A-Za-z0-9_-]+)(?:\\u0026|&)t=([A-Za-z0-9_-]+)', pg)
+        if not m:
+            sys.exit("!! Studio nu ne-a dat token -> cookies expirate: re-exporta si re-pune Secret COOKIES_YT")
+        dl = f"https://www.youtube.com/download_my_video?v={m.group(1)}&t={m.group(2)}"
+        print("   token extras OK (automat)", flush=True)
     print(">> descarcare oficiala din Studio...", flush=True)
-    sh(["curl", "-sS", "-L", "-b", "cookies.txt",
-        "-A", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
-        "-o", "live_curent.mp4", URL])
+    sh(["curl", "-sS", "-L", "-b", "cookies.txt", "-A", UA, "-o", "live_curent.mp4", dl])
     cap = open("live_curent.mp4", "rb").read(300) if os.path.exists("live_curent.mp4") else b""
     if cap.startswith(b"<"):
         sys.exit("!! Studio a trimis pagina de login -> cookies expirate: re-exporta si re-pune COOKIES_YT")
     print("STUDIO OK:", os.path.getsize("live_curent.mp4") // (1024 * 1024), "MB", flush=True)
+    studio_ok = True
 
 # ── 1b) GOOGLE DRIVE (calitate originala, zero blocari) ──
 elif "drive.google.com" in URL or "docs.google.com" in URL:
