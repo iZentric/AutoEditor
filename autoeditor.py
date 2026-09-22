@@ -46,9 +46,9 @@ MUZICA_VOLUME = 0.12  # volum muzica de fundal
 COLD_OPEN = 8         # secunde de reactie la inceput (teaserul momentului maxim)
 P1 = 55               # SETUP (scena 1)
 P2 = 55               # DESFASURARE (scena 2)
-INTREBARE_TEXT = "CE CREZI CĂ SE INTÂMPLĂ? Scrie în comentarii!"
+INTREBARE_TEXT = "CE CREZI CĂ SE INTÂMPLĂ? Ghicește și Vezi mai departe!"
 HYPE_TEXT = "ATENTIE! ACUM VINE MOMENTUL CEL MAI TARE!"
-CTA_TEXT = "LIKE + scrie în comentarii ce prindem în episodul următor!"
+CTA_TEXT = "LIKE + ABONEAZĂ-TE ca să nu pierzi următorul episod!"
 NUME_CANAL = "iZentric"
 # SLOTURI DE EFECTE: pui sunetul in assets/efecte/ cu numele de mai jos si e automat
 # pe TOATE episoadele, pentru totdeauna. Zero configurare per video.
@@ -1231,7 +1231,7 @@ def main():
             rap.append(f"- SETUP din {_ts(sc[1][0])} (cum a pornit totul — inceputul live-ului)")
             rap.append(f"- DESFASURARE din {_ts(sc[2][0])} (actiunea creste — mijlocul)")
             rap.append(f"- MOMENTUL MAXIM din {_ts(sc[3][0])} (explozia completa)")
-            rap.append(f"- Pe ecran: intrebare la 0:12 · hype la {_ts(START_P3-10)} · LIKE+comentariu la final")
+            rap.append(f"- Pe ecran: intrebare la 0:12 · hype la {_ts(START_P3-10)} · LIKE+ABONEAZA (MFK-safe) la final")
         else:
             rap.append(f"## EP{k:02d} — CLASIC (scor {e['scor']})")
             rap.append(f"- Incepe la {_ts(e['scene'][0][0])} · explozie la {_ts(e['varf'])}")
@@ -1370,7 +1370,10 @@ def main():
                  "📩 Business: game.nation.izentric@gmail.com\n\n"
                  "#minecraft #pokemon #pokecity\n")
         open(os.path.join(folder, f"EP{k:02d}_upload.txt"), "w", encoding="utf-8").write(
-            f"TITLU:\n{titlu_full}\n\nDESCRIERE:\n{desc}\nTAG-URI (lipești în câmpul Tag-uri):\n{TAGURI}\n")
+            f"TITLU:\n{titlu_full}\n\nDESCRIERE:\n{desc}\nTAG-URI (lipești în câmpul Tag-uri):\n{TAGURI}\n"
+               "⚠️ OBLIGATORIU (legea COPPA): la Upload bifează «DA, e făcut pentru copii» "
+               "(conținutul e pentru 6-13 ani). Săritura = risc amendă FTC (până la 42.530$/video).\n"
+               "(MFK închide comentariile automat - de-asta episoadele NU mai cer comentarii)\n")
 
     print(f"\nGATA: {len(facute)} episoade in autoeditor/episodes/")
     print("URMATOR PAS: vizioneaza-le pe TOATE inainte de upload. Tu esti filtrul de calitate.")
