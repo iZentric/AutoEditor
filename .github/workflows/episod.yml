@@ -34,6 +34,7 @@ jobs:
       - name: yt-dlp FRESH (build master — YouTube se schimba saptamanal)
         run: pip install --force-reinstall --no-deps https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
       - name: Aflare sursa (input SAU declansa/live.txt SAU fisier din Release)
+        id: afla
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -46,15 +47,21 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
               | python3 -c "import json,sys; a=json.load(sys.stdin).get('assets',[]); print(a[0]['id'] if a else '')")
             if [ -z "$ASSET_ID" ]; then echo "!! release-ul $TAG nu are fisier atasat"; exit 1; fi
-            echo "URL=https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID" >> "$GITHUB_ENV"
+            URL="https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
             echo "ASSET_TOKEN=$GH_TOKEN" >> "$GITHUB_ENV"
             echo "Sursa: fisierul din release $TAG (asset $ASSET_ID)"
-            exit 0
+          else
+            URL="${{ inputs.live_url }}"
+            if [ -z "$URL" ] && [ -f declansa/live.txt ]; then URL=$(tr -d '[:space:]' < declansa/live.txt); fi
+            if [ -z "$URL" ]; then echo "nicio sursa"; exit 1; fi
           fi
-          URL="${{ inputs.live_url }}"
-          if [ -z "$URL" ] && [ -f declansa/live.txt ]; then URL=$(tr -d '[:space:]' < declansa/live.txt); fi
-          if [ -z "$URL" ]; then echo "nicio sursa"; exit 1; fi
           echo "URL=$URL" >> "$GITHUB_ENV"
+          echo "vodkey=vod-$(echo -n "$URL" | md5sum | cut -c1-12)" >> "$GITHUB_OUTPUT"
+      - name: Cache sursa descarcata (re-run = fara re-descarcare)
+        uses: actions/cache@v4
+        with:
+          path: live_curent.mp4
+          key: ${{ steps.afla.outputs.vodkey }}
       - name: Cookies YouTube (Secret COOKIES_YT sau cookies.b64 din repo)
         env:
           COOKIES_YT: ${{ secrets.COOKIES_YT }}
