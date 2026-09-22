@@ -435,7 +435,83 @@ def scrie_ass(nume, durata, poveste):
     return os.path.basename(nume)
 
 
-def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080):
+def fps_sursa(ff, video):
+    """FPS-ul sursei (fallback 30)."""
+    r = subprocess.run([ff, "-i", video], capture_output=True, text=True, timeout=60)
+    import re as _re2
+    m = _re2.search(r"([0-9.]+) fps", r.stderr)
+    return float(m.group(1)) if m else 30.0
+
+
+def masoara_lufs(ff, cale):
+    """Masura loudness-ul real (LUFS integrat) + true peak dintr-un fisier."""
+    r = subprocess.run([ff, "-i", cale, "-af",
+                        "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
+                        "-f", "null", "-"], capture_output=True, text=True, timeout=600)
+    j = r.stderr[r.stderr.find("{"):r.stderr.rfind("}") + 1]
+    try:
+        d = json.loads(j)
+        return float(d.get("input_i", -70)), float(d.get("input_tp", 0))
+    except Exception:
+        return None, None
+
+
+def calibreaza_lufs(ff, cale):
+    """MASTER pentru YouTube (normalizeaza la -14 LUFS, NU amplifica ce e linistit!).
+    Metoda de studio: 2 treceri loudnorm in mod LINIAR (gain static — zero pompare,
+    plafon true-peak exact). -> (LUFS inainte, LUFS dupa) sau None."""
+    if os.environ.get("AE_LUFS") == "0":
+        return None
+    i_in, _ = masoara_lufs(ff, cale)
+    if i_in is None:
+        return None
+    if abs(-14.0 - i_in) <= 0.4:                # deja in tinta
+        return (i_in, i_in)
+    tmp = cale.replace(".mp4", "_cal.mp4")
+    i_out = i_in
+    for trecere in range(2):
+        d = masoara_lufs_json(ff, cale)
+        if not d:
+            return None
+        lin = (f"loudnorm=I=-14:TP=-1.5:LRA=11:measured_I={d['input_i']}:"
+               f"measured_TP={d['input_tp']}:measured_LRA={d['input_lra']}:"
+               f"measured_thresh={d['input_thresh']}:offset={d.get('target_offset', 0)}:linear=true,"
+               "aresample=48000")
+        r = subprocess.run([ff, "-y", "-i", cale, "-af", lin,
+                            "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                            "-movflags", "+faststart", tmp],
+                           capture_output=True, text=True, timeout=900)
+        if r.returncode != 0 or not os.path.exists(tmp):
+            return None
+        os.replace(tmp, cale)
+        i_out, _ = masoara_lufs(ff, cale)
+        if i_out is None:
+            return None
+        if abs(-14.0 - i_out) <= 0.6:
+            break
+    print(f"   CALIBRARE YOUTUBE: {i_in:.1f} -> {i_out:.1f} LUFS (tinta -14, varfuri <= -1.5 dBTP)")
+    return (i_in, i_out)
+
+
+def masoara_lufs_json(ff, cale):
+    """Toate campurile de masurare loudnorm (pt trecerea liniara)."""
+    r = subprocess.run([ff, "-i", cale, "-af",
+                        "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
+                        "-f", "null", "-"], capture_output=True, text=True, timeout=600)
+    j = r.stderr[r.stderr.find("{"):r.stderr.rfind("}") + 1]
+    try:
+        return json.loads(j)
+    except Exception:
+        return None
+
+
+def expr_zoom(poz, sfarsit, varf, crestere, fps, urcare, coborare):
+    """O fereastra de zoom pentru zoompan: urca la varf, tine, coboara. In cadrane."""
+    a, b = int(poz * fps), int(sfarsit * fps)
+    return f"(between(in,{a},{b})*{crestere}*min((in-{a})/{max(1, int(urcare * fps))},1)*min(max(({b}-in)/{max(1, int(coborare * fps))},0),1))"
+
+
+def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None):
     """O comanda ffmpeg: concateneaza scenele (+intro-reactia), pune logo, textele, muzica."""
     ass = scrie_ass(os.path.join(folder, f"EP{nr:02d}.ass"), durata, poveste)
     cmd = [ff, "-y"]
@@ -455,6 +531,22 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
         src_vc = "[vc2]"
     else:
         src_vc = "[vc]"
+    # ZOOM-uri stil MrBeast: punch-in la cold-open, la textul HYPE si la CLIMAX.
+    # zoompan = cadran cu cadran, centrat, max 1.14 (zero pierdere vizibila).
+    zoom_txt = ""
+    if dim and os.environ.get("AE_ZOOM", "1") != "0":
+        w_z, h_z, fps_z = dim
+        if tinta_h:
+            h_z = tinta_h
+            w_z = int((dim[0] * tinta_h / dim[1]) // 2 * 2)
+        w_z, h_z = max(2, int(w_z) // 2 * 2), max(2, int(h_z) // 2 * 2)
+        ferestre = [(0.4, 6.5, 0.07, 0.5, 0.8),                                # cold-open punch
+                    (START_P3 - 10, START_P3 - 4, 0.05, 0.6, 1.0),             # sub textul HYPE
+                    (START_P3, min(START_P3 + 15, max(durata - 8, START_P3 + 6)), 0.14, 1.2, 1.0)]
+        ferestre = [(a, min(b, durata - 1), c, d, e) for a, b, c, d, e in ferestre if a < durata - 2]
+        zexpr = "1+" + "+".join(expr_zoom(a, b, 0, c, fps_z, d, e) for a, b, c, d, e in ferestre)
+        zoom_txt = (f",fps={fps_z},zoompan=z='{zexpr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+                    f":d=1:s={w_z}x{h_z}:fps={fps_z}")
     if logo:
         cmd += ["-i", logo]
         li = n
@@ -463,7 +555,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
                    "[b0][lg]overlay=W-w-24:24[b1]",
                    f"[b1]subtitles={ass}[vout]"]
     else:
-        filtre += [f"{src_vc}scale=trunc(iw/2)*2:trunc(ih/2)*2,subtitles={ass}[vout]"]
+        filtre += [f"{src_vc}scale=trunc(iw/2)*2:trunc(ih/2)*2{zoom_txt},subtitles={ass}[vout]"]
     vmap = "[vout]"
     if confeti:
         cmd += ["-i", confeti]
@@ -693,7 +785,7 @@ def alege_sfx_inteligent(pool, durata, transcript, scene):
             continue          # ex: bambus hit max 2/episod — rar = copiii raman pe tentă
         candidati = pe_cat.get(tip) or pe_cat["generic"]
         if candidati:
-            alese.append((t_ep, random.choice(candidati), random.uniform(0.7, 0.9)))
+            alese.append((t_ep, random.choice(candidati), random.uniform(0.75, 0.95)))
             folosite[tip] = folosite.get(tip, 0) + 1
     protejate = [(0, 12), (durata - 14, durata)]
     incercari = 0
@@ -984,6 +1076,7 @@ def main():
           f"confeti={'DA' if confeti_p else 'nu'} · sunete-random={len(pool_rand)} · sunete-mele={sum(len(v) for v in sunete_mele_pool().values())}")
 
     w_src, h_src = rezolutie_sursa(ff, os.path.abspath(opt.video))
+    fps_live = fps_sursa(ff, os.path.abspath(opt.video))
     tinta_h = 1440 if (opt.calitate == "2k" and h_src < 1440) else 0
     print(f"sursa: {w_src}x{h_src} -> export {'1440p (2K, lanczos+sharpen)' if tinta_h else 'rezolutie sursa'}")
     if opt.calitate == "2k" and h_src >= 1440:
@@ -1077,6 +1170,7 @@ def main():
             if e.get("ai_promite"):
                 rap.append(f"- PROMIS=LIVRAT {'OK ✓' if e.get('ai_livrat', True) else 'RECALIBRAT ✓'} (promite: {e['ai_promite']})")
             titluri.append(f"EP{k:02d}: {e['ai_titlu']}")
+
     if not titluri:
         rap.append("Titlurile sunt SABLON — le personalizezi dupa ce vizionezi.")
     if titluri:
@@ -1117,8 +1211,12 @@ def main():
         else:
             print(f"   EP{k:02d} ({eticheta})...")
         out = comanda_randare(ff, os.path.abspath(opt.video), e, durata_ep, folder, muzica, logo, k,
-                              efecte, tinta_h, sfx_rand, confeti_p, h_out)
+                              efecte, tinta_h, sfx_rand, confeti_p, h_out,
+                              dim=(w_src, h_src, fps_live))
         if out:
+            lu = calibreaza_lufs(ff, os.path.join(folder, out))
+            if lu:
+                e["_lufs"] = lu
             facute.append((k, e, out))
             print(f"   OK -> episodes/{out}")
 
@@ -1147,6 +1245,10 @@ def main():
                 f"moment {'scor AI ' + str(e.get('ai_scor', '?')) + '/10' if e.get('ai_scor') else 'scor energie ' + str(e['scor'])} · "
                 f"sunete potrivite contextului: {len(e.get('_sfx', []))} · confeti: {'DA' if confeti_p else 'nu'} · "
                 f"texte engagement (intrebare+hype+CTA): DA · durata exacta: {opt.durata}s")
+        for k, e, out in facute:
+            if e.get("_lufs"):
+                chk.append(f"- {out}: AUDIO CALIBRAT YOUTUBE {e['_lufs'][0]:.1f} -> {e['_lufs'][1]:.1f} LUFS (tinta -14, varfuri <= -1.5 dBTP)")
+            chk.append(f"- {out}: ZOOM-uri MrBeast (cold-open + HYPE + CLIMAX, max 1.14x)")
         open(os.path.join(folder, "RAPORT.md"), "a", encoding="utf-8").write("\n".join(chk) + "\n")
 
     if opt.subtitrari and transcript:
