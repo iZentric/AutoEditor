@@ -608,3 +608,12 @@
 - TESTE: E2E sintetic 2 EP (-14.1/-14.2 LUFS ✓, FLOW în RAPORT ✓) · UNIT cu 4 vârfuri: **6 punch-uri = 3 fixe + 3 energie; al 4-lea vârf sărit CORECT (la 2s de HYPE — dublu-hit evitat)** ✓ · zoompan cu PI validat de randare ✓.
 - BUG-URI: semnătura cu [:-1] sparge parantezele (a 2-a oară! FIX: scriu semnătura completă, niciodată [:-1] pe „):").
 - Pe git: v3.13 (f73d0a8). AȘTEPT GO pentru primul video real (regula t65).
+
+## 22.09 — THREAD 69: v3.14 MEME GREENSCREEN + GRADE + TABEL COMPLET CAPABILITĂȚI — LIVRAT+TESTAT
+- User: „ști tot despre canal + secretele YouTube → fă tabel cu ce faci + de ce ai nevoie; vrei efecte greenscreen? caută pe net ce e mai bun".
+- CERCETARE (5+ surse 2026): stilul 2026 = hook 5s + pattern interrupts la 15-30s + meme cutaways + punch-ins (editori gaming 40-120$/video fac exact asta) · MrBeast = 23-38 cuts/min, saturated/high-contrast grade, sound design pe fiecare cut, zero dead air · trend 2024-26 = calmare ușoară.
+- v3.14 autoeditor.py: ①**GRADE** eq=contrast=1.06:saturation=1.18 (AE_GRADE=0 off) ②**MEME greenscreen**: gaseste_meme(assets/meme/ .mp4/.webm/.mov/.gif) → în comanda_randare: 2-3 meme-uri × 1.6s pe momentele comice (din sfx_rand sau fallback 35%/65% din durată), colț stânga-jos, h/4, chromakey 0x00FF00:0.25:0.08 · **BUG CRITIC PRINS**: secondary input-ul (meme 2s) se consuma din t=0 → la t=32 era epuizat → overlay invizibil (verificare vizuală pe sintetic navy a prins-o) → FIX: tpad=start_duration=t0:start_mode=clone pe secondary; VERIFICAT: 17% alb la momente, 0% între · al doilea bug: meme-urile consumau indici input-urilor confeti/muzică → bloc mutat DUPĂ sfx_rand, înainte de amix + vmap chaining prin {prev} · al treilea: replace mi-a mâncat „vmap=[vout]" → UnboundLocalError → re pus.
+- assets/meme/PUNE_AICI.txt creat (instrucțiuni greenscreen).
+- TESTE: E2E complet cu meme în RAPORT ✓ · chromakey izolat 74% transparent/26% alb ✓ · pipeline real 17%/0% ✓ · py_compile verde.
+- Pe git: v3.14 (f07b8ab).
+- TABELUL COMPLET cerut de user = livrat în răspuns (capabilități automate + ce-i lipsesc: meme-uri reale greenscreen de downloadat, logo.png, muzică licențiată, faster-whisper pt subtitrări pe PC).
