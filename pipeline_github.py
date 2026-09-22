@@ -30,9 +30,10 @@ else:
 
     # ── 1a) YOUTUBE: token de download extras AUTOMAT din pagina Studio (3 reincercari) ──
     if yt and os.path.exists("cookies.txt") and "SAPISID" in open("cookies.txt").read():
-        vid = (re.search(r'[?&]v=([A-Za-z0-9_-]{11})', URL) or
-               re.search(r'/(?:live|shorts)/([A-Za-z0-9_-]{11})', URL) or
-               (re.fullmatch(r'[A-Za-z0-9_-]{11}', URL) and [URL] or [None]))[0] or URL.rstrip("/").split("/")[-1][:11]
+        m = (re.search(r'[?&]v=([A-Za-z0-9_-]{11})', URL) or
+             re.search(r'/(?:live|shorts)/([A-Za-z0-9_-]{11})', URL))
+        vid = m.group(1) if m else (URL if re.fullmatch(r'[A-Za-z0-9_-]{11}', URL)
+                                    else URL.rstrip("/").split("/")[-1][:11])
         dl = None
         for incercare in range(1, 4):
             print(f">> extragem token din Studio pt {vid} (incercarea {incercare}/3)...", flush=True)
