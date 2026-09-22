@@ -1,6 +1,24 @@
-════ SUNETELE TALE — PLUG & PLAY ════
-1. Arunci fisiere .mp3 sau .wav in folderul potrivit (vezi pune_aici.txt din fiecare).
-2. Atat. Nu atingi nimic altceva.
-Engine-ul le ia AUTOMAT la momentul potrivit in TOATE episoadele, de acum inainte.
-Poti pune mai multe in acelasi folder = le amesteca (varietate pe episoade).
-Stergi un sunet din folder = nu se mai foloseste. Simplu.
+════ SUNETELE TALE — CEL MAI SIMPLU ════
+
+1. Arunci fisierul .mp3/.wav DIRECT aici (in sunete_mele/)
+   cu NUME NORMAL in romana — de exemplu:
+
+     teava care cade.mp3      -> il punem la caderi
+     oase rupte.mp3           -> il punem la caderi grele
+     bambus hit.mp3           -> la lovituri (dar MAX 2 pe episod,
+                                 ca sa ramana surpriza pentru copii)
+     l-am prins yay.mp3       -> la bucurii
+     sting.mp3                -> la frica/tensiune
+
+2. NU mai trebuie sa stii foldere. Noi citim numele si il aranjam
+   automat la momentul potrivit din fiecare episod.
+   Cuvinte pe care le folosim: cade/cadere/oase/rupt/teava = caderi,
+   hit/lovit/bambus/pumn/sabie = lovituri, prins/yay/reusit = bucurie,
+   frica/speriat/sting = tensiune. Orice altceva = comice random.
+
+3. Optional (avansat): daca vrei un sunet EXACT intr-un loc anume,
+   fa-i un folder cu numele: INTRARE (la inceput), HYPE, EXPLOZIE
+   (momentul maxim), VICTORIE, FINAL. Sau numeste fisierul asa.
+
+4. Mai multe sunete in aceeasi categorie = le amesteca pe episoade.
+   Stergi un fisier = nu se mai foloseste. Atat.

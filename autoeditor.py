@@ -204,21 +204,57 @@ FOLDERE_MELE = {
 }
 
 
+SLOT_FOLDERE = {"INTRARE", "HYPE", "EXPLOZIE", "VICTORIE", "FINAL"}
+
+# tu arunci fisierul cu ORICE nume natural — noi il aranjam dupa cuvinte
+CUVINTE_SUNET = {
+    "fericit": ["prins", "capturat", "reusit", "castig", "victor", "yay", "wohoo",
+                "fericit", "evolutie", "level", "incredibil", "wow", "epic"],
+    "cadere": ["oase", "crac", "os rupt", "rupt", "cade", "cadere", "cazut", "cazi",
+               "teava", "prabus", "pamant", "splash", "busit"],
+    "speriat": ["speriat", "fric", "groaza", "sting", "hop", "tensiune", "creepy"],
+    "hit": ["hit", "lovit", "bambus", "pumn", "poc", "pach", "smash", "sabie", "damage"],
+}
+# rar = ramane surpriza pentru copii (ex: bambus hit max 2 pe episod)
+MAX_PE_CATEG = {"hit": 2, "cadere": 3, "fericit": 3, "speriat": 3, "generic": 3}
+
+
+def clasifica_sunet(cale):
+    """Categoria dupa NUMELE fisierului, fara diacritice."""
+    nume = (os.path.splitext(os.path.basename(cale))[0].lower()
+            .replace("ă", "a").replace("â", "a").replace("î", "i")
+            .replace("ș", "s").replace("ț", "t"))
+    for tip, cuvinte in CUVINTE_SUNET.items():
+        if any(c in nume for c in cuvinte):
+            return tip
+    return "generic"
+
+
 def sunete_mele_pool():
-    """Sunetele puse de creator in sunete_mele/, sortate pe categorii."""
+    """Sunetele lui: fisierul poate fi aruncat DIRECT in sunete_mele/ sau in orice
+    subfolder cu orice nume — il clasificam automat dupa nume. Doar cele 5 foldere
+    de sloturi (INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL) au regula fixa de pozitie."""
     d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sunete_mele")
-    pe_cat = {"fericit": [], "cadere": [], "speriat": [], "generic": []}
-    if os.path.isdir(d):
-        for fold in os.listdir(d):
-            sub = os.path.join(d, fold)
-            if not os.path.isdir(sub) or fold.startswith("."):
+    pe_cat = {"fericit": [], "cadere": [], "speriat": [], "hit": [], "generic": []}
+    if not os.path.isdir(d):
+        return pe_cat
+    for f in os.listdir(d):
+        cale = os.path.join(d, f)
+        if f.startswith(".") or os.path.splitext(f)[1].lower() not in EXT_AUDIO:
+            continue
+        if os.path.splitext(f)[0].lower() in EFECTE_SLOTS:
+            continue          # numit ca un slot (ex: intrare.wav) = doar pe slot, nu si random
+        pe_cat[clasifica_sunet(cale)].append(cale)   # aruncat in radacina = dupa nume
+    for fold in os.listdir(d):
+        sub = os.path.join(d, fold)
+        if not os.path.isdir(sub) or fold.startswith(".") or fold.upper() in SLOT_FOLDERE:
+            continue
+        tip_fix = FOLDERE_MELE.get(fold.upper())      # folder cu nume cunoscut = regula tare
+        for f in os.listdir(sub):
+            if f.startswith(".") or os.path.splitext(f)[1].lower() not in EXT_AUDIO:
                 continue
-            tip = FOLDERE_MELE.get(fold.upper(), "generic")
-            for f in os.listdir(sub):
-                if f.startswith("."):
-                    continue
-                if os.path.splitext(f)[1].lower() in EXT_AUDIO:
-                    pe_cat[tip].append(os.path.join(sub, f))
+            cale = os.path.join(sub, f)
+            pe_cat[tip_fix or clasifica_sunet(cale)].append(cale)
     return pe_cat
 
 
@@ -235,6 +271,11 @@ def gaseste_efecte(folder_assets):
         if os.path.isdir(sub):
             candidati += [os.path.join(sub, f) for f in os.listdir(sub)
                           if os.path.splitext(f)[1].lower() in EXT_AUDIO and not f.startswith(".")]
+        if os.path.isdir(baza_mele):
+            candidati += [os.path.join(baza_mele, f) for f in os.listdir(baza_mele)
+                          if os.path.splitext(f)[0].lower() == nume
+                          and os.path.splitext(f)[1].lower() in EXT_AUDIO
+                          and not f.startswith(".")]
         if os.path.isdir(d):
             candidati += [os.path.join(d, f) for f in os.listdir(d)
                           if os.path.splitext(f)[0].lower() == nume
@@ -396,8 +437,10 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     out = f"EP{nr:02d}.mp4"
     crf = "20" if tinta_h else "23"
     preset = "medium" if tinta_h else "veryfast"
+    # mediu sarac (sandbox 2GB): 30fps + x264 econom (AE_USOR=1) — aceeasi calitate perceputa, RAM redus de 3-4x
+    usor = ["-r", "30", "-x264opts", "rc-lookahead=20:ref=2:threads=2"] if os.environ.get("AE_USOR") == "1" else []
     cmd += ["-filter_complex", ";".join(filtre), "-map", vmap, "-map", harta_a,
-            "-c:v", "libx264", "-preset", preset, "-crf", crf,
+            "-c:v", "libx264", "-preset", preset, "-crf", crf, *usor,
             "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", out]
     r = subprocess.run(cmd, capture_output=True, text=True, cwd=folder)
     if r.returncode != 0 or not os.path.exists(os.path.join(folder, out)):
@@ -514,6 +557,7 @@ CATEG_SFX = {
     "cadere": ["a cazut", "cazut", "s-a lovit", "sa lovit", "busit", "doare",
                 "sparge", "spart", "a picat", "picat", "boom", "os"],
     "speriat": ["frica", "groaza", "speriat", "hop", "ce e asta", "ce-a fost", "stai ce"],
+    "hit": ["lovit", "hit", "bambus", "sabie", "pumn", "l-a batut", "damage", "pocnit", "l-am lovit"],
 }
 
 
@@ -553,11 +597,11 @@ def alege_sfx_inteligent(pool, durata, transcript, scene):
     """PRECIS, nu doar random: evenimentele REALE din vorbire primeste sunetul POTRIVIT
     (fericit_* la 'am prins!', cadere_* la 'a cazut!'). Daca evenimentele sunt rare,
     umple cu random in puncte sigure. -> [(t_episod, fisier, volum)]"""
-    pe_cat = {"fericit": [], "cadere": [], "speriat": [], "generic": []}
+    pe_cat = {"fericit": [], "cadere": [], "speriat": [], "hit": [], "generic": []}
     for cale in pool:
         nume = os.path.splitext(os.path.basename(cale))[0].lower()
         pus = False
-        for tip in ("fericit", "cadere", "speriat"):
+        for tip in ("fericit", "cadere", "speriat", "hit"):
             if nume.startswith(tip + "_") or nume.startswith(tip + "-"):
                 pe_cat[tip].append(cale)
                 pus = True
@@ -568,6 +612,7 @@ def alege_sfx_inteligent(pool, durata, transcript, scene):
         pe_cat[tip].extend(lst)
 
     alese = []
+    folosite = {}
     for t_live, tip in detecteaza_evenimente(transcript):
         if len(alese) >= 4:
             break
@@ -576,9 +621,12 @@ def alege_sfx_inteligent(pool, durata, transcript, scene):
             continue
         if any(abs(t_ep - x) < 8 for x, _, _ in alese):
             continue
-        candidati = pe_cat[tip] or pe_cat["generic"]
+        if folosite.get(tip, 0) >= MAX_PE_CATEG.get(tip, 3):
+            continue          # ex: bambus hit max 2/episod — rar = copiii raman pe tentă
+        candidati = pe_cat.get(tip) or pe_cat["generic"]
         if candidati:
             alese.append((t_ep, random.choice(candidati), random.uniform(0.7, 0.9)))
+            folosite[tip] = folosite.get(tip, 0) + 1
     protejate = [(0, 12), (durata - 14, durata)]
     incercari = 0
     while len(alese) < 2 and incercari < 100 and pe_cat["generic"]:
@@ -758,7 +806,8 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             'si un camp nou "in_joc": descriere concreta a evenimentului din joc (1-2 propozitii). ' 
             '{"scor": 0-10 (cat de tare e momentul pentru copii), '
             '"de_ce": "o propozitie scurta", '
-            '"titlu": "titlu YouTube max 60 caractere, cu mister, romaneste", '
+            '"titlu": "titlu YouTube max 60 caractere, stil MrBeast: PRIMELE 3 CUVINTE = soc/FOMO '
+            '(AM GASIT, L-AM PRINS, NIMENI NU STIE, PRIMUL DIN...), apoi misterul; cuvintele-cheie in MAJUSCULE; romaneste", '
             '"promite": ["ce promite titlul, max 3 lucruri"], '
             '"livrat": true/false — TRUE doar daca TOT ce promite titlul chiar se vede/se aude in moment}. '
             'REGULA DE AUR: titlul descrie DOAR ce chiar se intampla in moment (vezi cadrele + ce s-a vorbit). '

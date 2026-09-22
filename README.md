@@ -220,19 +220,20 @@ Vizionezi TOATE episoadele înainte de upload (10 min/episod). De ce nu sari pes
 | `CTA_TEXT` | LIKE + comentarii | Textul de final |
 | `NUME_CANAL` | iZentric | Semnătura în colț |
 
-## 🎵 SUNETELE TALE — plug & play (`sunete_mele/`)
+## 🎵 SUNETELE TALE — arunci cu nume normal, EU le aranjez (`sunete_mele/`)
 
-Arunci fisiere .mp3/.wav in folderul cu numele potrivit si gata — intra AUTOMAT in toate episoadele:
-| Folder | Cand suna |
+Arunca fisierul .mp3/.wav DIRECT in `sunete_mele/` cu nume natural in romana — atat:
+| Nume fisier | Unde ajunge |
 |---|---|
-| INTRARE · HYPE · EXPLOZIE · VICTORIE · FINAL | pe sloturile fixe ale episodului (start, ridicare, MAXIM, victorie, CTA) |
-| OASE_RUPTE · CADERE | AUTOMAT cand zici „a cazut / doare / mi-am rupt oasele / s-a spart" |
-| FERICIT | cand zici „l-am prins / am reusit / incredibil" |
-| SPERIAT | la frica si tensiune |
-| COMICE | umplutura comica pe zone sigure (bruh, vine boom) |
+| teava care cade, oase rupte, am cazut... | la CADERI (automat pe evenimentele reale) |
+| bambus hit, lovitura, pumn... | la LOVITURI — dar MAX 2/episod ca sa ramana surpriza |
+| l-am prins yay, am reusit... | la BUCURII |
+| sting, frica... | la TENSIUNE |
+| orice altceva | comice random (viata in episod) |
+Optional/avansat: folder sau nume INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL = loc fix in episod.
+Detalii in `sunete_mele/CITESTE-MA.txt` · Secretile de editare MrBeast: `SECRETE_EDITARE.md`.
 
-Mai multe fisiere in acelasi folder = le amesteca (varietate). Detalii in `sunete_mele/CITESTE-MA.txt`.
-Secretile de editare MrBeast si unde sunt active la tine: `SECRETE_EDITARE.md`.
+## 🛡️ VEGHEAZA
 
 ## 🛡️ VEGHEAZA — isi ia live-ul SINGUR de pe canal (`vegheaza.py`)
 
