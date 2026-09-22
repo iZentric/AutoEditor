@@ -1160,6 +1160,61 @@ def scrie_srt_episod(cale, transcript, poveste):
     return idx
 
 
+def grupeaza_cu_ai(cheie, model, episoade, transcript):
+    """AI-ul vede TOATE momentele din live si le grupeaza pe TEMA/quest:
+    ex 'cautam pasarea' -> toate momentele cu pasarea (de la inceput/mijloc/sfarsit)
+    intr-un SINGUR episod, aranjat ca poveste. Fallback: nimic (raman ca inainte)."""
+    if len(episoade) < 3:
+        return None
+    randuri = []
+    for i, e in enumerate(episoade):
+        ce = e.get("ai_in_joc") or e.get("ai_de_ce") or ""
+        if not ce and transcript:
+            try:
+                bucati = [tx for a, b, tx in transcript
+                          if a - 30 <= e["varf"] <= b + 30][:2]
+                ce = " ".join(bucati)[:150]
+            except Exception:
+                ce = ""
+        randuri.append(f"{i} | {_ts(e['varf'])} | scor {e['scor']} | {ce[:140]}")
+    prompt = ('Esti editor AI pentru canalul PokeCity (Minecraft+Pokemon, copii 8-15, RO). '
+              "Mai jos sunt TOATE momentele tari dintr-un LIVE (index | timp | scor | ce se intampla). "
+              "Grupeaza momentele in EPISOADE pe ACEEASI tema/quest: daca in 3+ momente se urmareste "
+              "acelasi lucru (ex: 'cautam un pokemon rar', 'construim baza', 'raid'), pune-le in ACELASI "
+              "episod — de la inceput, mijloc si sfarsit al live-ului — ca sa formeze O POVESTE completa. "
+              "Un moment apartine unui singur episod. Grup de MINIM 3 momente. "
+              "Momentelor fara tema comuna NU le forta gruparea. "
+              'Raspunzi DOAR cu JSON: {"grupuri": [{"tema": "numele quest-ului", "indici": [0,3,5]}]}\n\n'
+              + "\n".join(randuri))
+    try:
+        r = ia_gemini(cheie, model, prompt, None)
+        grupuri = (r or {}).get("grupuri") or []
+        if not grupuri:
+            return None
+    except Exception:
+        return None
+    folosite, rezultat = set(), []
+    for g in grupuri:
+        idxs = [i for i in g.get("indici", []) if isinstance(i, int) and 0 <= i < len(episoade)]
+        if len(idxs) < 3:
+            continue
+        membri = sorted((episoade[i] for i in idxs), key=lambda e: e["varf"])
+        maxim = max(membri, key=lambda e: e["scor"])
+        scena = [(max(0, maxim["varf"] - 2), 8),
+                 (max(0, membri[0]["varf"] - 15), 55),
+                 (max(0, membri[1]["varf"] - 10), 55),
+                 (max(0, maxim["varf"] - 15), 52)]
+        rezultat.append({"tip": "poveste", "scor": round(sum(e["scor"] for e in membri) / len(membri), 1),
+                         "scene": scena, "varf": maxim["varf"],
+                         "folosite": sorted(set().union(*[set(e.get("folosite", [])) for e in membri])),
+                         "tema": g.get("tema", "")})
+        folosite.update(idxs)
+    if not rezultat:
+        return None
+    restul = [e for i, e in enumerate(episoade) if i not in folosite]
+    return sorted(rezultat + restul, key=lambda e: -e["scor"])
+
+
 def main():
     aranjeaza_sunete_mele()
     ap = argparse.ArgumentParser()
@@ -1264,6 +1319,12 @@ def main():
             print(f"   MOD AI ACTIV ({model}): {len(episoade)} candidati judecati semantic...")
             episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript, baza)
             print(f"   AI a pastrat {len(episoade)} episoade (cele cu scor mic au cazut)")
+            if len(episoade) >= 3:
+                grupate = grupeaza_cu_ai(cheie, model, episoade, transcript)
+                if grupate:
+                    episoade = grupate
+                    teme = sum(1 for e in episoade if e.get("tema"))
+                    print(f"   TEME: momente din TOT live-ul, grupate in {teme} episoade tematice")
     print(f"   plan: {len(episoade)} episoade ({sum(1 for e in episoade if e['tip']=='poveste')} in modul poveste)")
 
     rap = ["# RAPORT AUTOEDITOR (POVESTEA) — " + datetime.now().strftime("%d.%m.%Y %H:%M"),
