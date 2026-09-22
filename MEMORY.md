@@ -706,3 +706,10 @@
 - SOLUȚIA (pe git + Release „kit-auto-dupa-live"): kitul auto_dupa_live pe PC-ul creatorului: auto_dupa_live.py (watcher pe folderul Videos/OBS → detectează înregistrarea când s-a scris complet → urcă pe pixeldrain anonim → scrie link-ul în declansa/live.txt prin Contents API (token-ul existent are Contents RW ✓) → push declanșează workflow-ul) + PORNESTE.bat + CITESTE-MA.txt. ZIP la Releases/download/kit-auto-dupa-live/auto_dupa_live.zip.
 - workflow episod.yml: trigger + push paths declansa/live.txt; „Aflare sursa" citeste URL din input SAU din fișier. Zero nevoie de Secreturi noi, zero tokenuri noi.
 - USERUL: setare unică 3 min (GITHUB_TOKEN în kit/.env + PORNESTE.bat) → apoi: live cu Recording în OBS → inchide → episoade în Releases. VOD-urile vechi: le aruncă în folderul Videos → procesate automat la fel.
+
+## Lectie CRITICA cookies Studio (22.09, seara)
+- Cookies COMPLETE au mers EXACT 1 download de pe server: run #7 = 1794MB OK (20:21). La 20:32 aceleasi cookies -> 303 login. Google invalideaza sesiunea dupa 1-2 descarcari de pe IP datacenter.
+- Token-ul `download_my_video?v=ID&t=KEY` e STABIL per video (nu e single-use) — autorizarea vine din cookies. Cand cookies mor, totul moare.
+- REGULA: re-export cookies de catre user = banda rataNTA. Drumul ROBUST = kit auto_dupa_live (PC -> pixeldrain -> workflow). Studio ramane in pipeline ca varianta 1 cand cookies sunt proaspete.
+- Run #8 (35780889937) a confirmat: mesaj clar in log "cookies expirate".
+- FIX facut in pipeline: dupa STUDIO OK sare peste strategiile yt-dlp (bug run #7: avea fisierul dar a rulat yt-dlp oricum).
