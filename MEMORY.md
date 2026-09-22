@@ -728,3 +728,11 @@
 - pipeline: yt link/id + cookies cu SAPISID -> extrage token -> curl. cookies.b64 scos din repo; Secret COOKIES_YT = drumul (SECRET_COPIAZA.txt de lipit).
 - Lectie: exportul "doar youtube" vechi LIPSEA token-urile scurte (PSIDTS/SIDCC) => murea instant. Exportul complet are tot; filtram noi.
 - REGULA SECURITATE: user NU mai da export complet in chat; doar in Secret.
+
+## PATTERN DOVEDIT (2x): session kill dupa download complet (23.09, ~01:40)
+- Run #7: download complet 1794MB 20:21 -> sesiune moarta 20:32. Run #10: download complet 1794MB 22:14-16 -> moarta 22:27 (titlu pagina "YouTube", fara token; moarta global, si din sandbox). Probele mici (603MB partial) NU o omoara.
+- REGULA FIER: 1 export cookies = MAX 1 download complet de pe server. Cookie-urile principale raman, dar Google ucide autorizarea dupa ~1.8GB de pe IP datacenter.
+- Run #10 a dovedit insa lantul COMPLET cu secretul userului: "cookies din Secret" -> token auto-extras -> STUDIO OK 1794MB in 2m21s (12.7MB/s!) -> SURSA OK. Numai sesiunea a murit dupa.
+- Run #11 (dispatch user din UI) + #12: ambele picate la token (sesiune moarta). #12 = primul cu CACHE (actions/cache key vod-md5(url)) + retry token 3x cu debug titlu — de lasat in loc.
+- Concluzie user: pentru "mereu, zero batai de cap" = pixeldrain SAU drag&drop in Release (ambele fara cookies). Studio = fallback cu re-export inainte de FIECARE video.
+- BUG fix: extragere ID din /live/ si /shorts/ (group(1), nu match[0]) — testat pe 4 forme de URL.
