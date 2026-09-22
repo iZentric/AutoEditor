@@ -721,3 +721,10 @@
 - TESTAT cap-coada cu release vod-test (2MB): trigger OK, asset gasit, download OK, validare marime OK. Release+tag test STERSE dupa.
 - Publica step: nullglob guard (nu mai picata cand nu sunt episoade).
 - Timpi estimati pe drumul release: upload user 2-6min + server 10-12min = episoade in ~12-18min de la Publish.
+
+## AUTOMATIZAREA COMPLETA Studio (23.09, ~01:00) — REZOLVAT t83 DEFINITIV
+- User a dat export complet de browser; extras DOAR liniile youtube/google -> uploads/cookies_yt_fresh.txt (30 cookies, ACEEASI sesiune cu PSIDTS/SIDCC proaspete) = VIU: studio 200 + download 603MB/35s cu token auto-extras.
+- DESCOPERICHE: pagina studio.youtube.com/video/{ID}/edit contine in HTML "download_my_video?v=ID\u0026t=TOKEN" (token PROASPAT per sesiune). Cookie vii -> tokenul il scoatem NOI, userul nu mai da link Studio.
+- pipeline: yt link/id + cookies cu SAPISID -> extrage token -> curl. cookies.b64 scos din repo; Secret COOKIES_YT = drumul (SECRET_COPIAZA.txt de lipit).
+- Lectie: exportul "doar youtube" vechi LIPSEA token-urile scurte (PSIDTS/SIDCC) => murea instant. Exportul complet are tot; filtram noi.
+- REGULA SECURITATE: user NU mai da export complet in chat; doar in Secret.
