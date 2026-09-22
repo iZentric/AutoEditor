@@ -554,3 +554,11 @@
 - GitHub: **repo 404** (nu exista public inca) → ghid DA_MI_CHEIA.md actualizat cu numele AutoEditor; user trebuie: creeaza repo (privat ok) + fine-grained token Contents RW → apoi push 16 commituri (remote=github.com/iZentric/AutoEditor).
 - ZIP reconstruit (2,8MB) cu tot codul actualizat; zip scos din git (.gitignore *.zip).
 - Pe git: v3.8 (16 commituri). Răspuns la „AI mai bun pe net?": NU (t56: Powder/Eklipse/Opus — fara RO, fara vedere integrala, fara episoade editate, fara invatare) + acum avem LITERALLY cel mai bun model Google integrat, cu dovada de azi.
+
+## 22.09 — THREAD 62: GITHUB CONECTAT — iZentric/AutoEditor LIVE — SISTEMUL COMPLET FUNCTIONEAZA
+- User a dat fine-grained token (github_pat_11AX...89hR, repo-only AutoEditor, Contents+Issues RW). A intrebat de „full access" → refuzat profesional: acces minim = securitate; Contents+Issues acopera tot (code+releases+comenzi).
+- **PUSH REUSIT**: main → github.com/iZentric/AutoEditor, 16 COMMITURI confirmate prin API. Remote URL cu token in .git/config (nu persista in snapshot → la sesiune noua: remote add origin https://iZentric:$GITHUB_TOKEN@... din .env).
+- **Issue #1 creat** „Scrie-mi aici ce vrei schimbat" (canalul de comenzi). **Release v3.8 + asset autoeditor_pokecity.zip 2,8MB** (Release ID 393751070) — primul livrabil in Releases.
+- PROTOCOL (CUM_VORBIM.md in repo): Issues = comenzi user · eu citesc+lucrez+push+inchid cu raspuns · Releases = video-uri/kit-uri pana la 2GB · MEMORY.md in repo = memoria completa (orice sesiune noua citeste repo-ul).
+- GITHUB_TOKEN/GITHUB_USER/GITHUB_REPO acum in .env (gitignored). PENTRU SESIUNI NOI: la inceput → git remote add din .env + git pull; verifica Issues; lucreaza; push.
+- Lipseste doar: TELEGRAM_TOKEN+TELEGRAM_USER_ID (pt AI in telefon). Primul live real = calibrare.
