@@ -33,7 +33,10 @@ print("SURSA:", src, os.path.getsize(src) // (1024 * 1024), "MB", flush=True)
 
 # 2) randare (runner 7GB RAM = fara AE_USOR) + poarta STRICTA: doar ce chiar merita
 env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.6"))
-sh([sys.executable, "autoeditor.py", src, "--calitate", "1080p", "--max", MAXN, "--subtitrari"], env=env)
+cmd = [sys.executable, "autoeditor.py", src, "--calitate", "1080p", "--max", MAXN]
+if os.environ.get("SUBTITRARI", "0") == "1":   # whisper pe live 2h = ~10 min; default OFF pt viteza
+    cmd += ["--subtitrari"]
+sh(cmd, env=env)
 
 # 3) urcare 2K (2560x1440 lanczos+unsharp)
 sh([sys.executable, "urca_2k.py"])
