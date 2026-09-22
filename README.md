@@ -239,8 +239,10 @@ Detalii in `sunete_mele/CITESTE-MA.txt` · Secretile de editare MrBeast: `SECRET
   YouTube normalizeaza la -14 si NU amplifica ce e linistit; masterul la -16 = episod prea incet
   fata de restul feed-ului). Metoda de studio: loudnorm liniar in 2 treceri (zero pompare),
   varfuri sub -1.5 dBTP. In consola/RAPORT vezi: „CALIBRARE YOUTUBE: -16.0 -> -14.0 LUFS". (AE_LUFS=0 opreste)
-- **ZOOM**: punch-in centrat (max 1.14x, elegant) la cele 3 clipe critice: cold-open (start),
-  textul HYPE si CLIMAX — trucul MrBeast care tine copiii lipiti de ecran. (AE_ZOOM=0 opreste)
+- **FLOW MrBeast (v3.13, calibrat pe JocuriHorror: 178 schimbari vizuale/19.8 min = una la 6.7s)**:
+  cadrul „respira" permanent (oscilatie discreta) + punch-in la cold-open, HYPE, CLIMAX
+  si la FIECARE varf real de energie (max 4) + aerul mort se taie de la 9s (inainte 12s).
+  Frame-ul nu se mai opreste niciodata din miscare — ca la el.
 
 ## 🛡️ VEGHEAZA — isi ia live-ul SINGUR de pe canal (`vegheaza.py`)
 

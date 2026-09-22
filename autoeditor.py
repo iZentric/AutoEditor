@@ -511,7 +511,7 @@ def expr_zoom(poz, sfarsit, varf, crestere, fps, urcare, coborare):
     return f"(between(in,{a},{b})*{crestere}*min((in-{a})/{max(1, int(urcare * fps))},1)*min(max(({b}-in)/{max(1, int(coborare * fps))},0),1))"
 
 
-def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None):
+def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None, seria=None):
     """O comanda ffmpeg: concateneaza scenele (+intro-reactia), pune logo, textele, muzica."""
     ass = scrie_ass(os.path.join(folder, f"EP{nr:02d}.ass"), durata, poveste)
     cmd = [ff, "-y"]
@@ -544,7 +544,34 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
                     (START_P3 - 10, START_P3 - 4, 0.05, 0.6, 1.0),             # sub textul HYPE
                     (START_P3, min(START_P3 + 15, max(durata - 8, START_P3 + 6)), 0.14, 1.2, 1.0)]
         ferestre = [(a, min(b, durata - 1), c, d, e) for a, b, c, d, e in ferestre if a < durata - 2]
-        zexpr = "1+" + "+".join(expr_zoom(a, b, 0, c, fps_z, d, e) for a, b, c, d, e in ferestre)
+        cand = []
+        # PUNCH-uri DINAMICE la varfurile REALE de energie (max 4) — ritmul masurat la
+        # JocuriHorror: 178 de schimbari vizuale in 19.8 min = una la ~6.7s. Frame-ul
+        # nostru are o singura camera; punch-ul pe energie e echivalentul editorial.
+        if seria and poveste.get("scene"):
+            idx_map = {int(s): v for s, v in seria}
+            vol_ep = []
+            for start, lung in poveste["scene"]:
+                for t in range(int(lung)):
+                    vol_ep.append(idx_map.get(int(start) + t))
+            vii = sorted(v for v in vol_ep if v is not None)
+            baza_v = vii[len(vii) // 2] if vii else 0
+            for t, v in enumerate(vol_ep):
+                if v is None or v < baza_v + 2 or not (10 <= t <= durata - 12):
+                    continue
+                if any(vol_ep[j] is not None and vol_ep[j] > v for j in range(max(0, t - 3), min(len(vol_ep), t + 4))):
+                    continue                       # nu e maxim local
+                if any(abs(t - x) < 12 for x in cand) or any(abs(t - a2) < 6 for a2, _, _, _, _ in ferestre):
+                    continue                       # prea aproape de alt punch
+                cand.append(t)
+                if len(cand) >= 4:
+                    break
+            ferestre += [(t, min(t + 2.5, durata - 1), 0.10, 0.3, 0.9) for t in cand]
+        # RESPIRAT: cadrul NU sta niciodata pe loc — oscilatie discreta (perioada 8s, pana la 1.035)
+        respir = "0.035*(0.5-0.5*cos(in*2*PI/" + str(max(1, int(8 * fps_z))) + "))"
+        zexpr = ("1+" + respir + ("+" + "+".join(expr_zoom(a, b, 0, c, fps_z, d, e)
+                 for a, b, c, d, e in ferestre) if ferestre else ""))
+        poveste["_zoom_n"] = len(ferestre)
         zoom_txt = (f",fps={fps_z},zoompan=z='{zexpr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
                     f":d=1:s={w_z}x{h_z}:fps={fps_z}")
     if logo:
@@ -812,7 +839,7 @@ def motiv_de_exista(episoade, prag=0.55):
     return bune
 
 
-def comprima_zone_moarte(sm, scene, durata, min_scena=12):
+def comprima_zone_moarte(sm, scene, durata, min_scena=9):
     """STILUL JOH (confirmat in transcriptele lor): narare CONTINUA, fara goluri.
     Taie segmentele moarte >=min_scena din mijlocul scenelor; scena care pierde
     peste 35% din durata ramane intreaga (nu o facem neintelegibila).
@@ -1212,7 +1239,7 @@ def main():
             print(f"   EP{k:02d} ({eticheta})...")
         out = comanda_randare(ff, os.path.abspath(opt.video), e, durata_ep, folder, muzica, logo, k,
                               efecte, tinta_h, sfx_rand, confeti_p, h_out,
-                              dim=(w_src, h_src, fps_live))
+                              dim=(w_src, h_src, fps_live), seria=seria)
         if out:
             lu = calibreaza_lufs(ff, os.path.join(folder, out))
             if lu:
@@ -1248,7 +1275,7 @@ def main():
         for k, e, out in facute:
             if e.get("_lufs"):
                 chk.append(f"- {out}: AUDIO CALIBRAT YOUTUBE {e['_lufs'][0]:.1f} -> {e['_lufs'][1]:.1f} LUFS (tinta -14, varfuri <= -1.5 dBTP)")
-            chk.append(f"- {out}: ZOOM-uri MrBeast (cold-open + HYPE + CLIMAX, max 1.14x)")
+            chk.append(f"- {out}: FLOW MrBeast — respirat continuu + {e.get('_zoom_n', '?')} punch-uri (cold-open/HYPE/CLIMAX + pe energie)")
         open(os.path.join(folder, "RAPORT.md"), "a", encoding="utf-8").write("\n".join(chk) + "\n")
 
     if opt.subtitrari and transcript:
