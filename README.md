@@ -233,6 +233,12 @@ Arunca fisierul .mp3/.wav DIRECT in `sunete_mele/` cu nume natural in romana —
 Optional/avansat: folder sau nume INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL = loc fix in episod.
 Detalii in `sunete_mele/CITESTE-MA.txt` · Secretile de editare MrBeast: `SECRETE_EDITARE.md`.
 
+## 💥 CUVINTE-IMPACT PE ECRAN (v3.15, pornite — stil JocuriHorror)
+
+Pe fiecare sunet al tau apare automat un cuvant-soc in cutie, centrat, 0.8s:
+PUM! (lovituri) · PAH! (caderi) · WOW! (bucurie) · HOP! (speriat) — exact ca „ZIAR"-ul lui.
+Intrate in subtitrarile mari + zoom + FLOW = pachetul complet de retenție.
+
 ## 🖼️ MEME GREENSCREEN + GRADE DE CULOARE (v3.14, pornite)
 
 - **GRADE**: saturatie 1.18 + contrast 1.06 pe fiecare episod — „pica" in feed (stilul

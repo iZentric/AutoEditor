@@ -409,12 +409,15 @@ def alege_din_momente(momente, varfuri, scor, live_len, durata, max_ep):
 
 def _ts(sec):
     # format ASS cere OBLIGATORIU H:MM:SS.CC (centisecunde) — fara ele libass arunca linia
-    h, rest = divmod(int(sec), 3600)
-    m, s = divmod(rest, 60)
-    return f"{h}:{m:02d}:{s:02d}.00"
+    sec = max(0.0, float(sec))
+    cs = int(round(sec * 100))
+    h, rest = divmod(cs, 360000)
+    m, rest = divmod(rest, 6000)
+    s, cc = divmod(rest, 100)
+    return f"{h}:{m:02d}:{s:02d}.{cc:02d}"
 
 
-def scrie_ass(nume, durata, poveste):
+def scrie_ass(nume, durata, poveste, impact_words=None):
     """Textele pe ecran: semnatura colt + intrebare (0:12) + hype (inainte de maxim) + CTA final."""
     linii = ["[Script Info]", "ScriptType: v4.00+", "PlayResX: 1920", "PlayResY: 1080", "",
              "[V4+ Styles]",
@@ -422,6 +425,7 @@ def scrie_ass(nume, durata, poveste):
              "Style: CTA,Arial,84,&H00FFFFFF,&H00000000,&H80000000,1,4,0,2,60,60,90,1",
              "Style: WM,Arial,44,&H00FFFFFF,&H00000000,&H80000000,1,3,0,7,40,40,30,1",
              "Style: HYPE,Arial,96,&H0000E5FF,&H00000000,&H80000000,1,5,0,2,60,60,90,1",
+             "Style: IMPACT,Arial,96,&H00FFFFFF,&H00000000,&H70000000,1,4,0,5,40,40,40,3",
              "", "[Events]",
              "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
     if NUME_CANAL:
@@ -431,6 +435,10 @@ def scrie_ass(nume, durata, poveste):
         linii.append(f"Dialogue: 0,{_ts(START_P3 - 10)},{_ts(START_P3 - 2)},HYPE,,0,0,0,,{HYPE_TEXT}")
     linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{CTA_TEXT}")
     linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{{\\fs56\\c&H0000E5FF&\\pos(960,700)}}ABONEAZĂ-TE ca să nu pierzi seria!")
+    # CUVINTE-IMPACT (stil JocuriHorror: „ZIAR" in cutie mare la obiecte): apar 0.8s, centrate, pe sunetele lui
+    for t, cuvant in (impact_words or []):
+        linii.append(f"Dialogue: 0,{_ts(t)},{_ts(t + 0.8)},IMPACT,,0,0,0,,"
+                     f"{{\\pos(960,400)}}{cuvant}")
     open(nume, "w", encoding="utf-8").write("\n".join(linii) + "\n")
     return os.path.basename(nume)
 
@@ -521,7 +529,11 @@ def expr_zoom(poz, sfarsit, varf, crestere, fps, urcare, coborare):
 
 def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None, seria=None, meme=None):
     """O comanda ffmpeg: concateneaza scenele (+intro-reactia), pune logo, textele, muzica."""
-    ass = scrie_ass(os.path.join(folder, f"EP{nr:02d}.ass"), durata, poveste)
+    # cuvant-impact pe fiecare sunet al lui (ca „ZIAR"-ul de la JocuriHorror)
+    cuvant_pt = {"hit": "PUM!", "cadere": "PAH!", "fericit": "WOW!", "speriat": "HOP!", "generic": "BAM!"}
+    impact_words = [(max(0.2, t), cuvant_pt.get(clasifica_sunet(cale), "BAM!"))
+                    for t, cale, _ in (sfx_rand or [])]
+    ass = scrie_ass(os.path.join(folder, f"EP{nr:02d}.ass"), durata, poveste, impact_words)
     cmd = [ff, "-y"]
     for start, lung in poveste["scene"]:
         cmd += ["-ss", str(max(0, start)), "-t", str(lung), "-i", video]
