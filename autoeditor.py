@@ -27,6 +27,7 @@ COMENZI:
 import argparse
 import base64
 import json
+import math
 import os
 import random
 import time
@@ -710,7 +711,7 @@ def font_gros(size):
     return ImageFont.load_default()
 
 
-def fa_miniatura(cale_cadru, cale_out, titlu, logo=None):
+def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None):
     """MINIATURA in stil Minecraft, EDITATA din cadru REAL al live-ului
     (niciodata generata cu AI — regula canalului):
     crop 16:9 -> saturatie/contrast/sharpness boost -> logo -> text mare cu contur."""
@@ -731,6 +732,23 @@ def fa_miniatura(cale_cadru, cale_out, titlu, logo=None):
         lg = Image.open(logo).convert("RGBA")
         lg.thumbnail((170, 170))
         img.paste(lg, (24, 24), lg)
+    # SAGETA ROSIE stil Minecraft-kids: arata cat punctul de interes + cerc de accent
+    if sageata:
+        try:
+            ax, ay = sageata[0], sageata[1]
+            d.ellipse([ax - 95, ay - 95, ax + 95, ay + 95], outline=(255, 40, 40), width=14)
+            cx = 1120
+            cy = 140
+            ang = math.atan2(ay - cy, ax - cx)
+            gh = 70
+            d.line([cx, cy, cx + int((ax - cx) * 0.86), cy + int((ay - cy) * 0.86)],
+                   fill=(255, 40, 40), width=22)
+            ex, ey = cx + int((ax - cx) * 0.86), cy + int((ay - cy) * 0.86)
+            for da in (ang + 2.6, ang - 2.6):
+                d.line([ex, ey, ex + int(gh * math.cos(da)), ey + int(gh * math.sin(da))],
+                       fill=(255, 40, 40), width=22)
+        except Exception:
+            pass
     toate = [c for c in titlu.upper().replace("!", "").replace("?", "").replace("…", "").split() if len(c) > 1]
     # pastram cuvintele CU GREUTATE (nume/caietele de guerre), nu pe cele mici (CE, PE, UN)
     cuvinte = toate[:5]
@@ -1354,7 +1372,7 @@ def main():
         cadru = os.path.join(folder, f"EP{k:02d}_cadru2.jpg")
         try:
             if os.path.exists(cadru):
-                p = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura.jpg"), titlu_full, logo)
+                p = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura.jpg"), titlu_full, logo, sageata=(820, 240))
                 print(f"   miniatura: {os.path.basename(p)}")
         except ImportError:
             print("   ! pt miniaturi instalezi: pip install pillow")

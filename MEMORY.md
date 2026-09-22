@@ -652,3 +652,10 @@
 ## 22.09 — THREAD 74: CONFIRMARE FINALĂ STRATEGIE — LIVRAT
 - User: „deci facem tot doar că în stilul în care canalul meu poate crește, video-urile de 3 minute și etc, da?" → CONFIRMARE: DA. Tot sistemul (v3.15.2) = calibrat pe canalul lui: episoade 3 min (170s, final elastic min 90s), public 8-15 RO non-MFK, FLOW MrBeast, cuvinte-impact, sunetele lui, -14 LUFS, titluri patterne trending RO, autopilot vegheaza→flux→Releases, memoria în repo.
 - AȘTEPT GO pentru primul episod real. Nimic nou de construit — doar rulare + calibrare pe material real.
+
+## 22.09 — THREAD 75: MINIATURA PROFESIONISTĂ (săgeată roșie + cerc) + LISTĂ DE LIVRARE PRIMUL VIDEO — LIVRAT
+- User: „vreau titlurile perfecte pentru video-urile lor, hai să începem primul video — îmi dai tot: titlu etc, miniatură făcută cu fațe din video (nu AI), ca un thumbnail profesionist de Minecraft pentru copii: săgeată roșie care arată, culori suprasaturate etc; spune-mi ce mai ai nevoie; îți trimit primul live; facem tot în 2K".
+- v3.15.3 autoeditor.py: fa_miniatura(..., sageata=None) — SĂGEATĂ ROȘIE groasă (22px) care vine din colț dreapta-sus spre punctul de interes + CERC ROȘU de accent (raza 95, contur 14) + default sageata=(820,240) pentru fiecare miniatură din kit · saturare/contrast/sharpness existente păstrate · VERIFICAT VIZUAL: săgeata+cerc+text conturat pe cadru de test ✓ (miniatura rămâne din CADRU REAL al clipului, niciodată generată AI — regula canalului).
+- LIVRARE PRIMUL VIDEO (fluxul confirmat userului): ①trimitere LIVE (VOD link sau fișier) ②eu: vegheaza/flux → episoade 3 min în 2K + subtitrări + cuvinte-impact + sunetele lui + zoom/FLOW + -14 LUFS ③TITLU AI (patterne trending RO) + DESCRIERE + TAG-URI în EP01_upload.txt ④MINIATURĂ: cadru real + săgeată roșie + cerc + text CAPS ⑤totul la Releases → download → upload YouTube (lasă non-MFK).
+- CE MAI TREBUIE DE LA USER pt primul video: DOAR live-ul (link VOD sau fișier). Opțional: logo.png, meme-uri greenscreen, muzică NCS. 2K = confirmat (sursele lui 1440p → export nativ 2K).
+- Pe git: v3.15.3.
