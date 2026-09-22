@@ -17,10 +17,11 @@ def sh(cmd, env=None):
 cmd = [sys.executable, "-m", "yt_dlp", "--merge-output-format", "mp4",
        "--concurrent-fragments", "8", "-o", "live_curent.%(ext)s", "--no-playlist"]
 if os.path.exists("cookies.txt"):
-    print("folosesc cookies.txt (Secret COOKIES_YT)", flush=True)
+    print("folosesc cookies.txt (clienti default, compatibili cookies)", flush=True)
     cmd += ["--cookies", "cookies.txt"]
-cmd += ["--extractor-args", "youtube:player_client=android_vr,tv",
-        "-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio", URL]
+else:
+    cmd += ["--extractor-args", "youtube:player_client=android_vr,tv"]
+cmd += ["-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio", URL]
 sh(cmd)
 src = "live_curent.mp4"
 if not os.path.exists(src):
