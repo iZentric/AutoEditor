@@ -576,3 +576,12 @@
 - SECRETE_EDITARE.md: regula mama (1 video nebun>10 medii) + tabel secret→unde e activ in pipeline (cold open 8s, hook, zero dead air, re-hook 10-20s, sunet=50%, poveste, promis=livrat, CTA inainte de final, iteratie) + 3 sfaturi de upload (thumb=promisiunea 2, constanta, primele 3 cuvinte FOMO).
 - .gitignore: adaugate *.mp3/ogg/m4a/flac/aac/opus GLOBAL (sunetele lui nu se comita niciodata; pune_aici.txt da).
 - Pe git: v3.9 (19 commituri, push OK). FLOW-SUNETE user: arunca mp3 in sunete_mele/<NUME>/ → automat in toate episoadele de acum inainte.
+
+## 22.09 — THREAD 65: v3.10 SUNETE cu nume liber + TITLURI MrBeast + REGULA „NU PORNI VIDEO FĂRĂ GO" — LIVRAT+TESTAT
+- User: ①titluri AUTOMATE pt performanță maximă, stil MrBeast ②sunete: aruncă cu nume natural („teava care cade", „bambus hit") și EU le aranjez, fără să învețe foldere ③bambus hit RAR ④**REGULĂ DE STAȚIE: „nu te apuca de un video până nu zic eu că avem tot ce e nevoie"**.
+- OPRIT demo Ep.2 în curs; curățat prindere/episoade/stare; PIKACHU necomitat din nou (gata de reluat la GO).
+- v3.10: CATEG_SFX+hit · CUVINTE_SUNET (auto-clasificare după NUME fișier) · sunete_mele_pool() acceptă rădăcina + orice subfolder (slot folders exceptate; fișier numit ca slotul = doar slot) · MAX_PE_CATEG {hit:2} cu contor · folderele de categorii eliminate (rămân INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL) · CITESTE-MA rescris · prompt titlu MrBeast (primele 3 cuvinte șoc/FOMO + MAJUSCULE; promis=livrat rămâne).
+- USER A UPLOAT PE WEB: sunete_mele/OASE_RUPTE/pumm.mp3 + sunete_mele/SPERIAT/faaa.mp3 → pull --rebase, integrate (pumm=cadere, faaa=speriat), TESTATE pe scenariu real ✓. El poate uploada și prin web, și în chat, și pe PC — toate merg.
+- TESTE: auto-aranjare după nume 5/5 · slot din rădăcină ✓ · 6 lovituri→2 bambus ✓ · sunetele lui reale ✓ · py_compile verde.
+- TITLURI: automate în EP{k}_upload.txt + RAPORT, acum cu reguli MrBeast; dovadă reală: „AM GASIT PRIMUL POKEMON LEGENDAR DE PE POKECITY!".
+- Pe git: v3.10 (push OK după rebase peste upload-urile lui).
