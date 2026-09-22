@@ -233,6 +233,14 @@ Arunca fisierul .mp3/.wav DIRECT in `sunete_mele/` cu nume natural in romana —
 Optional/avansat: folder sau nume INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL = loc fix in episod.
 Detalii in `sunete_mele/CITESTE-MA.txt` · Secretile de editare MrBeast: `SECRETE_EDITARE.md`.
 
+## 🖼️ MEME GREENSCREEN + GRADE DE CULOARE (v3.14, pornite)
+
+- **GRADE**: saturatie 1.18 + contrast 1.06 pe fiecare episod — „pica" in feed (stilul
+  MrBeast confirmat: bright/saturated/high-contrast). (AE_GRADE=0 opreste)
+- **MEME-uri**: arunci clipuri cu fundal VERDE in `assets/meme/` (.mp4/.webm/.gif) —
+  apar AUTOMAT 1.6s pe momentele comice, decupate (chromakey), colt stanga-jos,
+  marime 1/4 din inaltime. 2-4 piese = varietate. (exact ce fac editorii de 40-120$/video)
+
 ## 🔊 CALIBRARE AUDIO YOUTUBE + 🎬 ZOOM-URI MrBeast (automate, pornite)
 
 - **AUDIO**: fiecare episod e MASURAT si adus la **-14 LUFS** (standardul YouTube 2026 —

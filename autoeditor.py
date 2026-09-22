@@ -443,6 +443,14 @@ def fps_sursa(ff, video):
     return float(m.group(1)) if m else 30.0
 
 
+def gaseste_meme(assets_dir):
+    """Clipurile greenscreen ale creatorului: assets/meme/*.mp4|webm|mov|gif."""
+    d = os.path.join(assets_dir, "meme")
+    ext = {".mp4", ".webm", ".mov", ".gif", ".mkv"}
+    return [os.path.join(d, f) for f in (os.listdir(d) if os.path.isdir(d) else [])
+            if os.path.splitext(f)[1].lower() in ext and not f.startswith(".")]
+
+
 def masoara_lufs(ff, cale):
     """Masura loudness-ul real (LUFS integrat) + true peak dintr-un fisier."""
     r = subprocess.run([ff, "-i", cale, "-af",
@@ -511,7 +519,7 @@ def expr_zoom(poz, sfarsit, varf, crestere, fps, urcare, coborare):
     return f"(between(in,{a},{b})*{crestere}*min((in-{a})/{max(1, int(urcare * fps))},1)*min(max(({b}-in)/{max(1, int(coborare * fps))},0),1))"
 
 
-def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None, seria=None):
+def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None, seria=None, meme=None):
     """O comanda ffmpeg: concateneaza scenele (+intro-reactia), pune logo, textele, muzica."""
     ass = scrie_ass(os.path.join(folder, f"EP{nr:02d}.ass"), durata, poveste)
     cmd = [ff, "-y"]
@@ -526,11 +534,17 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     filtre.append("[ac]loudnorm=I=-16:TP=-1.5:LRA=11[acn]")
     # calitate: daca cerem 2K si sursa e mai mica -> scalare LANCZOS + usor sharpen
     # (YouTube da bitrate mai mare la 1440p => imaginea supravietuieste mai bine re-encodarii lor)
+    # GRADE stil MrBeast: saturatie+contrast usor ridicate — cadrul "pica" si la
+    # marimea de feed din telefon (confirmat: stilul lui e bright/saturated/high-contrast)
+    vc_src = "[vc]"
+    if os.environ.get("AE_GRADE", "1") != "0":
+        filtre.append("[vc]eq=contrast=1.06:saturation=1.18[vcg]")
+        vc_src = "[vcg]"
     if tinta_h:
-        filtre.append(f"[vc]scale=-2:{tinta_h}:flags=lanczos,unsharp=5:5:0.3:5:5:0.0[vc2]")
+        filtre.append(f"{vc_src}scale=-2:{tinta_h}:flags=lanczos,unsharp=5:5:0.3:5:5:0.0[vc2]")
         src_vc = "[vc2]"
     else:
-        src_vc = "[vc]"
+        src_vc = vc_src
     # ZOOM-uri stil MrBeast: punch-in la cold-open, la textul HYPE si la CLIMAX.
     # zoompan = cadran cu cadran, centrat, max 1.14 (zero pierdere vizibila).
     zoom_txt = ""
@@ -590,7 +604,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
         # confeti.webm = 2s cu fundal transparent; tpad=clone (transparent) pana la moment, apoi overlay
         intarziere = max(0, durata - 8)
         filtre.append(f"[{ci}:v]scale=-2:{h_out},tpad=start_duration={intarziere}:start_mode=clone[cf]")
-        filtre.append(f"[vout][cf]overlay=0:0:eof_action=pass[vfin]")
+        filtre.append(f"{vmap}[cf]overlay=0:0:eof_action=pass[vfin]")
         vmap = "[vfin]"
     harta_a = "[ac]"
     if muzica:
@@ -616,6 +630,27 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
             idx = baza_idx + j
             filtre.append(f"[{idx}:a]adelay={int(t*1000)}:all=1,volume={vol:.2f}[x{idx}]")
             intrari_rand.append(f"[x{idx}]")
+    # MEME-uri greenscreen (assets/meme/): apar scurt (1.6s) pe momentele comice,
+    # jos in stanga, decupate cu chromakey — ca la editorii de 40-120$/video
+    if meme:
+        momente_meme = [t for t, _, _ in (sfx_rand or [])][:3] or [round(durata * 0.35, 1), round(durata * 0.65, 1)]
+        momente_meme = [t for t in momente_meme if 6 <= t <= durata - 10][:3]
+        baza_idx = n + (1 if logo else 0) + (1 if confeti else 0) + (1 if muzica else 0) + (len(efecte) if efecte else 0) + (len(sfx_rand) if sfx_rand else 0)
+        prev = vmap
+        for j, t0 in enumerate(momente_meme):
+            cale = random.choice(meme)
+            cmd += ["-i", cale]
+            idx_m = baza_idx + j
+            # tpad clone = meme-ul incepe la t0 (secondary input-ul altfel se consuma din t=0 si overlay-ul
+            # nu-l mai gaseste la momentul enable — BUG prins prin verificare vizuala)
+            filtre.append(f"[{idx_m}:v]scale=-2:{max(2, h_out // 4)},"
+                          f"tpad=start_duration={t0}:start_mode=clone,"
+                          f"chromakey=0x00FF00:0.25:0.08[mk{idx_m}]")
+            filtre.append(f"{prev}[mk{idx_m}]overlay=x=24:y=H-h-24:enable='between(t,{t0},{t0 + 1.6})':eof_action=pass[mm{idx_m}]")
+            prev = f"[mm{idx_m}]"
+        if prev != vmap:
+            vmap = prev
+            poveste["_meme_n"] = len(momente_meme)
     amix_in = "[acn]" + ("[bg]" if muzica else "") + "".join(intrari_sfx) + "".join(intrari_rand)
     filtre.append(f"{amix_in}amix=inputs={amix_in.count('[')}:duration=first:normalize=0[a0]")
     filtre.append(f"[a0]afade=t=out:st={max(0, durata-2)}:d=2[aout]")
@@ -1098,9 +1133,10 @@ def main():
     confeti_p = os.path.join(assets_dir, "efecte", "confeti.webm")
     confeti_p = confeti_p if os.path.exists(confeti_p) else None
     pool_rand = gaseste_sfx_random(assets_dir)
+    meme = gaseste_meme(assets_dir)
     print(f"assets: muzica={'DA' if muzica else 'NU'} · logo={'DA' if logo else 'NU'} · "
           f"efecte={','.join(efecte) if efecte else 'niciunul'} · "
-          f"confeti={'DA' if confeti_p else 'nu'} · sunete-random={len(pool_rand)} · sunete-mele={sum(len(v) for v in sunete_mele_pool().values())}")
+          f"confeti={'DA' if confeti_p else 'nu'} · sunete-random={len(pool_rand)} · sunete-mele={sum(len(v) for v in sunete_mele_pool().values())} · meme-greenscreen={len(meme)}")
 
     w_src, h_src = rezolutie_sursa(ff, os.path.abspath(opt.video))
     fps_live = fps_sursa(ff, os.path.abspath(opt.video))
@@ -1239,7 +1275,7 @@ def main():
             print(f"   EP{k:02d} ({eticheta})...")
         out = comanda_randare(ff, os.path.abspath(opt.video), e, durata_ep, folder, muzica, logo, k,
                               efecte, tinta_h, sfx_rand, confeti_p, h_out,
-                              dim=(w_src, h_src, fps_live), seria=seria)
+                              dim=(w_src, h_src, fps_live), seria=seria, meme=meme)
         if out:
             lu = calibreaza_lufs(ff, os.path.join(folder, out))
             if lu:
@@ -1276,6 +1312,9 @@ def main():
             if e.get("_lufs"):
                 chk.append(f"- {out}: AUDIO CALIBRAT YOUTUBE {e['_lufs'][0]:.1f} -> {e['_lufs'][1]:.1f} LUFS (tinta -14, varfuri <= -1.5 dBTP)")
             chk.append(f"- {out}: FLOW MrBeast — respirat continuu + {e.get('_zoom_n', '?')} punch-uri (cold-open/HYPE/CLIMAX + pe energie)")
+            if e.get("_meme_n"):
+                chk.append(f"- {out}: {e['_meme_n']} meme-uri greenscreen pe momentele comice")
+            chk.append(f"- {out}: GRADE culoare (saturatie 1.18, contrast 1.06 — pica in feed)")
         open(os.path.join(folder, "RAPORT.md"), "a", encoding="utf-8").write("\n".join(chk) + "\n")
 
     if opt.subtitrari and transcript:
