@@ -659,3 +659,16 @@
 - LIVRARE PRIMUL VIDEO (fluxul confirmat userului): ①trimitere LIVE (VOD link sau fișier) ②eu: vegheaza/flux → episoade 3 min în 2K + subtitrări + cuvinte-impact + sunetele lui + zoom/FLOW + -14 LUFS ③TITLU AI (patterne trending RO) + DESCRIERE + TAG-URI în EP01_upload.txt ④MINIATURĂ: cadru real + săgeată roșie + cerc + text CAPS ⑤totul la Releases → download → upload YouTube (lasă non-MFK).
 - CE MAI TREBUIE DE LA USER pt primul video: DOAR live-ul (link VOD sau fișier). Opțional: logo.png, meme-uri greenscreen, muzică NCS. 2K = confirmat (sursele lui 1440p → export nativ 2K).
 - Pe git: v3.15.3.
+
+## 22.09 — THREAD 76: PRIMA LIVRARE REALĂ din live 2h18 + v3.15.4/5 (lanț rapid + 3 buguri critice fixate)
+- User a dat live-ul REAL: 0yLhCsn9ZwY „AM INTRAT PE POKECITY + ROBLOX CU VOI!" 2:18:02, iZentric. Vrea „câte episoade bune poti scoate, nu vreau sa pierd cofetete deloc din live" + „optimizeaza sa nu stai mult".
+- BUGURI PRINSE ȘI FIXATE (toate pe git):
+  ①ffmpeg/yt-dlp/pachete pip DISPAR între sesiuni (sandbox reset >128MB) → la sesiune: pip install yt-dlp google-genai pillow imageio-ffmpeg + ln ffmpeg pe PATH ÎNAINTE de yt-dlp (altfel descarcă fară sunet SILENCIOS!)
+  ②yt-dlp fără ffmpeg la start → alege format video-only (f299) fără warning final → rapid.py acum fuzionează manual lossless dacă lipsește live_curent.mp4 (-c copy, 26s pentru 2h18)
+  ③**RAM-explosion: comanda_randare deschidea de 6× CONCOMITENT fișierul de 4,4GB (1 decodator/scenă) → OOM la 2GB** → FIX: pre-taie scenele în episodes/scene_tmp/EP{k}_s{i}.mp4 (ultrafast crf18, CACHE = rerulare instant) când sursa >200MB — EP01 a randat CU SUCCES după fix
+  ④**CONFFETI WEBM FĂRĂ ALPHA (yuv420p!) + tpad clone = strat negru opac peste TOT jocul** (cadru = confetti pe negru, bitrate 35kb/s) → FIX: chromakey=0x000000:0.15:0.02 după scale, înainte de tpad (v3.15.5)
+  ⑤Gemini 429/503 pe TOATE modelele (cote gratuite epuizate azi) → modul energie (fără AI) funcționează; titluri = sablon + le personalizăm manual din cadre
+- DESCOPERIRE MARE: live-ul de 2h18 are **98 momente-explozie, 12 de ELITĂ (poarta ≥20.7)** → EP01 (scor 109.2: intro-reactie 1:45:43 + setup 0:09:47 + dezf 1:07:58 + MAXIM 1:45:30) + **lot 2: 10 povești de elită** în momente_lot2.txt (1:08:08 scor 94.1, 2:14:58 60.3, 1:36:05 59.8, 1:58:25 52.6, 2:03:08 52.2, 1:15:20 48.0, 1:52:37 46.9, 2:07:41 44.1, 1:31:31 40.7, 21:01 32.0)
+- UNDE SUNT: episodes/ = EP01.mp4 (2K urcat, fix confeti în lotul curent) + scene_tmp/ cache · liveuri/live_curent.mp4 = sursa 4,4GB (nu se comită)
+- COMENZI NOI: rapid.py URL [N] = lanț unic descărcare→randare→2K · urca_2k.py = urcă toate EP*.mp4 la 2560x1440 lanczos+unsharp (îl rulează singur după randare) · v3.15.5 = 786eb0d→(fix confeti commit nou)
+- LEȚIE: verifică PIX_FMT pe orice asset „transparent" (yuva420p vs yuv420p) + cadre VIZUAL din ieșirea FINALĂ, nu doar din surse.
