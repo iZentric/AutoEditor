@@ -1,0 +1,41 @@
+name: Episod din live
+on:
+  workflow_dispatch:
+    inputs:
+      live_url:
+        description: 'URL-ul live-ului/VOD-ului de pe YouTube'
+        required: true
+        type: string
+      max_episoade:
+        description: 'Max episoade (doar ce CHIAR merita; implicit 2)'
+        default: '2'
+        type: string
+concurrency:
+  group: episod
+  cancel-in-progress: true
+jobs:
+  episod:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instaleaza dependinte
+        run: pip install yt-dlp google-genai pillow imageio-ffmpeg
+      - name: Randare episoade (descarcare -> analiza -> episoade -> 2K)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
+          AE_POARTA: '0.6'
+        run: python3 pipeline_github.py "${{ inputs.live_url }}" "${{ inputs.max_episoade }}"
+      - name: Publica in Releases (gata de download)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="ep-$(date -u +%Y%m%d-%H%M)"
+          gh release create "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura.jpg episodes/EP*_upload.txt episodes/*.srt \
+            --title "Episoade $TAG" --notes "Episoade 2K gata de upload pe YouTube. Vezi EP*_upload.txt pentru titlu/descriere/tag-uri."

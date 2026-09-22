@@ -1212,7 +1212,7 @@ def main():
             # POARTA DE ELITA: intra doar momentele din clasa de varf a live-ului.
             # Daca live-ul are un singur moment tare, raman UNUL — umplutura NU se face.
             scor_max = max(s for _, s in varfuri)
-            poarta = max(7.0, 0.5 * scor_max)
+            poarta = max(7.0, float(os.environ.get("AE_POARTA", "0.6")) * scor_max)  # 0.6 = doar ce CHIAR merita
             varfuri_elita = [v for v in varfuri if v[1] >= poarta]
             print(f"   poarta de elita: scor >= {poarta:.1f} -> {len(varfuri_elita)} momente merita episod")
         else:
