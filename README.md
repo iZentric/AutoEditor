@@ -220,6 +220,21 @@ Vizionezi TOATE episoadele înainte de upload (10 min/episod). De ce nu sari pes
 | `CTA_TEXT` | LIKE + comentarii | Textul de final |
 | `NUME_CANAL` | iZentric | Semnătura în colț |
 
+## 👁️ PRIVESTE — Gemini VIDEAZA tot materialul (`priveste.py`)
+
+```
+python priveste.py https://www.youtube.com/watch?v=XXXX   <- VOD-ul tau de pe canal (zero descarcare!)
+python priveste.py live_comprimat.mp4                     <- fisier local (pana la 2GB, File API)
+```
+Primești analiza COMPLETA (in `cunoastere/analize/` + consola):
+- DESPRE CE e vorba · CE SE VEDE in joc (cu minute) · CE SE SPUNE (pe sectiuni)
+- TOP momente pentru episoade: minut start + explozie + ce se vede/spune + scor + motiv de exista
+- TITLURI per moment (doar ce se vede) + RISCURI de verificat (minute exacte)
+- creierul canalului + regulile tale invatate sunt in prompt = analiza „ca un editor care te cunoaste"
+
+Limita onesta: 2GB la fisier (File API) — dar VOD-ul tau public de pe YouTube merge DIRECT prin link,
+deci live-urile lungi NU au nevoie de descarcare pentru analiza.
+
 ## 📱 PAL TELEGRAM — AI-ul canalului in telefon, oriunde esti (`pal_telegram.py`)
 
 ```
