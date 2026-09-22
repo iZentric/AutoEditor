@@ -206,6 +206,73 @@ FOLDERE_MELE = {
 
 SLOT_FOLDERE = {"INTRARE", "HYPE", "EXPLOZIE", "VICTORIE", "FINAL"}
 
+
+def aranjeaza_sunete_mele():
+    """Aranjatorul Automat: ce arunci tu in sunete_mele/ il punem la punct singuri:
+    1) DUPLICATELE (acelasi continut pus de 2 ori) -> se pastreaza o singura copie
+    2) MULTI-IN-UNU (un fisier lung cu mai multe sunete) -> despicat in sunete separate
+    Ruleaza singur la fiecare randare (si poate fi chemat oricand manual)."""
+    import hashlib
+    import re as _re
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sunete_mele")
+    if not os.path.isdir(d):
+        return
+    ff = gaseste_ffmpeg()
+    fisiere = []
+    for rad, _dosare, nume in os.walk(d):
+        for f in nume:
+            if f.startswith("."):
+                continue
+            if os.path.splitext(f)[1].lower() in EXT_AUDIO:
+                fisiere.append(os.path.join(rad, f))
+    vazute = {}
+    # la duplicate castiga copia din SUBFOLDER (are regula fixa de categorie), nu cea din radacina
+    for cale in sorted(fisiere, key=lambda c: (0 if os.path.dirname(c) != d else 1, c)):
+        try:
+            h = hashlib.md5(open(cale, "rb").read()).hexdigest()
+        except OSError:
+            continue
+        if h in vazute:
+            os.remove(cale)
+            print(f"   [sunete] duplicat sters: {os.path.basename(cale)} (= {os.path.basename(vazute[h])})")
+        else:
+            vazute[h] = cale
+    for cale in fisiere:
+        if not os.path.exists(cale):
+            continue
+        try:
+            r = subprocess.run([ff, "-i", cale, "-af", "silencedetect=noise=-35dB:d=0.4",
+                                "-f", "null", "-"], capture_output=True, text=True, timeout=60)
+        except Exception:
+            continue
+        starts = [float(x) for x in _re.findall(r"silence_start: ([0-9.]+)", r.stderr)]
+        ends = [float(x) for x in _re.findall(r"silence_end: ([0-9.]+)", r.stderr)]
+        bucati = []
+        cursor = 0.0
+        for s in starts:
+            if s - cursor >= 0.8:
+                bucati.append((cursor, s))
+            cursor = (ends.pop(0) if ends else s)
+        dur_atat = 0.0
+        m = _re.search(r"Duration: ([0-9:.]+)", r.stderr)
+        if m:
+            hh, mm, ss = m.group(1).split(":")
+            dur_atat = int(hh) * 3600 + int(mm) * 60 + float(ss)
+        if dur_atat - cursor >= 0.8:
+            bucati.append((cursor, dur_atat))
+        if len(bucati) < 2:
+            continue
+        baza, ext = os.path.splitext(cale)
+        idx = 0
+        for s, e in bucati:
+            idx += 1
+            piesa = f"{baza} {idx}{ext.lower()}"
+            subprocess.run([ff, "-y", "-ss", str(s), "-to", str(e), "-i", cale,
+                            "-c:a", "libmp3lame", "-q:a", "4", piesa],
+                           capture_output=True, timeout=120)
+        os.remove(cale)
+        print(f"   [sunete] despicat {os.path.basename(cale)} -> {idx} sunete separate")
+
 # tu arunci fisierul cu ORICE nume natural — noi il aranjam dupa cuvinte
 CUVINTE_SUNET = {
     "fericit": ["prins", "capturat", "reusit", "castig", "victor", "yay", "wohoo",
@@ -213,7 +280,7 @@ CUVINTE_SUNET = {
     "cadere": ["oase", "crac", "os rupt", "rupt", "cade", "cadere", "cazut", "cazi",
                "teava", "prabus", "pamant", "splash", "busit"],
     "speriat": ["speriat", "fric", "groaza", "sting", "hop", "tensiune", "creepy"],
-    "hit": ["hit", "lovit", "bambus", "pumn", "poc", "pach", "smash", "sabie", "damage"],
+    "hit": ["hit", "lovit", "bambus", "bonk", "pumn", "poc", "pach", "smash", "sabie", "damage"],
 }
 # rar = ramane surpriza pentru copii (ex: bambus hit max 2 pe episod)
 MAX_PE_CATEG = {"hit": 2, "cadere": 3, "fericit": 3, "speriat": 3, "generic": 3}
@@ -880,6 +947,7 @@ def scrie_srt_episod(cale, transcript, poveste):
 
 
 def main():
+    aranjeaza_sunete_mele()
     ap = argparse.ArgumentParser()
     ap.add_argument("video")
     ap.add_argument("--durata", type=int, default=DURATA)
