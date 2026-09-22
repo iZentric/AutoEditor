@@ -14,15 +14,23 @@ def sh(cmd, env=None):
 # YouTube blocheaza IP-urile de datacenter ("Sign in to confirm you're not a bot"):
 #  - clientul android_vr/tv trece de obicei fara cookies
 #  - daca exista cookies.txt (Secret COOKIES_YT) -> folosim cookies = garantat
-cmd = [sys.executable, "-m", "yt_dlp", "--merge-output-format", "mp4",
-       "--concurrent-fragments", "8", "-o", "live_curent.%(ext)s", "--no-playlist"]
+strategii = []
 if os.path.exists("cookies.txt"):
-    print("folosesc cookies.txt (clienti default, compatibili cookies)", flush=True)
-    cmd += ["--cookies", "cookies.txt"]
-else:
-    cmd += ["--extractor-args", "youtube:player_client=android_vr,tv"]
-cmd += ["-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio", URL]
-sh(cmd)
+    strategii += [["--cookies", "cookies.txt", "--extractor-args", "youtube:player_client=web_safari"],
+                  ["--cookies", "cookies.txt", "--extractor-args", "youtube:player_client=mweb"],
+                  ["--cookies", "cookies.txt"]]
+strategii += [["--extractor-args", "youtube:player_client=android_vr"], []]
+gata = False
+for s in strategii:
+    cmd = [sys.executable, "-m", "yt_dlp", "--merge-output-format", "mp4",
+           "--concurrent-fragments", "8", "-o", "live_curent.%(ext)s", "--no-playlist"] + s +           ["-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio", URL]
+    print(">> strategie descarcare:", " ".join(s) or "default", flush=True)
+    if subprocess.run(cmd).returncode == 0:
+        gata = True
+        break
+    print("   strategie picata, incerc urmatoarea...", flush=True)
+if not gata:
+    sys.exit("!! toate strategiile de descarcare au picat")
 src = "live_curent.mp4"
 if not os.path.exists(src):
     v, a = "live_curent.f299.mp4", "live_curent.f140.m4a"

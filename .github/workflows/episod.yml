@@ -27,6 +27,8 @@ jobs:
           python-version: '3.11'
       - name: Instaleaza dependinte
         run: pip install yt-dlp google-genai pillow imageio-ffmpeg faster-whisper
+      - name: yt-dlp FRESH (build master — YouTube se schimba saptamanal)
+        run: pip install --force-reinstall --no-deps https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
       - name: Cookies YouTube (Secret COOKIES_YT sau cookies.b64 din repo)
         env:
           COOKIES_YT: ${{ secrets.COOKIES_YT }}
