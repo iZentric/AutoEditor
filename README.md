@@ -220,6 +220,21 @@ Vizionezi TOATE episoadele înainte de upload (10 min/episod). De ce nu sari pes
 | `CTA_TEXT` | LIKE + comentarii | Textul de final |
 | `NUME_CANAL` | iZentric | Semnătura în colț |
 
+## 📱 PAL TELEGRAM — AI-ul canalului in telefon, oriunde esti (`pal_telegram.py`)
+
+```
+SETARE (3 min, o data):
+1. Telegram -> @BotFather -> /newbot -> TOKEN -> in autoeditor/.env:
+   TELEGRAM_TOKEN=...     TELEGRAM_USER_ID=...   (ID-ul tau: @userinfobot)
+2. pe PC: python pal_telegram.py   (fereastra deschisa)
+3. din TELEFON, oriunde in lume:
+   „ce momente are live-ul?"  -> iti arata minutele + scorurile
+   „vreau clip cu caderea"    -> recomandari concrete
+   /momente · /randeaza · /status  -> controlezi randarea de la distanta
+```
+Botul raspunde NUMAI tie (filtru pe ID-ul tau). Foloseste acelasi creier
+(autoeditor + Gemini). Testat: endpoint + taiere mesaje lungi ✓
+
 ## 💬 PAL — vorbesti cu AI-ul inainte de randare (`pal.py`)
 
 ```
