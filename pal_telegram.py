@@ -174,7 +174,7 @@ def main():
                         trimite(tok, chat, "Lipseste GEMINI_API_KEY din .env (aistudio.google.com/apikey).")
                         continue
                     prompt = (
-                        "Esti PAL, AI-ul canalului PokeCity (iZentric, Minecraft+Pokemon RO, copii 6-13). "
+                        "Esti PAL, AI-ul canalului PokeCity (iZentric, Minecraft+Pokemon RO, copii 8-15 (public general)). "
                         "Vorbesti romaneste, scurt, ca un prieten de gaming.\n\n"
                         "MOMENTELE DIN ULTIMUL LIVE:\n" + ctx + "\n\n"
                         "Ce a scris creatorul din telefon: \"" + text + "\"\n\n"

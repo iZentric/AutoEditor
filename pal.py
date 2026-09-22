@@ -92,7 +92,7 @@ def main():
         istoric.append(f"TU: {cerere}")
         ultime = "\n".join(istoric[-6:])
         prompt = (
-            "Esti PAL, prietenul AI al creatorului PokeCity (iZentric: Minecraft+Pokemon RO, copii 6-13). "
+            "Esti PAL, prietenul AI al creatorului PokeCity (iZentric: Minecraft+Pokemon RO, copii 8-15 (public general)). "
             "Vorbesti romaneste, pe scurt, ca un prieten de gaming.\n\n"
             "MOMENTELE DIN LIVE (minute: scor, ce zice):\n" + context + "\n\n"
             "CONVERSATIA PANA ACUM:\n" + ultime + "\n\n"
