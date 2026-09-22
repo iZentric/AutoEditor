@@ -220,6 +220,20 @@ Vizionezi TOATE episoadele înainte de upload (10 min/episod). De ce nu sari pes
 | `CTA_TEXT` | LIKE + comentarii | Textul de final |
 | `NUME_CANAL` | iZentric | Semnătura în colț |
 
+## 🎵 SUNETELE TALE — plug & play (`sunete_mele/`)
+
+Arunci fisiere .mp3/.wav in folderul cu numele potrivit si gata — intra AUTOMAT in toate episoadele:
+| Folder | Cand suna |
+|---|---|
+| INTRARE · HYPE · EXPLOZIE · VICTORIE · FINAL | pe sloturile fixe ale episodului (start, ridicare, MAXIM, victorie, CTA) |
+| OASE_RUPTE · CADERE | AUTOMAT cand zici „a cazut / doare / mi-am rupt oasele / s-a spart" |
+| FERICIT | cand zici „l-am prins / am reusit / incredibil" |
+| SPERIAT | la frica si tensiune |
+| COMICE | umplutura comica pe zone sigure (bruh, vine boom) |
+
+Mai multe fisiere in acelasi folder = le amesteca (varietate). Detalii in `sunete_mele/CITESTE-MA.txt`.
+Secretile de editare MrBeast si unde sunt active la tine: `SECRETE_EDITARE.md`.
+
 ## 🛡️ VEGHEAZA — isi ia live-ul SINGUR de pe canal (`vegheaza.py`)
 
 ```

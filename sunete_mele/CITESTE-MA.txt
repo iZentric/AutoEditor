@@ -1,0 +1,6 @@
+════ SUNETELE TALE — PLUG & PLAY ════
+1. Arunci fisiere .mp3 sau .wav in folderul potrivit (vezi pune_aici.txt din fiecare).
+2. Atat. Nu atingi nimic altceva.
+Engine-ul le ia AUTOMAT la momentul potrivit in TOATE episoadele, de acum inainte.
+Poti pune mai multe in acelasi folder = le amesteca (varietate pe episoade).
+Stergi un sunet din folder = nu se mai foloseste. Simplu.

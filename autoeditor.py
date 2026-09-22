@@ -192,17 +192,56 @@ def rezolutie_sursa(ff, video):
     return 1920, 1080
 
 
+EXT_AUDIO = {".mp3", ".wav", ".ogg", ".m4a", ".flac", ".aac", ".opus", ".wma"}
+
+# folderele lui din sunete_mele/ -> categoria de SFX in care intra
+FOLDERE_MELE = {
+    "FERICIT": "fericit",
+    "OASE_RUPTE": "cadere",
+    "CADERE": "cadere",
+    "SPERIAT": "speriat",
+    "COMICE": "generic",
+}
+
+
+def sunete_mele_pool():
+    """Sunetele puse de creator in sunete_mele/, sortate pe categorii."""
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sunete_mele")
+    pe_cat = {"fericit": [], "cadere": [], "speriat": [], "generic": []}
+    if os.path.isdir(d):
+        for fold in os.listdir(d):
+            sub = os.path.join(d, fold)
+            if not os.path.isdir(sub) or fold.startswith("."):
+                continue
+            tip = FOLDERE_MELE.get(fold.upper(), "generic")
+            for f in os.listdir(sub):
+                if f.startswith("."):
+                    continue
+                if os.path.splitext(f)[1].lower() in EXT_AUDIO:
+                    pe_cat[tip].append(os.path.join(sub, f))
+    return pe_cat
+
+
 def gaseste_efecte(folder_assets):
-    """Cauta efectele in assets/efecte/ dupa numele sloturilor (orice format audio).
+    """Cauta efectele pe sloturi: INTAI in sunete_mele/<SLOT>/ (sunetele tale,
+    alegere random daca sunt mai multe), apoi in assets/efecte/<nume>.
     lipsa = slotul se sari; prezenta = se aplica automat peste tot."""
     d = os.path.join(folder_assets, "efecte")
+    baza_mele = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sunete_mele")
     gasite = {}
-    if os.path.isdir(d):
-        for nume in EFECTE_SLOTS:
-            for f in os.listdir(d):
-                if os.path.splitext(f)[0].lower() == nume and not f.startswith("."):
-                    gasite[nume] = os.path.join(d, f)
-                    break
+    for nume in EFECTE_SLOTS:
+        candidati = []
+        sub = os.path.join(baza_mele, nume.upper())
+        if os.path.isdir(sub):
+            candidati += [os.path.join(sub, f) for f in os.listdir(sub)
+                          if os.path.splitext(f)[1].lower() in EXT_AUDIO and not f.startswith(".")]
+        if os.path.isdir(d):
+            candidati += [os.path.join(d, f) for f in os.listdir(d)
+                          if os.path.splitext(f)[0].lower() == nume
+                          and os.path.splitext(f)[1].lower() in EXT_AUDIO
+                          and not f.startswith(".")]
+        if candidati:
+            gasite[nume] = random.choice(candidati)
     return gasite
 
 
@@ -525,6 +564,8 @@ def alege_sfx_inteligent(pool, durata, transcript, scene):
                 break
         if not pus:
             pe_cat["generic"].append(cale)
+    for tip, lst in sunete_mele_pool().items():
+        pe_cat[tip].extend(lst)
 
     alese = []
     for t_live, tip in detecteaza_evenimente(transcript):
@@ -822,7 +863,7 @@ def main():
     pool_rand = gaseste_sfx_random(assets_dir)
     print(f"assets: muzica={'DA' if muzica else 'NU'} · logo={'DA' if logo else 'NU'} · "
           f"efecte={','.join(efecte) if efecte else 'niciunul'} · "
-          f"confeti={'DA' if confeti_p else 'nu'} · sunete-random={len(pool_rand)}")
+          f"confeti={'DA' if confeti_p else 'nu'} · sunete-random={len(pool_rand)} · sunete-mele={sum(len(v) for v in sunete_mele_pool().values())}")
 
     w_src, h_src = rezolutie_sursa(ff, os.path.abspath(opt.video))
     tinta_h = 1440 if (opt.calitate == "2k" and h_src < 1440) else 0
