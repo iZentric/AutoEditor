@@ -693,3 +693,10 @@
 - TEST 1 grupeaza_cu_ai cu Gemini simulat: PASS — tema 'oul rar' leagă momentele 585s+3690s+5398s într-un episod-poveste; momentele fără temă rămân separate (assert-uri).
 - TEST 2 chromakey confetti: PASS numeric — pixel centru (66,0,253) lum 106 (>40), jocul se vede prin confetti, nu mai e negru. Test în /tmp (3s, șters după; zero impact workspace).
 - Rămâne NEVERIFICAT până la primul Run din Actions: lanțul complet în cloud cu AI real + faster-whisper + Release. Tot restul e probat component-cu-componentă.
+
+## 22.09 — BLOCARE YOUTUBE TOTALĂ pe servere + SOLUȚIA DRIVE (thread critic)
+- 4 rulări Actions picate: YouTube blochează IP datacenter ("Sign in to confirm you're not a bot") — cu cookies, fără cookies, web_safari/mweb/tv/android_vr/default, chiar bgutil POT server montat (server pornit, dar yt-dlp nu mai ajunge să-l întrebe). Și sandbox-ul IP a fost flăgrat între 15:39 (mergea) și 18:22 (au lovit descărcările de 4GB).
+- SOLUȚIA (pe git, v-final): pipeline_github.py acceptă **link Google Drive** ("Share → Anyone with the link") → gdown → randare normală. Creatorul descarcă propriul VOD din YouTube Studio (Content → ⋮ → Download) și îl urcă pe Drive = calitate originală, zero blocări, via contul lui.
+- FUTUR: OBS record local (2K pe disc) → Drive → pipeline = 2K NATIV de la sursă, nu mai depinde deloc de descărcarea YouTube.
+- Rulări: #1 picat bot-check, #2 picat (tv client „page needs to be reloaded" cu cookies), #3 picat (la fel), #4 picat (toate strategiile). NO Critical remaining: doar așteptăm link Drive de la user și dispatch.
+- bgutil server local pe 4416 rulat OK (node 20, repo clonat în .arena/bgutil) — poate fi refolosit dacă YouTube mai relaxează.
