@@ -624,7 +624,8 @@ CATEG_SFX = {
     "cadere": ["a cazut", "cazut", "s-a lovit", "sa lovit", "busit", "doare",
                 "sparge", "spart", "a picat", "picat", "boom", "os"],
     "speriat": ["frica", "groaza", "speriat", "hop", "ce e asta", "ce-a fost", "stai ce"],
-    "hit": ["lovit", "hit", "bambus", "sabie", "pumn", "l-a batut", "damage", "pocnit", "l-am lovit"],
+    "hit": ["lovit", "lovesc", "loveste", "lovire", "hit", "bambus", "bambusul", "sabie", "sabia",
+            "pumn", "pumnul", "l-a batut", "damage", "pocnit", "l-am lovit", "atac"],
 }
 
 
