@@ -700,3 +700,9 @@
 - FUTUR: OBS record local (2K pe disc) → Drive → pipeline = 2K NATIV de la sursă, nu mai depinde deloc de descărcarea YouTube.
 - Rulări: #1 picat bot-check, #2 picat (tv client „page needs to be reloaded" cu cookies), #3 picat (la fel), #4 picat (toate strategiile). NO Critical remaining: doar așteptăm link Drive de la user și dispatch.
 - bgutil server local pe 4416 rulat OK (node 20, repo clonat în .arena/bgutil) — poate fi refolosit dacă YouTube mai relaxează.
+
+## 22.09 — AUTO-DUPA-LIVE (soluția finală „tu doar faci live") — PE GITHUB
+- Regândire completă cerută de user („vreau acces direct în Studio"). Verdict: YouTube blochează orice acces din servere (dovedit: 4 rulări, 6 clienți, cookies, POT); cookies-urile userului NU conțin cookies de auth în parsarea mea finală (posibil export incomplet SAU IP-flag).
+- SOLUȚIA (pe git + Release „kit-auto-dupa-live"): kitul auto_dupa_live pe PC-ul creatorului: auto_dupa_live.py (watcher pe folderul Videos/OBS → detectează înregistrarea când s-a scris complet → urcă pe pixeldrain anonim → scrie link-ul în declansa/live.txt prin Contents API (token-ul existent are Contents RW ✓) → push declanșează workflow-ul) + PORNESTE.bat + CITESTE-MA.txt. ZIP la Releases/download/kit-auto-dupa-live/auto_dupa_live.zip.
+- workflow episod.yml: trigger + push paths declansa/live.txt; „Aflare sursa" citeste URL din input SAU din fișier. Zero nevoie de Secreturi noi, zero tokenuri noi.
+- USERUL: setare unică 3 min (GITHUB_TOKEN în kit/.env + PORNESTE.bat) → apoi: live cu Recording în OBS → inchide → episoade în Releases. VOD-urile vechi: le aruncă în folderul Videos → procesate automat la fel.
