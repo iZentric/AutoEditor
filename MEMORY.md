@@ -600,3 +600,11 @@
 - BUG-URI PRINSE: ①alimiter din ffmpeg adaugă +1dB singur (doar alimiter: -12.95→-11.95!) → înlocuit cu loudnorm liniar 2-treceri: -12.95→-13.95 ✓ ②zoompan verificat VIZUAL (q1 vs q2 blend: 55% dif) — pragurile mele inițiale prea stricte, nu zoom-ul era problema ③titlu orfan „## 🛡️ VEGHEAZA" în README → reparat.
 - TESTE: sintetic -16.0→-14.0 LUFS (fix în țintă) · măsurare finală episod livrat: **-13.98 LUFS** ✓ · zoompan validat vizual ✓ · py_compile verde · E2E complet cu RAPORT care arată calibrarea.
 - Pe git: v3.12 (857a00e + README fix). Defaults PORNITE (AE_LUFS=0 / AE_ZOOM=0 pentru oprire).
+
+## 22.09 — THREAD 68: v3.13 FLOW ENGINE (calibrat pe referința JocuriHorror) — LIVRAT+TESTAT
+- User a dat video referință: youtube.com/watch?v=ZtWWeZtdS9k = **„CE s-a intamplat cu COPILUL?" | Jocuri Horror** (19.8 min, 19.09.2026) și vrea „videourile mele să decurgă ca ale lui" + „zoomuri dacă e nevoie".
+- ANALIZĂ TEHNICĂ a referinței (descărcat worst-quality în /tmp, șters după): **178 tăieri/19.8 min = 9/min (una la 6.7s)** · **-12.2 LUFS + vârfuri +4.5 dBTP** (comprimat tare, cu distorsiune; YouTube îl coboară oricum la -14 — al nostru e -14 curat, avantaj calitate). LRA 8.4. DINAMICA: grep fără showinfo = 0 (greșeala mea, nefolosit).
+- DIAGNOZĂ: al nostru ~2 schimbări/min vs el 9/min = de-asta „nu curgea". FIX în v3.13 autoeditor.py: ①**RESPIRAT**: oscilație continuă în zexpr (0.035*(0.5-0.5*cos(in*2*PI/(8*fps)))) = cadrul niciodată static ②**PUNCH-URI DINAMICE**: seria (energia live) intră în comanda_randare(..., seria=); vol_ep reconstruit din scene; vârfuri = vol≥mediana+2 & maxim local ±3s & în 10..durata-12 & spațiate ≥12s & ≥6s de ferestrele fixe → max 4 punch-uri (amplitudine 0.10, urcare 0.3s) ③**comprima_zone_moarte min_scena 12→9** ④RAPORT: „FLOW MrBeast — respirat continuu + N punch-uri".
+- TESTE: E2E sintetic 2 EP (-14.1/-14.2 LUFS ✓, FLOW în RAPORT ✓) · UNIT cu 4 vârfuri: **6 punch-uri = 3 fixe + 3 energie; al 4-lea vârf sărit CORECT (la 2s de HYPE — dublu-hit evitat)** ✓ · zoompan cu PI validat de randare ✓.
+- BUG-URI: semnătura cu [:-1] sparge parantezele (a 2-a oară! FIX: scriu semnătura completă, niciodată [:-1] pe „):").
+- Pe git: v3.13 (f73d0a8). AȘTEPT GO pentru primul video real (regula t65).
