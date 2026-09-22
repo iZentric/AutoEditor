@@ -10,11 +10,7 @@ on:
         description: 'Max episoade (doar ce CHIAR merita; implicit 2)'
         default: '2'
         type: string
-      gemini_key:
-        description: 'Cheie GEMINI (lipeste aici prima data; dupa poti pune Secretul)'
-        required: false
-        default: ''
-        type: string
+
 concurrency:
   group: episod
   cancel-in-progress: true
@@ -33,7 +29,7 @@ jobs:
         run: pip install yt-dlp google-genai pillow imageio-ffmpeg
       - name: Randare episoade (descarcare -> analiza -> episoade -> 2K)
         env:
-          GEMINI_API_KEY: ${{ inputs.gemini_key || secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
         run: python3 pipeline_github.py "${{ inputs.live_url }}" "${{ inputs.max_episoade }}"
