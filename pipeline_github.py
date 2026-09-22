@@ -32,7 +32,23 @@ elif "drive.google.com" in URL or "docs.google.com" in URL:
     if not os.path.exists("live_curent.mp4") or os.path.getsize("live_curent.mp4") < 10_000_000:
         sys.exit("!! download Drive a esuat (verifica: 'Anyone with the link' pe fisier)")
 else:
-    # YouTube: blocheaza IP-urile de datacenter -> lanț de strategii (poate ceda)
+    # 1a) LINK DE STUDIO (download_my_video): cu cookies COMPLETE = descarcare oficiala, calitate maxima
+    if "download_my_video" in URL and os.path.exists("cookies.txt"):
+        are_logare = "SAPISID" in open("cookies.txt").read()
+        if are_logare:
+            print(">> incerc descarcarea oficiala din Studio (link download_my_video)...", flush=True)
+            sh(["curl", "-sS", "-L", "-b", "cookies.txt",
+                "-A", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+                "-o", "live_curent.mp4", URL])
+            cap = open("live_curent.mp4", "rb").read(300) if os.path.exists("live_curent.mp4") else b""
+            if cap.startswith(b"<") or os.path.getsize("live_curent.mp4") < 50_000_000:
+                print("   link Studio picat (cookies vechi/incomplete) -> strategii normale", flush=True)
+                os.remove("live_curent.mp4")
+            else:
+                print("STUDIO OK:", os.path.getsize("live_curent.mp4") // (1024*1024), "MB", flush=True)
+        else:
+            print("!! cookies.txt NU are SAPISID -> export incomplet, nu pot folosi link-ul de Studio", flush=True)
+    # 1b) YouTube clasic: lanț de strategii (poate ceda)
     strategii = []
     if os.path.exists("cookies.txt"):
         strategii += [["--cookies", "cookies.txt", "--extractor-args", "youtube:player_client=web_safari"],
