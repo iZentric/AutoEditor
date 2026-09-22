@@ -698,6 +698,10 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
         p_creier = os.path.join(baza, "cunoastere", "canal.md")
         if os.path.exists(p_creier):
             creier = open(p_creier, encoding="utf-8").read()[:3000] + "\n\n"
+        p_reguli = os.path.join(baza, "cunoastere", "reguli.md")
+        if os.path.exists(p_reguli):
+            creier += "REGULI INVATATE RECENT DE LA CREATOR (respecta-le cu prioritate):\n" + \
+                      open(p_reguli, encoding="utf-8").read()[:1500] + "\n\n"
         p_titluri = os.path.join(baza, "cunoastere", "titluri_folosite.txt")
         vechi_t = ""
         if os.path.exists(p_titluri):

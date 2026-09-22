@@ -235,6 +235,17 @@ SETARE (3 min, o data):
 Botul raspunde NUMAI tie (filtru pe ID-ul tau). Foloseste acelasi creier
 (autoeditor + Gemini). Testat: endpoint + taiere mesaje lungi ✓
 
+### 🎓 /invata — AI-ul INVATA de la tine in timp real
+```
+TU (din telefon):  /invata titlurile sa aiba max 5 cuvinte
+PAL:               INVATAT ✓ «titlurile sa aiba max 5 cuvinte»
+                   Aplic de la URMATORUL clip.
+```
+- regula ta intra in `cunoastere/reguli.md` (cu data)
+- autoeditorul o CITESTE la fiecare randare si o injecteaza in Gemini cu prioritate
+- /reguli = vezi tot ce a invatat
+- INVATA-TI BOTUL cat vrei — cu fiecare regula devine mai mult AL TAU. Testat cap-coada ✓
+
 ## 💬 PAL — vorbesti cu AI-ul inainte de randare (`pal.py`)
 
 ```

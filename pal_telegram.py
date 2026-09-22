@@ -75,6 +75,16 @@ def trimite(tok, chat, text):
         text = rest
 
 
+def invata(regula, baza=None):
+    """O regula noua de la creator -> cunoastere/reguli.md (aplicata de la urmatorul clip)."""
+    baza = baza or BASE
+    p = os.path.join(baza, "cunoastere", "reguli.md")
+    linie = "- " + regula.strip() + "   *(invatata " + time.strftime("%d.%m.%Y") + ")*\n"
+    with open(p, "a", encoding="utf-8") as f:
+        f.write(linie)
+    return len(open(p, encoding="utf-8").read().splitlines())
+
+
 def gaseste_live():
     """Ultimul live gasit: prindere/ sau primul .mp4 din folderul autoeditor."""
     dosar = os.path.join(BASE, "prindere")
@@ -137,6 +147,18 @@ def main():
                            "--subtitrari", "--ai"]
                     subprocess.Popen(cmd, cwd=BASE)
                     trimite(tok, chat, "Randarea a PORNIT pe PC (fundal). Scrie /status cand vrei stadiul.")
+                elif text.startswith("/invata "):
+                    regula = text[7:].strip()
+                    if len(regula) < 5:
+                        trimite(tok, chat, "Scrie regula asa: /invata titlurile sa aiba max 5 cuvinte")
+                    else:
+                        nr = invata(regula)
+                        trimite(tok, chat,
+                                f"INVATAT ✓\n\n«{regula}»\n\nAplic de la URMATORUL clip. "
+                                f"Avem {nr} randuri de reguli in creier. Toate se duc si in GitHub.")
+                elif text.startswith("/reguli"):
+                    p = os.path.join(BASE, "cunoastere", "reguli.md")
+                    trimite(tok, chat, open(p, encoding="utf-8").read()[:3800] if os.path.exists(p) else "(niciun fisier)")
                 elif text.startswith("/status"):
                     logp = os.path.join(BASE, "episodes", "RAPORT.md")
                     if os.path.exists(logp):
