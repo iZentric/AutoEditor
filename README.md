@@ -161,6 +161,20 @@ Apoi: `python autoeditor.py LIVE.mp4 --momente momente.txt`
 - testat: live cu 7 momente → doar 3 au trecut → 1 poveste; live cu 1 moment bun → EXACT 1 episod
 - dacă niciun moment nu e suficient de tare: refuză să facă episoade slabe (mesaj clar)
 
+## MAXIMUL PENTRU UN EPISOD DE 3 MIN (ce face fiecare secundă să conteze)
+
+| Strat | Ce face | Cine l-a inspirat |
+|---|---|---|
+| Poartă de elită + motiv de există | doar momentele din clasa de vârf | regula ta + MrBeast |
+| Poveste cronologică | intro→setup→dezf→maxim | MrBeast re-engagement |
+| **Comprimare stil-JOH** | taie golurile ≥12s din mijloc (zero dead-air) | Jocuri Horror (narare continuă) |
+| **Final elastic** | taie când povestea s-a terminat | MrBeast |
+| **Normalizare voce -16 LUFS** | volum constant, indiferent de microfon | standard streaming |
+| Sunete pe context + random + confetti | comic + sărbătoare | cultura nișei (iRaffael 499K) |
+| 4 texte pe ecran la secunde exacte | întrebare→hype→LIKE→ABONARE | engagement copii |
+| AI: 6 cadre + in_joc + titlu promis=livrat | înțelege jocul, nu înșală | regula ta |
+| 2K nativ + subtitrări + miniatură editată | max calitate pe toate suprafețele | YouTube 2026 |
+
 ## 🛡️ PROTECȚIA COPIILOR (zero pierderi — implementată)
 
 De-aia nu pierzi copii din clip:
