@@ -683,3 +683,8 @@
 - DECIZIE PERMANENTĂ: în /home/user NU se mai descarcă/randeză NICIODATĂ video (fără yt-dlp, fără ffmpeg pe surse reale). TOT ce e greu = GitHub Actions (episod.yml). Livrare = Releases. Sandbox = doar cod, analiză, strategie.
 - Stare finală: 0 procese · workspace 27MB (doar cod+assets mici, max 390KB/fișier) · repo curat (198 fișiere, fără zip/mp4) · v3.16 (cd14d03) cu pipeline complet pe runner.
 - PENTRU SUNETELE LUI PE GITHUB: sunetele proprii (13) NU sunt în repo (doar cele 5 sintetizate) → user le urcă o dată pe github.com: sunete_mele/ → Add file → Upload files.
+
+## 22.09 — CHEIE GEMINI ACTIVĂ + TESTATĂ (thread final)
+- User a dat cheia GEMINI_API_KEY în chat → scrisă în .env (gitignored, confirmat check-ignore) · TESTATĂ LIVE: gemini-3.5-flash răspunde OK (curl REST).
+- Cheia NU poate fi pusă de agent în GitHub Secrets (token fine-grained are doar Contents+Issues, fără secrets write) → ULTIMUL PAS rămâne la USER: Settings → Secrets and variables → Actions → New repository secret: GEMINI_API_KEY.
+- De acum: chei DOAR prin .env/Secrets, nu în chat.
