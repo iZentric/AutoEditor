@@ -1,5 +1,7 @@
 name: Episod din live
 on:
+  push:
+    paths: [declansa/live.txt]
   workflow_dispatch:
     inputs:
       live_url:
@@ -29,6 +31,12 @@ jobs:
         run: pip install yt-dlp google-genai pillow imageio-ffmpeg faster-whisper
       - name: yt-dlp FRESH (build master — YouTube se schimba saptamanal)
         run: pip install --force-reinstall --no-deps https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
+      - name: Aflare sursa (input SAU declansa/live.txt)
+        run: |
+          URL="${{ inputs.live_url }}"
+          if [ -z "$URL" ] && [ -f declansa/live.txt ]; then URL=$(tr -d '[:space:]' < declansa/live.txt); fi
+          if [ -z "$URL" ]; then echo "nicio sursa"; exit 1; fi
+          echo "URL=$URL" >> "$GITHUB_ENV"
       - name: Cookies YouTube (Secret COOKIES_YT sau cookies.b64 din repo)
         env:
           COOKIES_YT: ${{ secrets.COOKIES_YT }}
@@ -41,7 +49,7 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
-        run: python3 pipeline_github.py "${{ inputs.live_url }}" "${{ inputs.max_episoade }}"
+        run: python3 pipeline_github.py "$URL" "${{ inputs.max_episoade || 2 }}"
       - name: Publica in Releases (gata de download)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

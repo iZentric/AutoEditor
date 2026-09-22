@@ -1,0 +1,18 @@
+AUTO-DUPA-LIVE — instalezi O DATA, apoi: doar faci live.
+==========================================================
+SETARE (3 minute, o singura data):
+1. Deschide GitHub -> Settings -> Developer settings -> Fine-grained personal
+   access tokens -> token-ul tau -> Copy (sau regenereaza + copy).
+2. In acest folder creezi un fisier .env cu 2 linii:
+     GITHUB_TOKEN=token-ul_tau
+     MAX_EPISOADE=2
+3. Dublu-click pe PORNESTE.bat si lasi fereastra deschisa cand dai live.
+
+FIECARE LIVE (de acum):
+- in OBS pornesti si Recording (butonul de langa Start Streaming)
+- cand termini live-ul: inchizi/Opresti Recording — atat!
+- scriptul urca inregistrarea si porneste singur episoadele
+- in ~30 min: github.com/iZentric/AutoEditor -> Releases -> download
+
+Ai un VOD vechi? Downloadeaza-l cu link-ul din Studio si arunca fisierul
+in folderul Videos — scriptul il proceseaza la fel de automat.
