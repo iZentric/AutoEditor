@@ -233,7 +233,14 @@ Arunca fisierul .mp3/.wav DIRECT in `sunete_mele/` cu nume natural in romana —
 Optional/avansat: folder sau nume INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL = loc fix in episod.
 Detalii in `sunete_mele/CITESTE-MA.txt` · Secretile de editare MrBeast: `SECRETE_EDITARE.md`.
 
-## 🛡️ VEGHEAZA
+## 🔊 CALIBRARE AUDIO YOUTUBE + 🎬 ZOOM-URI MrBeast (automate, pornite)
+
+- **AUDIO**: fiecare episod e MASURAT si adus la **-14 LUFS** (standardul YouTube 2026 —
+  YouTube normalizeaza la -14 si NU amplifica ce e linistit; masterul la -16 = episod prea incet
+  fata de restul feed-ului). Metoda de studio: loudnorm liniar in 2 treceri (zero pompare),
+  varfuri sub -1.5 dBTP. In consola/RAPORT vezi: „CALIBRARE YOUTUBE: -16.0 -> -14.0 LUFS". (AE_LUFS=0 opreste)
+- **ZOOM**: punch-in centrat (max 1.14x, elegant) la cele 3 clipe critice: cold-open (start),
+  textul HYPE si CLIMAX — trucul MrBeast care tine copiii lipiti de ecran. (AE_ZOOM=0 opreste)
 
 ## 🛡️ VEGHEAZA — isi ia live-ul SINGUR de pe canal (`vegheaza.py`)
 

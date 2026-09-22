@@ -592,3 +592,11 @@
 - STAREA FINALĂ a sunetelelor lui: cadere=OASE_RUPTE/pumm · speriat=SPERIAT/faaa · hit=3 (Bamboo, bonk, metal_lovitura) · fericit=anime-wow · generic=7 comice (Awkward Moment + Pause 1/2/3, basina, pop, vine-boom).
 - TEST FINAL 4/4 evenimente reale: cădere→pumm · „ce e asta stai ce"→faaa · „il lovesc cu sabia"→Bamboo Hit · „L-AM PRINS wow"→anime-wow ✓✓✓✓ (push: d705c9d + e6147f0).
 - AȘTEPT: „avem tot, pornește" (regula t65: NU pornesc video fără GO).
+
+## 22.09 — THREAD 67: v3.12 MASTER AUDIO -14 LUFS (YouTube) + ZOOM-URI MrBeast — LIVRAT+TESTAT
+- User: „calibrează sunetul pentru YouTube la -14, să nu fie prea tare/incet, zoom-uri, tot ce trebuie un editor MrBeast — cauta tu răspunsuri".
+- CERCETARE (2 surse 2026): YouTube = -14 LUFS integrat, vârfuri ≤ -1 dBTP (BS.1770-4); **normalizează DOAR în jos — NU amplifică liniștit** → masterul vechi -16 LUFS = episod prea încet în feed. TikTok/Reels tot -14.
+- v3.12 autoeditor.py: masoara_lufs/masoara_lufs_json (loudnorm print_format=json) · calibreaza_lufs = 2 treceri loudnorm LINIAR (gain static, zero pompare; lin=true cu measured_*, aresample=48000) chemat după fiecare EP → e["_lufs"] · fps_sursa() · comanda_randare(..., dim=(w,h,fps)) · expr_zoom + zoompan (z=1+sumă între ferestre, centrat, d=1, s=WxH, fps sursa) la 3 ferestre: cold-open (0.4-6.5s, 1.07x), HYPE (START_P3-10→-4, 1.05x), CLIMAX (START_P3→+15, 1.14x, gardă min(b,durata-1) + skip dacă a>=durata-2) · SFX volume 0.75-0.95 · RAPORT: linia AUDIO CALIBRAT după randare (raportul se construia ÎNAINTE — fix) + linia ZOOM.
+- BUG-URI PRINSE: ①alimiter din ffmpeg adaugă +1dB singur (doar alimiter: -12.95→-11.95!) → înlocuit cu loudnorm liniar 2-treceri: -12.95→-13.95 ✓ ②zoompan verificat VIZUAL (q1 vs q2 blend: 55% dif) — pragurile mele inițiale prea stricte, nu zoom-ul era problema ③titlu orfan „## 🛡️ VEGHEAZA" în README → reparat.
+- TESTE: sintetic -16.0→-14.0 LUFS (fix în țintă) · măsurare finală episod livrat: **-13.98 LUFS** ✓ · zoompan validat vizual ✓ · py_compile verde · E2E complet cu RAPORT care arată calibrarea.
+- Pe git: v3.12 (857a00e + README fix). Defaults PORNITE (AE_LUFS=0 / AE_ZOOM=0 pentru oprire).
