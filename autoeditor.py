@@ -672,7 +672,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     crf = "20" if tinta_h else "23"
     preset = "medium" if tinta_h else "veryfast"
     # mediu sarac (sandbox 2GB): 30fps + x264 econom (AE_USOR=1) — aceeasi calitate perceputa, RAM redus de 3-4x
-    usor = ["-r", "30", "-x264opts", "rc-lookahead=20:ref=2:threads=2"] if os.environ.get("AE_USOR") == "1" else []
+    usor = ["-r", "30", "-preset", "veryfast", "-x264opts", "rc-lookahead=20:ref=2:threads=2"] if os.environ.get("AE_USOR") == "1" else []
     cmd += ["-filter_complex", ";".join(filtre), "-map", vmap, "-map", harta_a,
             "-c:v", "libx264", "-preset", preset, "-crf", crf, *usor,
             "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", out]
