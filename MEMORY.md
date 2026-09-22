@@ -568,3 +568,11 @@
 - DECIZIE: pal_telegram.py RĂMÂNE în repo (construit+testat, opțional dacă vreodată îl vrea), dar NU mai e cerință; TELEGRAM_TOKEN NU mai e în lista de așteptare.
 - SETUP FINAL pe PC-ul lui (tot ce-i trebuie): ①zip din Releases ②pip install yt-dlp ③.env cu GEMINI_API_KEY (singura cheie de pe PC-ul lui!) ④python vegheaza.py. GitHub token NU e nevoie pe PC (eu fac push din sandbox).
 - CALIBRARE RĂMASĂ: primul live real → ajustez praguri/titluri după feedbackul lui. ATENȚIE sesiuni viitoare: remote git se reconstruiește din .env (GITHUB_TOKEN), pull înainte de lucru, verifică Issues # raspunsuri.
+
+## 22.09 — THREAD 64: v3.9 SUNETE_MELE (folder plug-and-play al creatorului) + SECRETE_EDITARE — LIVRAT+TESTAT
+- User: „vreau sa devii editorul meu ca al lui MrBeast, sa stii secretele, si fa-mi folder cu sunete (oase rupte, cand cazi etc) sa le bag eu acolo".
+- v3.9 autoeditor.py: **sunete_mele/** cu 10 foldere RO (INTRARE/HYPE/EXPLOZIE/VICTORIE/FINAL = sloturi fixe · OASE_RUPTE+CADERE=tip cadere · FERICIT · SPERIAT · COMICE=generic) cu pune_aici.txt in fiecare + CITESTE-MA.txt. Patch: EXT_AUDIO · FOLDERE_MELE · sunete_mele_pool() · gaseste_efecte cauta intai sunete_mele/<SLOT>/ si alege random · alege_sfx_inteligent contopeste pool-ul lui (evenimente reale din transcript primesc sunetele lui) · statusul de start arata sunete-mele=N. Sunetele lui au PRIORITATE fata de assets/efecte.
+- TESTE: unit — pool categorizat corect (cadere=2 din OASE_RUPTE, fericit, generic incluzand slot folders) · eveniment „AM CAZUT mi-am rupt oasele" → 6/6 mereu sunet OASE · „L-AM PRINS" → FERICIT ✓. E2E — t9 sintetic: status efecte=explozie(din sunetele lui)+sunete-mele=5, EP01 randat ✓. Test-sunete sterse (foldere livrate curate, doar pune_aici.txt).
+- SECRETE_EDITARE.md: regula mama (1 video nebun>10 medii) + tabel secret→unde e activ in pipeline (cold open 8s, hook, zero dead air, re-hook 10-20s, sunet=50%, poveste, promis=livrat, CTA inainte de final, iteratie) + 3 sfaturi de upload (thumb=promisiunea 2, constanta, primele 3 cuvinte FOMO).
+- .gitignore: adaugate *.mp3/ogg/m4a/flac/aac/opus GLOBAL (sunetele lui nu se comita niciodata; pune_aici.txt da).
+- Pe git: v3.9 (19 commituri, push OK). FLOW-SUNETE user: arunca mp3 in sunete_mele/<NUME>/ → automat in toate episoadele de acum inainte.
