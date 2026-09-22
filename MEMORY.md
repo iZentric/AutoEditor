@@ -713,3 +713,11 @@
 - REGULA: re-export cookies de catre user = banda rataNTA. Drumul ROBUST = kit auto_dupa_live (PC -> pixeldrain -> workflow). Studio ramane in pipeline ca varianta 1 cand cookies sunt proaspete.
 - Run #8 (35780889937) a confirmat: mesaj clar in log "cookies expirate".
 - FIX facut in pipeline: dupa STUDIO OK sare peste strategiile yt-dlp (bug run #7: avea fisierul dar a rulat yt-dlp oricum).
+
+## BUTON NOU: drag&drop in Releases (22.09, 20:50)
+- episod.yml are trigger `release: published`. Userul da Draft a new release -> tag vod-N -> ataseaza VOD -> Publish => workflow porneste SINGUR.
+- "Aflare sursa": la event release, tag ep-* -> skip (anti-bucla); altfel ia asset[0] id via API -> URL api.github.com/.../releases/assets/<id> + ASSET_TOKEN in GITHUB_ENV.
+- pipeline ramura 1d "fisier direct": github releases/* sau extensie video -> curl cu Bearer ASSET_TOKEN + Accept octet-stream.
+- TESTAT cap-coada cu release vod-test (2MB): trigger OK, asset gasit, download OK, validare marime OK. Release+tag test STERSE dupa.
+- Publica step: nullglob guard (nu mai picata cand nu sunt episoade).
+- Timpi estimati pe drumul release: upload user 2-6min + server 10-12min = episoade in ~12-18min de la Publish.
