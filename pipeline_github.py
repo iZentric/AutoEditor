@@ -28,7 +28,8 @@ def sursa_gata():
 # ── 1a) YOUTUBE: cookies + token de download extras AUTOMAT din pagina Studio ──
 import re
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
-yt = ("youtube.com" in URL or "youtu.be" in URL or "download_my_video" in URL)
+yt = bool(re.match(r'^[A-Za-z0-9_-]{11}$', URL.strip())) or ("youtube.com" in URL or "youtu.be" in URL or "download_my_video" in URL)
+URL = URL.strip()
 if yt and os.path.exists("cookies.txt") and "SAPISID" in open("cookies.txt").read():
     dl = URL
     if "download_my_video" not in URL:  # orice link/id YouTube -> scoatem tokenul noi insine
