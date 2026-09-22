@@ -27,11 +27,13 @@ jobs:
           python-version: '3.11'
       - name: Instaleaza dependinte
         run: pip install yt-dlp google-genai pillow imageio-ffmpeg faster-whisper
-      - name: Cookies YouTube (Secret COOKIES_YT, optional)
+      - name: Cookies YouTube (Secret COOKIES_YT sau cookies.b64 din repo)
         env:
           COOKIES_YT: ${{ secrets.COOKIES_YT }}
         run: |
-          if [ -n "$COOKIES_YT" ]; then printf '%s' "$COOKIES_YT" > cookies.txt; echo "cookies activate"; else echo "fara cookies"; fi
+          if [ -n "$COOKIES_YT" ]; then printf '%s' "$COOKIES_YT" > cookies.txt; echo "cookies din Secret";
+          elif [ -f cookies.b64 ]; then base64 -d cookies.b64 > cookies.txt; echo "cookies din repo (b64)";
+          else echo "fara cookies"; fi
       - name: Randare episoade (descarcare -> analiza -> episoade -> 2K)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
