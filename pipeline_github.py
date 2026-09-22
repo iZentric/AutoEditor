@@ -11,7 +11,14 @@ def sh(cmd, env=None):
         sys.exit(f"!! A PICAT: {' '.join(cmd[:4])}")
 
 # 1) SURSA: Google Drive (calitate originala, zero blocari — RECOMANDAT)
-if "drive.google.com" in URL or "docs.google.com" in URL:
+if "pixeldrain.com" in URL:
+    # pixeldrain: drag&drop, fara cont, pana la 20GB — cel mai rapid pentru creator
+    print(">> sursa: pixeldrain", flush=True)
+    fid = URL.rstrip("/").split("/u/")[1].split("/")[0] if "/u/" in URL else URL.rstrip("/").split("/")[-1]
+    sh(["curl", "-L", "-o", "live_curent.mp4", f"https://pixeldrain.com/api/file/{fid}?download"])
+    if not os.path.exists("live_curent.mp4") or os.path.getsize("live_curent.mp4") < 10_000_000:
+        sys.exit("!! download pixeldrain a esuat")
+elif "drive.google.com" in URL or "docs.google.com" in URL:
     print(">> sursa: Google Drive (upload de la creator)", flush=True)
     sh([sys.executable, "-m", "pip", "install", "-q", "gdown"])
     if "/d/" in URL:
