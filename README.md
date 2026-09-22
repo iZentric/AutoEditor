@@ -220,6 +220,26 @@ Vizionezi TOATE episoadele înainte de upload (10 min/episod). De ce nu sari pes
 | `CTA_TEXT` | LIKE + comentarii | Textul de final |
 | `NUME_CANAL` | iZentric | Semnătura în colț |
 
+## 🛡️ VEGHEAZA — isi ia live-ul SINGUR de pe canal (`vegheaza.py`)
+
+```
+python vegheaza.py            <- il lasi deschis; verifica la 10 min
+python vegheaza.py --odata    <- o singura verificare (test)
+```
+Urmareste canalul tau (yt-dlp, FARA API key). Orice video nou mai lung de 15 min
+(shorts ignorate) -> luat automat -> FLUX -> episoade in episodes/.
+ATENTIE: prima rulare ia cel mai recent video lung existent = test perfect cu material real!
+(ia deja testat pe canalul real: gaseste ultimul video, respecta memoria celor procesate)
+
+## 📦 SETUP PE PC-UL TAU (3 minute, FARA GitHub)
+1. Descarca `autoeditor_pokecity.zip` si dezarhiveaza-l (click dreapta -> Extract)
+2. Deschide Command Prompt in folderul dezarhivat: `pip install yt-dlp`
+3. Creeaza fisierul `.env` in `autoeditor/` cu o linie: `GEMINI_API_KEY=cheia_ta` (aistudio.google.com/apikey)
+4. Atol:
+   - `python vegheaza.py` lasat deschis = totul automat dupa fiecare live
+   - sau `python flux.py <link-youtube>` cand vrei tu
+Update-uri: cand zic ca am imbunatatiri, descarci zip-ul nou peste cel vechi (1 min). GitHub optional.
+
 ## 🚀 FLUX — AUTOPILOT COMPLET, o singura comanda (`flux.py`)
 
 ```
