@@ -562,3 +562,9 @@
 - PROTOCOL (CUM_VORBIM.md in repo): Issues = comenzi user · eu citesc+lucrez+push+inchid cu raspuns · Releases = video-uri/kit-uri pana la 2GB · MEMORY.md in repo = memoria completa (orice sesiune noua citeste repo-ul).
 - GITHUB_TOKEN/GITHUB_USER/GITHUB_REPO acum in .env (gitignored). PENTRU SESIUNI NOI: la inceput → git remote add din .env + git pull; verifica Issues; lucreaza; push.
 - Lipseste doar: TELEGRAM_TOKEN+TELEGRAM_USER_ID (pt AI in telefon). Primul live real = calibrare.
+
+## 22.09 — THREAD 63: TELEGRAM RENUNȚAT (decizie user) — SISTEMUL FINAL SIMPLIFICAT
+- User: „nu cred ca am nevoie de telegram ca te am pe tine" → CORECT: Issues au înlocuit canalul de comenzi, Releases = livrări, memoria = în repo. Telegram era soluția pre-GitHub.
+- DECIZIE: pal_telegram.py RĂMÂNE în repo (construit+testat, opțional dacă vreodată îl vrea), dar NU mai e cerință; TELEGRAM_TOKEN NU mai e în lista de așteptare.
+- SETUP FINAL pe PC-ul lui (tot ce-i trebuie): ①zip din Releases ②pip install yt-dlp ③.env cu GEMINI_API_KEY (singura cheie de pe PC-ul lui!) ④python vegheaza.py. GitHub token NU e nevoie pe PC (eu fac push din sandbox).
+- CALIBRARE RĂMASĂ: primul live real → ajustez praguri/titluri după feedbackul lui. ATENȚIE sesiuni viitoare: remote git se reconstruiește din .env (GITHUB_TOKEN), pull înainte de lucru, verifică Issues # raspunsuri.
