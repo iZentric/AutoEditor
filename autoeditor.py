@@ -283,6 +283,7 @@ def scrie_ass(nume, durata, poveste):
         linii.append(f"Dialogue: 0,{_ts(12)},{_ts(21)},CTA,,0,0,0,,{INTREBARE_TEXT}")
         linii.append(f"Dialogue: 0,{_ts(START_P3 - 10)},{_ts(START_P3 - 2)},HYPE,,0,0,0,,{HYPE_TEXT}")
     linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{CTA_TEXT}")
+    linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{{\\fs56\\c&H0000E5FF&\\pos(960,700)}}ABONEAZĂ-TE ca să nu pierzi seria!")
     open(nume, "w", encoding="utf-8").write("\n".join(linii) + "\n")
     return os.path.basename(nume)
 
@@ -297,6 +298,9 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     # concat vrea perechi INTERLEAVED per segment: [0:v][0:a][1:v][1:a]...
     concat_in = "".join(f"[{i}:v][{i}:a]" for i in range(n))
     filtre.append(f"{concat_in}concat=n={n}:v=1:a=1[vc][ac]")
+    # NORMALIZARE VOCE (standard streaming): -16 LUFS constant, indiferent cat de departe
+    # era microfonul — copiii nu trebuie sa joace cu volumul
+    filtre.append("[ac]loudnorm=I=-16:TP=-1.5:LRA=11[acn]")
     # calitate: daca cerem 2K si sursa e mai mica -> scalare LANCZOS + usor sharpen
     # (YouTube da bitrate mai mare la 1440p => imaginea supravietuieste mai bine re-encodarii lor)
     if tinta_h:
@@ -346,7 +350,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
             idx = baza_idx + j
             filtre.append(f"[{idx}:a]adelay={int(t*1000)}:all=1,volume={vol:.2f}[x{idx}]")
             intrari_rand.append(f"[x{idx}]")
-    amix_in = "[ac]" + ("[bg]" if muzica else "") + "".join(intrari_sfx) + "".join(intrari_rand)
+    amix_in = "[acn]" + ("[bg]" if muzica else "") + "".join(intrari_sfx) + "".join(intrari_rand)
     filtre.append(f"{amix_in}amix=inputs={amix_in.count('[')}:duration=first:normalize=0[a0]")
     filtre.append(f"[a0]afade=t=out:st={max(0, durata-2)}:d=2[aout]")
     harta_a = "[aout]"
@@ -557,6 +561,51 @@ def motiv_de_exista(episoade, prag=0.55):
     if caze:
         print(f"   MOTIV DE EXISTA: {caze} episoade CAZUTE (sub {int(prag*100)}% din cel mai tare) — umplutura nu se posteaza")
     return bune
+
+
+def comprima_zone_moarte(sm, scene, durata, min_scena=12):
+    """STILUL JOH (confirmat in transcriptele lor): narare CONTINUA, fara goluri.
+    Taie segmentele moarte >=min_scena din mijlocul scenelor; scena care pierde
+    peste 35% din durata ramane intreaga (nu o facem neintelegibila).
+    -> (scene_noi, secunde_taiate)"""
+    if not sm:
+        return scene, 0
+    baza = sorted(sm)[len(sm) // 2]
+    noi, taiate_total = [], 0
+    for start, dur in scene:
+        moarte, curent = [], [None, None]
+        for t in range(int(dur)):
+            idx = int(start) + t
+            viu = 0 <= idx < len(sm) and sm[idx] >= baza + 2
+            if not viu:
+                if curent[0] is None:
+                    curent[0] = t
+                curent[1] = t
+            else:
+                if curent[0] is not None and curent[1] - curent[0] + 1 >= min_scena:
+                    moarte.append((curent[0], curent[1]))
+                curent = [None, None]
+        if curent[0] is not None and curent[1] - curent[0] + 1 >= min_scena:
+            moarte.append((curent[0], curent[1]))
+        if not moarte:
+            noi.append((start, dur))
+            continue
+        segmente, cursor = [], 0
+        for a, b in moarte:
+            if a < 10:            # pastram intrarea scenei
+                continue
+            segmente.append((cursor, a))
+            cursor = b + 1
+        segmente.append((cursor, int(dur)))
+        pierdere = int(dur) - sum(b - a for a, b in segmente)
+        if pierdere > 0.35 * dur:
+            noi.append((start, dur))      # scena ramane INTREAGA (nu o saram — bug prins de test)
+            continue
+        for a, b in segmente:
+            if b - a >= 6:
+                noi.append((start + a, b - a))
+        taiate_total += pierdere
+    return noi, taiate_total
 
 
 def profil_retentie(sm, scene, durata):
@@ -885,6 +934,10 @@ def main():
         eticheta = "POVESTEA" if e["tip"] == "poveste" else "clasic"
         # PROTECTIA RETENTIEI: daca finalul episodului e mort, il tai elastic (MrBeast:
         # tai cand s-a terminat povestea, nu cronometrul). Minim 90s.
+        if sm_full:
+            e["scene"], gol_taiat = comprima_zone_moarte(sm_full, e["scene"], opt.durata)
+            if gol_taiat:
+                print(f"   EP{k:02d}: COMPRIMARE stil-JOH: {int(gol_taiat)}s de gol scoase din mijloc")
         dead_pct, longest, cut_ep = profil_retentie(sm_full, e["scene"], opt.durata)
         durata_ep = opt.durata
         if cut_ep and cut_ep < opt.durata - 20:
