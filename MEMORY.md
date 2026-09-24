@@ -744,3 +744,11 @@
 - Workflow: step "Invata TRENDING RO" inainte de pipeline (|| true, nu blocheaza) + step MEMORIE dupa publish: titlurile EP urca in cunoastere/titluri_folosite.txt + commit (AI nu-s repeta titlurile).
 - SHORTS (23.09): shorts.py — 3 verticale 9:16 50s din varfurile cu scor max (min 5min intre ele, sarim primele 2min), loudnorm -14, + SHORTxx_upload.txt; plan.json scris de autoeditor (varf+scor); publish include shorts.
 - User cere AI si mai puternic ("GPT 6 Astra" nu exista) — oferta: cheie gratis OpenRouter/Groq in Secret pt creier suplimentar (optional, de implementat la cerere).
+
+## RUNDUl "MAXIM" (24.09, dimineata tarziu) — ce-i nou
+- auto_upload_yt.py: upload AUTOMAT pe YouTube Data API v3 (gated: YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN in Secrets; lipsa=skip curat, nu strica pipeline). Public, FARA madeForKids (comentarii deschise), categoria 20, titlu/desc din _upload.txt, miniatura set. user trebuie sa dea OAuth refresh token odata (de facut la cerere).
+- workflow NOTIFICARE: dupa publish creeaza/comenteaza Issue "EPISOADE GATA" cu link Release (comunicare prin Issues = regula).
+- invata_trending.py: suport cunoastere/canale_extra.txt (canale noi, un ID/linie, fara cod) — user poate extinde invatarea singur pe GitHub.
+- TESTAT: ytsearch merge partial din sandbox (1 rezultat din 12 — bot-limited) — nu e coloana vertebrala; RSS-ul ramane sursa primara.
+- BUG FIXAT: import os lipsa in distileaza() (LEARNING picat la testul de integrare, prins inainte de push final).
+- Viteza medie intreaga chat: sistemul are ACUM 4 pasi cu gate-uri; totul defensiv (skip, fallback) ca run-ul sa nu moara niciodata din cauza optionalurilor.
