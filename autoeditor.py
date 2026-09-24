@@ -577,7 +577,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     # ZOOM-uri stil MrBeast: punch-in la cold-open, la textul HYPE si la CLIMAX.
     # zoompan = cadran cu cadran, centrat, max 1.14 (zero pierdere vizibila).
     zoom_txt = ""
-    if dim and os.environ.get("AE_ZOOM", "1") != "0":
+    if dim and os.environ.get("AE_ZOOM", "0") == "1":   # zoom OFF by default (user: "fara zoom-uri degeaba")
         w_z, h_z, fps_z = dim
         if tinta_h:
             h_z = tinta_h
@@ -1313,6 +1313,10 @@ def main():
             p3 = opt.durata
         else:
             episoade, p3 = alege_povesti(varfuri_elita, scor, live_len, opt.durata, opt.max)
+            for e in episoade:                      # POVESTE = UN SINGUR JOC: scenele doar langa varf
+                e["scene"] = [sc for sc in e["scene"] if abs(sc[0] - e["varf"]) <= 720]
+                if not e["scene"]:
+                    e["scene"] = [(max(0, e["varf"] - 60), opt.durata)]
             episoade += alege_clasic(varfuri_elita, scor, live_len, opt.durata, opt.max, episoade)
     if not episoade:
         sys.exit("Niciun moment nu a trecut poarta de calitate. NU fac episoade slabe — regula ta: doar cel mai bun.")
