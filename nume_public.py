@@ -9,9 +9,12 @@ from upload_release import slug_nume
 folosite = set()
 for txt in sorted(glob.glob("episodes/*_upload.txt")):
     titlu = ""
-    for linie in open(txt, encoding="utf-8"):
+    randuri = open(txt, encoding="utf-8").read().splitlines()
+    for i, linie in enumerate(randuri):
         if linie.startswith("TITLU:"):
             titlu = linie.split(":", 1)[1].strip()
+            if not titlu and i + 1 < len(randuri):
+                titlu = randuri[i + 1].strip()      # titlul e pe linia urmatoare
             break
     baza_v = re.sub(r"_upload\.txt$", "", os.path.basename(txt))
     nr = int(re.sub(r"\D", "", baza_v.split("_")[-1]) or 0) if re.search(r"\d", baza_v) else None

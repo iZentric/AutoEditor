@@ -26,9 +26,13 @@ def titlu_din_asset(aid):
     try:
         txt = urllib.request.urlopen(urllib.request.Request(
             f"https://api.github.com/repos/{REPO}/releases/assets/{aid}", headers=h), timeout=60).read().decode("utf-8", "replace")
-        for l in txt.splitlines():
+        randuri = txt.splitlines()
+        for i, l in enumerate(randuri):
             if l.startswith("TITLU:"):
-                return l.split(":", 1)[1].strip()
+                t = l.split(":", 1)[1].strip()
+                if not t and i + 1 < len(randuri):
+                    t = randuri[i + 1].strip()
+                return t
     except Exception:
         pass
     return ""

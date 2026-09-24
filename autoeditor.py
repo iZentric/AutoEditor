@@ -1470,8 +1470,9 @@ def main():
             facute.append((k, e, out))
             print(f"   OK -> episodes/{out}")
             try:                      # LIVRARE PE RAND: episodul merge pe release imediat
-                from upload_release import incarca_pe_release
-                incarca_pe_release(os.path.join(folder, out))
+                from upload_release import incarca_pe_release, slug_nume
+                incarca_pe_release(os.path.join(folder, out),
+                                   nume=slug_nume(e.get("ai_titlu") or "EPISOD", nr=k))
             except Exception:
                 pass
 

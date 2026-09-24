@@ -165,7 +165,7 @@ def idei_cu_ai(ia_gemini, cheie, model, transcript, live_len, baza):
         '"de_ce":"o propozitie","scor":0-10}]}\n\nHARTA LIVE:\n' + harta)
     for _inc in range(3):
         try:
-            r = ia_gemini(cheie, model, prompt, None)
+            r = ia_gemini(cheie, model, prompt, [])
             idei = r.get("idei") or []
             bune = []
             for i in idei:
