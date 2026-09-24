@@ -39,7 +39,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Instaleaza dependinte
-        run: pip install yt-dlp google-genai pillow imageio-ffmpeg faster-whisper
+        run: pip install yt-dlp google-genai pillow imageio-ffmpeg faster-whisper scenedetect
       - name: yt-dlp FRESH (build master — YouTube se schimba saptamanal)
         run: pip install --force-reinstall --no-deps https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
       - name: Aflare sursa (input SAU declansa/live.txt SAU fisier din Release)
@@ -153,17 +153,29 @@ jobs:
           git config user.email "agent@autoeditor.local" && git config user.name "AutoEditor Agent"
           git add cunoastere/ && git commit -m "memorie: titluri publicate la ${TAG_PUBLISH:-auto}" || echo "(nimic nou de memorat)"
           git push || echo "(push memorie skip)"
-      - name: NOTIFICARE — Issue cu link-urile gata (canalul de comunicare al repo-ului)
+      - name: NOTIFICARE — TITLU + LINK download direct (click = se salveaza pe PC)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          NUMAR=$(ls episodes/EP*.mp4 2>/dev/null | wc -l); SHORTS=$(ls episodes/SHORT*.mp4 2>/dev/null | wc -l)
-          LINK="https://github.com/${{ github.repository }}/releases/tag/$TAG_PUBLISH"
+          {
+            echo "**TITLU + DOWNLOAD (click -> se salveaza pe PC):**"
+            for f in episodes/*_upload.txt; do
+              [ -f "$f" ] || continue
+              baza=$(basename "$f" _upload.txt)
+              titlu=$(head -1 "$f" | sed 's/^TITLU:\s*//')
+              vf=""
+              for cand in episodes/$baza.mp4 episodes/$baza*.mp4; do
+                [ -f "$cand" ] && vf=$(basename "$cand") && break
+              done
+              [ -z "$vf" ] && continue
+              enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1]))" "$vf")
+              echo "- **$titlu** -> [DESCARCA $vf](https://github.com/${{ github.repository }}/releases/download/${TAG_PUBLISH:-vod-1}/$enc)"
+            done
+          } > mesaj_livrare.md
+          cat mesaj_livrare.md
           if gh issue list --search "EPISOADE GATA in:title" --state open --json number -q '.[0].number' 2>/dev/null | grep -q .; then
             N=$(gh issue list --search "EPISOADE GATA in:title" --state open --json number -q '.[0].number')
-            gh issue comment "$N" --body "**GATA ✅** $NUMAR episoade + $SHORTS shorts -> [Release $TAG]($LINK)"
+            gh issue comment "$N" --body-file mesaj_livrare.md
           else
-            gh issue create --title "EPISOADE GATA — episod nou livrat" \
-              --body "**GATA ✅** $NUMAR episoade + $SHORTS shorts -> [Release $TAG]($LINK)
-              _Comentati aici daca vreo piesa nu v-a placut — AI-ul citeste Issue-urile._" || true
+            gh issue create --title "EPISOADE GATA — episod nou livrat" --body-file mesaj_livrare.md || true
           fi

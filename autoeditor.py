@@ -37,6 +37,7 @@ import shutil
 import subprocess
 import sys
 from datetime import datetime
+from idei_ai import idei_cu_ai, snap_taietura
 
 # ═══════════ SETĂRI ═══════════
 DURATA = 170          # lungime episod (2:50) — finalul taie BRUSC
@@ -1341,9 +1342,27 @@ def main():
             print("   -> creezi fisier autoeditor/.env cu linia:  GEMINI_API_KEY=cheia_ta")
         else:
             model = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
-            print(f"   MOD AI ACTIV ({model}): {len(episoade)} candidati judecati semantic...")
-            episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript, baza)
-            print(f"   AI a pastrat {len(episoade)} episoade (cele cu scor mic au cazut)")
+            idei = (idei_cu_ai(ia_gemini, cheie, model, transcript, live_len, baza)
+                    if (opt.clasic and transcript) else [])
+            if idei:
+                # EDITOR CU IDEI: episodul = interval CONTINUU care spune ideea; titlul = ideea
+                episoade = []
+                for i in idei:
+                    inc = snap_taietura(os.path.abspath(opt.video), i["inceput"])
+                    sf = min(inc + 170, i["sfarsit"])
+                    if sf - inc < 60:
+                        continue
+                    episoade.append({"varf": (inc + sf) // 2, "scor": float(i.get("scor", 7.5)),
+                                     "tip": "clasic", "scene": [(inc, sf - inc)],
+                                     "ai_titlu": str(i["titlu"])[:70],
+                                     "ai_de_ce": str(i.get("de_ce", ""))[:120], "idee": True})
+                print(f"   IDEI: {len(episoade)} episoade cu IDEE proprie (titlul = ideea)")
+            if idei and episoade:
+                print(f"   plan: {len(episoade)} episoade din IDEI (mod continuu)")
+            else:
+                print(f"   MOD AI ACTIV ({model}): {len(episoade)} candidati judecati semantic...")
+                episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript, baza)
+                print(f"   AI a pastrat {len(episoade)} episoade (cele cu scor mic au cazut)")
             if len(episoade) >= 3 and not opt.clasic:   # temele amesteca momente din tot live-ul — interzise in modul continuu
                 if grupate:
                     episoade = grupate
