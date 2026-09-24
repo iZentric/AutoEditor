@@ -5,16 +5,20 @@ on:
   workflow_dispatch:
     inputs:
       live_url:
-        description: 'URL-ul live-ului/VOD-ului de pe YouTube'
-        required: true
+        description: 'URL-ul live-ului/VOD-ului de pe YouTube (sau lasa gol si foloseste release_tag)'
+        required: false
         type: string
       max_episoade:
-        description: 'Max episoade (tu decizi; implicit 2)'
-        default: '2'
+        description: '(OPTIONAL) gol = AI-ul decide cate merita'
+        default: ''
         type: string
       max_shorts:
-        description: 'Cate shorturi (tu decizi; implicit 3, 0 = fara)'
-        default: '3'
+        description: '(OPTIONAL) gol = AI-ul decide cate shorturi'
+        default: ''
+        type: string
+      release_tag:
+        description: '(OPTIONAL) reproceseaza un release existent (ex: vod-1) — fara re-upload'
+        default: ''
         type: string
   release:
     types: [published]
@@ -66,7 +70,7 @@ jobs:
             echo "ASSET_TOKEN=$GH_TOKEN" >> "$GITHUB_ENV"
             echo "Sursa: fisierul din release $TAG (asset $ASSET_ID)"
             # CONTEXT PENTRU AI: descrierea release-ului (link + notiza creatorului)
-            printf '%s' "${{ github.event.release.body }}" > context_creator.txt
+            printf '%s' "$BODY" > context_creator.txt
             # daca e link YouTube in descriere, luam si titlul/descrierea oficiala (oEmbed, fara cookies)
             YT_ID=$(printf '%s' "$BODY" | grep -oE '(v=|/live/|youtu\.be/)[A-Za-z0-9_-]{11}' | head -1 | grep -oE '[A-Za-z0-9_-]{11}$')
             if [ -n "$YT_ID" ]; then
