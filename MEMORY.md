@@ -870,3 +870,16 @@
 - Run #21 anulat (cod fara verificare video); **Run #22 = codul complet** (605fcde + idei + verificare).
 - Robot inlocuire RE-pornit de 2x (procesele nohup mor intre apeluri; doar start_process persista).
 - Workflow GEMINI_MODEL: gemini-3.6-flash primul.
+
+## PENTRU ORICE AGENT NOU CARE PREIA (2026-09-24)
+- CITESTE INTAI `AGENTS.md` din radacina repo-ului (manualul complet, in engleza).
+- Apoi sectiunile de mai sus, cele mai noi primele.
+- VERIFICARE de preluare (ruleaza-le tu, nu crede nimic):
+  1) git fetch origin && git status  (trebuie curat)
+  2) ultimul run: GET /repos/iZentric/AutoEditor/actions/runs?per_page=1 (Bearer GITHUB_TOKEN din autoeditor/.env)
+  3) assets pe vod-1: GET /repos/iZentric/AutoEditor/releases/tags/vod-1
+  4) starea YouTube: refresh OAuth din /home/user/.env + /home/user/client_secret.json;
+     vezi titluri pe canal (uploads playlist) si playlistul "FĂCUTE DE AI" (id in cunoastere/ai_playlist_id.txt)
+  5) Secrete repo: COOKIES_YT (16:36 azi), GEMINI_API_KEY. Lipsesc inca YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN (pt upload din CI).
+- Regula de aur a userului: raspunsuri SCURTE in romana + tabele, autonomy maxima, verify-before-done.
+
