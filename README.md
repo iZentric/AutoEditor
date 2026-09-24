@@ -1,5 +1,10 @@
 # AutoEditor — iZentric
 
+> **Integrare in curs:** codul nou este publicat pe `arena/01a0d4bb-autoeditor`.
+> Actualizarile Actions raman de aplicat de un utilizator autorizat; vezi
+> [patch-ul de automatizare](docs/WORKFLOWS_PENDING.patch). Nu rula versiunea
+> noua ca productie inainte de integrarea acestora.
+
 Dintr-un live: episoade de aproximativ 3 minute, shorts de 16 secunde,
 miniaturi din cadre reale si fisiere cu titlu/descriere. Randarea se face
 pe GitHub Actions; livrarea este in Releases.

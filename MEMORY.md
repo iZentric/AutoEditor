@@ -1030,3 +1030,20 @@
   in chat nu au fost copiate sau folosite. Rularea reala cu noul cod necesita deploy.
 - GitHub CLI local nu are subcomanda variable; verificarea setarilor a fost facuta
   prin gh api (rezultat403), nu interpretata ca dovada ca variabilele lipsesc.
+
+## 25.09.2026 — DEBLOCARE PARTIALA: codul este pe GitHub
+- Schimbata abordarea dupa refuzuri: separat modificarile de cod de workflow-uri.
+  Primul push doar-cod pe baza veche c11f937 a fost si el refuzat, deoarece acea
+  baza avea o versiune diferita a episod.yml fata de main curent.
+- Ramura sesiunii realiniata prin rebase explicit --onto origin/main c11f937
+  (checkout-ul are istoric trunchiat; rebase simplu incerca sa reaplice commitul-baza).
+  Conflictele exclusiv de documentatie au fost rezolvate pastrand memoria actuala.
+- PUSH REUSIT pe arena/01a0d4bb-autoeditor, commit b250270: cod, catalog sunete,
+  kit autorizare, teste, documentatie. NU este integrare in main si NU e proba VOD.
+- Cele doua workflow-uri noi raman necomise local, pastrate integral. Patch aplicabil
+  in docs/WORKFLOWS_PENDING.patch, verificat cu git apply --check --reverse pe copia
+  locala modificata. Necesita aplicare/aprobare de un utilizator cu drept Workflows.
+- 62 teste locale trec dupa realiniere. Nu s-a folosit niciun token din chat si
+  nu s-a pornit o randare noua. Se pregateste PR draft, nu o activare partiala in productie.
+- PR draft creat: https://github.com/iZentric/AutoEditor/pull/3 . Codul este
+  publicat, dar automatizarea noua necesita inca aprobarea modificarilor de workflow.
