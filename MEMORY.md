@@ -37,6 +37,37 @@
   commit din workflow (memorie) → `git pull --rebase` înainte de push (obligatoriu după run-uri).
 - Logul API al unui job IN CURS: endpoint /logs dă BlobNotFound — normal; pollezi step-uri/assets.
 
+### Urcare pe YouTube — FUNCTIONEAZA din sandbox (24.09, dup-amiaza)
+- **Playlist special creat**: „FĂCUTE DE AI" → `PLWXAjXumcUUU` (id salvat în `cunoastere/ai_playlist_id.txt`).
+- **3 piese PRIVATE pe canal** (userul publica din Studio când vrea): EP01 „AM INTRAT PE POKECITY
+  CU VOI! 🎮" xchKGBh7fEU · EP02 „POKECITY + ROBLOX IN ACELASI LIVE?!" 0Tyso3t-aig · SHORT01
+  „CEL MAI TARE MOMENT DIN LIVE 😂" hoNY1i1fCTY — toate în playlistul FĂCUTE DE AI.
+  Titluri FĂRĂ „Ep." (cerință user); descrieri cu linkurile reale + playlist.
+- **`/home/user/upload_acum.py`** (sandbox, NU în repo): IDEMPOTENT — șterge duplicurile cu
+  același titlu (păstrează cel mai nou), skip dacă titlul există, miniatura cu 4 reîncercări
+  (404 = încă se procesează), playlist non-fatal, CotaPasta (403 quota) = mesaj clar. OAuth din
+  `.env` (YOUTUBE_REFRESH_TOKEN citit direct în python — `source .env` NU exportă bine) +
+  `client_secret.json`. A rulat VERDE.
+- **Miniaturi PENDING**: thumbnails/set → 404 în timpul procesării + cota a murit. Următoarea
+  rulare `upload_acum.py` (după resetarea cotei ~09:00 RO) le setează automat, sau userul
+  1-click din Studio (imaginile sunt pe release vod-1).
+- **COTA 10.000/zi EVUIZATĂ 24.09** (uploads 1600/bucată + sesiuni abandonate) — resetare
+  ~09:00 RO. Toate uneltele workspace-ului împart cota proiectului evotest-505609.
+- **GREȘELI recunoscute & fixate**: (1) upload_acum v1 fără anti-duplicat → EP01 urcat de 3×;
+  fix = curata_duplicuri() + skip-by-title. (2) `python ...| head -N` ucide procesul lung prin
+  SIGPIPE → redirectionare în fișier, niciodată head. (3) urllib tratează HTTP 308 ca eroare →
+  catch HTTPError 308 + header Range. (4) videos.delete → 204 gol (nu JSON).
+- **Descărcare DIRECTă YouTube**: yt-dlp simulate merge keyless din sandbox ACUM (titlu+
+  2:18:02 citite pt 0yLhCsn9ZwY). Pipeline: yt-dlp primul → Studio token fallback → asset plan B;
+  release FĂRĂ fișier + link YT în descriere = funcționează (episod.yml rescris, VERDE).
+  `proba_yt.yml` = workflow de probă pt oricând.
+- **Denumire publică FĂRĂ „EP"**: `slug_nume()` + `nume_public.py` (EP01.mp4 →
+  CE_S_A_INTAMPLAT_PE_POKECITY_1.mp4 — testat). Prompt AI: „FARA Ep. N in titlu". Publish
+  folosește `episodes/*` (toate numele noi).
+- **auto_upload_yt.py (CI) actualizat**: YT_PRIVACY (default PRIVATE) + notifySubscribers False +
+  playlist FĂCUTE DE AI automat. PENTRU CI mai trebuie Secretele YT_CLIENT_ID / YT_CLIENT_SECRET /
+  YT_REFRESH_TOKEN (userul le copiază din client_secret.json + .env în Settings→Secrets).
+
 ### Urmează
 - User: descarcă din vod-1, urcă pe YT (titlu/descriere din upload.txt + miniatura aleasă).
 - OFERTAT: auto-upload YT (3 Secrete OAuth: YT_CLIENT_ID/SECRET/REFRESH_TOKEN) — se activează
