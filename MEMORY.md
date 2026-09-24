@@ -1,5 +1,50 @@
 # Memorie sesiune
 
+## Sesiune 2026-09-24 — ★ PRIMA LIVRARE COMPLETĂ cap-coadă (vod-1) ★
+
+### REZULTATUL CEL MARE
+- **Lanțul complet a rulat PÂNĂ LA CAPĂT și a livrat**: user a publicat release `vod-1`
+  (live 2h18 „AM INTRAT PE POKECITY + ROBLOX CU VOI", 1794 MB + link YouTube 0yLhCsn9ZwY
+  în descriere) → Run #17 a livrat PE RÂND EP01/EP02/SHORT01, a crăpat pe 1 virgulă,
+  Run #18 (reprocesare automată, zero acțiune user) = **SUCCESS: 13 fișiere pe vod-1**:
+  EP01.mp4 2K 99MB + EP02.mp4 2K 155MB + SHORT01.mp4 50s vertical + 6 miniaturi (A/B/C per EP)
+  + 3 upload.txt + sursa. Issue #2 „EPISOADE GATA" creat. Memorie titluri f50c8aa.
+- Titluri AI: „CE S-A INTAMPLAT PE POKECITY?! Ep. 1/2" — descrieri cu linkurile REALE ale
+  userului (playlist PLI1rZHL507Wk, discord qzBUttGxHZ, game.nation.izentric@gmail.com —
+  toate din cunoastere/canal.md, VERIFICATE nu halucinații). Tag-uri „nocivanu ..." corecte.
+- AI-ul a DECIS singur: 2 episoade (poarta 0.6) + 1 short (poarta elita 0.75).
+
+### Ce am construit astăzi (toate pe GitHub, tested)
+- **LIVRARE PE RÂND**: `upload_release.py` — fiecare EP/SHORT urcă pe release IMEDIAT e gata
+  (gh release upload --clobber, env RELEASE_TOKEN/RELEASE_TAG/GITHUB_REPOSITORY); publish final
+  urcă doar restul mic; workflow: RELEASE_TAG din event + `TAG_PUBLISH` pt MEMORIE/NOTIFICARE.
+- **AI-ul DECIDE**: pipeline „auto" → --max 99 (poarta taie); shorts MAX_SH=auto → doar scor
+  ≥0.75·max, max 6, min 5 min între ele; inputs dispatch goale = auto.
+- **Input `release_tag`** la workflow_dispatch: reprocesează un release existent FĂRĂ re-upload
+  (folosit pt recuperarea #18; util oricând: dispatch cu release_tag=vod-N).
+- **FIX-uri după run #17**: pip install era `pip install -q "google-api-python-client requests"`
+  (o singură cerere invalidă!) → separate + bloc 2c non-fatal (try/except SystemExit);
+  `issues: write` în permissions (NOTIFICARE cădea silențios, `|| true`).
+- `urca_2k.py` înlocuiește EP-urile cu 2K pe loc → --clobber pe release le înlocuiește și acolo.
+
+### Greșeli/lecții
+- edit_file pe blocul de inputs din episod.yml a raportat success DE 2 ORI fără efect —
+  rescris cu python `.replace()` + grep de verificare. Dacă edit „success" nu se vede în grep →
+  rescrie determinist.
+- browser_download_url + fine-grained token = 404; API assets + Accept raw = tot JSON;
+  **Accept: application/octet-stream e SINGURUL care dă conținutul asset-urilor de release**.
+- Push: „Internal Server Error" tranzitoriu GitHub → retry simplu a mers; remote anterior cu
+  commit din workflow (memorie) → `git pull --rebase` înainte de push (obligatoriu după run-uri).
+- Logul API al unui job IN CURS: endpoint /logs dă BlobNotFound — normal; pollezi step-uri/assets.
+
+### Urmează
+- User: descarcă din vod-1, urcă pe YT (titlu/descriere din upload.txt + miniatura aleasă).
+- OFERTAT: auto-upload YT (3 Secrete OAuth: YT_CLIENT_ID/SECRET/REFRESH_TOKEN) — se activează
+  la „vreau auto-upload". SHORT-ul poartă titlu-generic (fallback) — titluri AI pt shorts = polish viitor.
+- La următorul live: user publică vod-2 la fel; totul e acum drumul dovedit.
+
+---
+
 ## Sesiune 2026-09-18 — Dashboard canal iZentric
 
 ### Ce am făcut
