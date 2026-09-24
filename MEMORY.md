@@ -736,3 +736,11 @@
 - Run #11 (dispatch user din UI) + #12: ambele picate la token (sesiune moarta). #12 = primul cu CACHE (actions/cache key vod-md5(url)) + retry token 3x cu debug titlu — de lasat in loc.
 - Concluzie user: pentru "mereu, zero batai de cap" = pixeldrain SAU drag&drop in Release (ambele fara cookies). Studio = fallback cu re-export inainte de FIECARE video.
 - BUG fix: extragere ID din /live/ si /shorts/ (group(1), nu match[0]) — testat pe 4 forme de URL.
+
+## UPGRADE CREIER (24.09 dimineata) — invatare automata
+- invata_trending.py: la FIECARE rulare workflow citeste RSS oficial YouTube (fara chei/cookies) pentru JocuriHorrorSky (UC7Tmdxj18fdu4tTtxVUhoCA, 1.33M) + iSilent (UC4tcRE6ezR1ChjNUHM0kbmA, 1.67M) -> cunoastere/trending_ro.md (titluri+date+frecventa; views partial din tab yt-dlp; merge combinat).
+- ATENTIE: RSS ?user=iSilent duce la ALT CANAL (DJ 2010) — folosim channel_id, nu user.
+- autoeditor creier primeste: adn_canale.md (ritualuri) + trending_ro.md (fresh) + context_sursa.txt (oEmbed titlu/canal live) + titluri_folosite.txt (istoric propriu).
+- Workflow: step "Invata TRENDING RO" inainte de pipeline (|| true, nu blocheaza) + step MEMORIE dupa publish: titlurile EP urca in cunoastere/titluri_folosite.txt + commit (AI nu-s repeta titlurile).
+- SHORTS (23.09): shorts.py — 3 verticale 9:16 50s din varfurile cu scor max (min 5min intre ele, sarim primele 2min), loudnorm -14, + SHORTxx_upload.txt; plan.json scris de autoeditor (varf+scor); publish include shorts.
+- User cere AI si mai puternic ("GPT 6 Astra" nu exista) — oferta: cheie gratis OpenRouter/Groq in Secret pt creier suplimentar (optional, de implementat la cerere).
