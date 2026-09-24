@@ -1062,6 +1062,15 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
         if os.path.exists(p_reguli):
             creier += "REGULI INVATATE RECENT DE LA CREATOR (respecta-le cu prioritate):\n" + \
                       open(p_reguli, encoding="utf-8").read()[:1500] + "\n\n"
+        p_adn = os.path.join(baza, "cunoastere", "adn_canale.md")
+        if os.path.exists(p_adn):
+            creier += "ADN CANALE CARE MERG (formule + ritualuri verificate — aplica-le la titluri si la ce momente ridici):\n" + \
+                      open(p_adn, encoding="utf-8").read()[:2500] + "\n\n"
+        p_ctx = "context_sursa.txt"
+        ctx_txt = ""
+        if os.path.exists(p_ctx):
+            ctx_txt = "CONTEXTUL SURSEI (live-ul original, ca sa stii despre ce e vorba):\n" + \
+                      open(p_ctx, encoding="utf-8").read()[:400] + "\n\n"
         p_titluri = os.path.join(baza, "cunoastere", "titluri_folosite.txt")
         vechi_t = ""
         if os.path.exists(p_titluri):
@@ -1074,7 +1083,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
                        "foloseste-l pentru titlu, in_joc si scor):\n" +
                        open(p_ctx, encoding="utf-8").read()[:1200] + "\n\n")
         prompt = (
-            creier + vechi_t +
+            ctx_txt + creier + vechi_t +
             'Esti editor AI pentru canalul "PokeCity" (Minecraft + Pokemon, COPII 8-15 ani (public general), Romania). '
             'Judeci un moment dintr-un live. Ce s-a vorbit in jur: "' + txt + '". '
              'Vezi 6 cadre din joc (Minecraft/Pixelmon pe serverul PokeCity). Analizeaza CE SE INTAMPLA '

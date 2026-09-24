@@ -47,6 +47,10 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
               | python3 -c "import json,sys; a=json.load(sys.stdin).get('assets',[]); print(a[0]['id'] if a else '')")
             if [ -z "$ASSET_ID" ]; then echo "!! release-ul $TAG nu are fisier atasat"; exit 1; fi
+            BODY_URL=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
+              | python3 -c "import json,sys,re; b=json.load(sys.stdin).get('body') or ''; m=re.search(r'https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/live/)[A-Za-z0-9_-]{11}', b); print(m.group(0) if m else '')")
+            if [ -n "$BODY_URL" ]; then echo "CTX_URL=$BODY_URL" >> "$GITHUB_ENV"; echo "Context AI: $BODY_URL (din descrierea release-ului)"; fi
             URL="https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
             echo "ASSET_TOKEN=$GH_TOKEN" >> "$GITHUB_ENV"
             echo "Sursa: fisierul din release $TAG (asset $ASSET_ID)"

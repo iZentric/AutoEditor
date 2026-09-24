@@ -21,6 +21,25 @@ if not URL:
     print("Release de episoade (ep-*) - nimic de procesat", flush=True)
     sys.exit(0)
 
+# ── 0) CONTEXT PT AI: titlul+canalul original al live-ului (oEmbed public, fara cookies) ──
+import json as _json
+_ctx = os.environ.get("CTX_URL") or (URL if re.fullmatch(r'[A-Za-z0-9_-]{11}', URL) or
+                                     "youtube" in URL else "")
+_m = (re.search(r'[?&]v=([A-Za-z0-9_-]{11})', _ctx) or
+      re.search(r'/(?:live|shorts)/([A-Za-z0-9_-]{11})', _ctx)) if _ctx else None
+_yid = (_m.group(1) if _m else (_ctx if re.fullmatch(r'[A-Za-z0-9_-]{11}', _ctx) else "")) if _ctx else ""
+if _yid:
+    try:
+        _r = subprocess.run(["curl", "-sS", "--max-time", "30",
+                             f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={_yid}&format=json"],
+                            capture_output=True, text=True)
+        _d = _json.loads(_r.stdout)
+        open("context_sursa.txt", "w", encoding="utf-8").write(
+            f"TITLU ORIGINAL: {_d.get('title','')}\nCANAL: {_d.get('author_name','')}\n")
+        print("context AI: '" + _d.get('title', '')[:70] + "'", flush=True)
+    except Exception as _e:
+        print("context AI: n-am putut lua titlul (" + str(_e)[:40] + ") — mergem fara", flush=True)
+
 # ── CACHE: daca fisierul e deja aici (run anterior picat dupa descarcare), nu redescarcam ──
 if sursa_gata():
     print(">> sursa gasita in cache -> sarim descarcarea", flush=True)
