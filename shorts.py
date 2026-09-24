@@ -61,9 +61,9 @@ except FileNotFoundError:
     pass
 
 for i, v in enumerate(sorted(alese), 1):
-    a = max(0.0, v - 25.0)
+    a = max(0.0, v - 11.0)   # 11s context inainte de varf
     out = f"episodes/SHORT{i:02d}.mp4"
-    sh([ff, "-y", "-ss", f"{a:.1f}", "-i", "live_curent.mp4", "-t", "50",
+    sh([ff, "-y", "-ss", f"{a:.1f}", "-i", "live_curent.mp4", "-t", "16",
         "-vf", "crop=ih*9/16:ih,scale=1080:1920:flags=lanczos,unsharp=5:5:0.5",
         "-af", "loudnorm=I=-14:TP=-1.5:LRA=11",
         "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
@@ -78,5 +78,5 @@ for i, v in enumerate(sorted(alese), 1):
         incarca_pe_release(out, nume=slug_nume(titlu, nr=i))
     except Exception:
         pass
-    print(f"SHORT{i:02d} OK (50s vertical) + upload.txt", flush=True)
+    print(f"SHORT{i:02d} OK (16s vertical, fix momentul tare) + upload.txt", flush=True)
 print(f"SHORTS GATA: {len(alese)} bucati", flush=True)

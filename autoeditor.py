@@ -1094,7 +1094,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             'IN JOC: ce face jucatorul (lupta, prinde pokemon, construieste, exploreaza, moare, raid, '
             'gasesc ceva rar), cu ce pokemon, ce eveniment de joc s-a petrecut. Raspunzi DOAR cu JSON '
             'si un camp nou "in_joc": descriere concreta a evenimentului din joc (1-2 propozitii). ' 
-            '{"scor": 0-10 (cat de tare e momentul pentru copii), '
+            '{"scor": 0-10 pt COPII 8-15; PRIORITATE MAXIMA: FAZE FAINE — rasete, trolluri, personaje amuzante, evenimente rare in joc, neprevazut; vorba goala sau grind fara nimic amuzant = scor 2-4; ', 
             '"de_ce": "o propozitie scurta", '
             '"titlu": "titlu YouTube max 60 caractere, stil MrBeast: PRIMELE 3 CUVINTE = soc/FOMO '
             '(AM GASIT, L-AM PRINS, NIMENI NU STIE, PRIMUL DIN...), apoi misterul; cuvintele-cheie in MAJUSCULE; romaneste. '

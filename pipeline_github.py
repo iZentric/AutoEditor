@@ -159,6 +159,7 @@ if not sursa_gata():
 # ── 2) RANDARE (runner 7GB) + poarta STRICTA: doar ce chiar merita ──
 env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.6"))
 cmd = [sys.executable, "autoeditor.py", "live_curent.mp4", "--calitate", "1080p", "--max", MAXN]
+cmd += ["--ai"]   # CREIERUL MEREU PORNIT: fara el momentele se aleg doar dupa zgomot (greseala r17/r18)
 if os.environ.get("SUBTITRARI", "0") == "1":   # whisper pe live 2h = ~10 min; default OFF pt viteza
     cmd += ["--subtitrari"]
 sh(cmd, env=env)
