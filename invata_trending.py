@@ -39,6 +39,7 @@ def tab_canal(handle, n=25):
         return []
 
 def distileaza():
+    import os
     linii, tot_bun = [], []
     # canale extra pot fi adaugate de creator in cunoastere/canale_extra.txt (un ID per linie)
     extra = []
