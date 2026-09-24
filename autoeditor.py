@@ -37,7 +37,7 @@ import shutil
 import subprocess
 import sys
 from datetime import datetime
-from idei_ai import idei_cu_ai, snap_taietura
+from idei_ai import idei_cu_ai, snap_taietura, verifica_idee_cu_video
 
 # ═══════════ SETĂRI ═══════════
 DURATA = 170          # lungime episod (2:50) — finalul taie BRUSC
@@ -1356,7 +1356,26 @@ def main():
                                      "tip": "clasic", "scene": [(inc, sf - inc)],
                                      "ai_titlu": str(i["titlu"])[:70],
                                      "ai_de_ce": str(i.get("de_ce", ""))[:120], "idee": True})
-                print(f"   IDEI: {len(episoade)} episoade cu IDEE proprie (titlul = ideea)")
+                # NIVEL 2026: Gemini PRIVESTE segmentul real si confirma ideea + titlul + hook-ul
+                verificate = []
+                for i, e in enumerate(episoade):
+                    try:
+                        v = verifica_idee_cu_video(ff, cheie, model, os.path.abspath(opt.video),
+                                                   {"titlu": e.get("ai_titlu", ""), "de_ce": e.get("ai_de_ce", ""),
+                                                    "inceput": e["scene"][0][0],
+                                                    "sfarsit": e["scene"][0][0] + e["scene"][0][1]})
+                        print(f"   VERIFICARE: {v.get('ce_se_intampla', '')[:90]}")
+                        if v.get("ok") and v.get("un_joc", False):
+                            if v.get("titlu_corectat"):
+                                e["ai_titlu"] = str(v["titlu_corectat"])[:70]
+                            verificate.append(e)
+                        else:
+                            print("   -> IDEE ARUNCATA (nu se confirma pe video / amestec jocuri)")
+                    except Exception as ex:
+                        print(f"   ! verificare a esuat ({str(ex)[:60]}) — pastrez ideea fara confirmare video")
+                        verificate.append(e)
+                episoade = verificate
+                print(f"   IDEI: {len(episoade)} episoade cu IDEE proprie, VERIFICATE pe video")
             if idei and episoade:
                 print(f"   plan: {len(episoade)} episoade din IDEI (mod continuu)")
             else:

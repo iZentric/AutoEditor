@@ -1,8 +1,100 @@
 # IDEI, nu momente random: AI-ul citeste HARTA vorbelor din tot live-ul si alege 2-3 IDEI
 # (evenimente concrete din joc cu inceput-desfasurare-final). Fiecare episod = interval CONTINUU
 # care spune ideea; TITLUL = ideea. Inceputurile se aliniaza la TAIETURI de scena (PySceneDetect).
+# NIVEL 2026 (dupa cercetare: Gemini File API = 1 FPS cu timestamp-uri; Eklipse = verificare vizuala
+# a evenimentului): fiecare idee este VERIFICATA trimistand SEGMENTUL REAL de video catre Gemini.
+import json
 import os
 import time
+import urllib.request
+
+
+def incarca_video_gemini(cale, cheie):
+    """Urc segmentul la File API (resumable, docs ai.google.dev): returneaza file_uri."""
+    import mimetypes
+    mt = mimetypes.guess_type(cale)[0] or "video/mp4"
+    dim = os.path.getsize(cale)
+    req = urllib.request.Request(
+        "https://generativelanguage.googleapis.com/upload/v1beta/files",
+        data=json.dumps({"file": {"display_name": os.path.basename(cale)}}).encode(),
+        method="POST", headers={"Content-Type": "application/json", "x-goog-api-key": cheie,
+                                "X-Goog-Upload-Protocol": "resumable",
+                                "X-Goog-Upload-Command": "start",
+                                "X-Goog-Upload-Header-Content-Length": str(dim),
+                                "X-Goog-Upload-Header-Content-Type": mt})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        url = r.headers["X-Goog-Upload-URL"]     # start-ul NU intoarce body — doar URL-ul de upload
+    chunk = 8 * 1024 * 1024
+    trimis = 0
+    nume = ""
+    with open(cale, "rb") as f:
+        while trimis < dim:
+            bucata = f.read(chunk)
+            final = trimis + len(bucata) >= dim
+            h = {"Content-Length": str(len(bucata)),
+                 "X-Goog-Upload-Command": "upload, finalize" if final else "upload",
+                 "X-Goog-Upload-Offset": str(trimis)}
+            with urllib.request.urlopen(urllib.request.Request(url, data=bucata, headers=h,
+                                                               method="POST"), timeout=600) as r:
+                if final:
+                    try:
+                        nume = json.load(r)["file"]["uri"]
+                    except Exception:
+                        pass
+            trimis += len(bucata)
+    if not nume:
+        raise RuntimeError("File API: finalize n-a returnat file.uri")
+    # asteptam procesarea (state -> ACTIVE)
+    for _i in range(30):
+        with urllib.request.urlopen(urllib.request.Request(
+                f"https://generativelanguage.googleapis.com/v1beta/files/{nume.split('/')[-1]}?key={cheie}"),
+                timeout=60) as r:
+            st = json.load(r).get("state", "")
+        if st == "ACTIVE":
+            return nume
+        if st == "FAILED":
+            raise RuntimeError("File API: procesare esuata")
+        time.sleep(4)
+    raise RuntimeError("File API: timeout procesare")
+
+
+def ia_gemini_video(cheie, model, prompt, cale_video):
+    """Acelasi apel ca in autoeditor.ia_gemini, dar partea 1 = SEGMENTUL DE VIDEO (File API).
+    Gemini mostreaza 1 FPS cu timestamp-uri — 'stie' ce se intampla in clip, nu ghiceste."""
+    uri = incarca_video_gemini(cale_video, cheie)
+    body = json.dumps({"contents": [{"parts": [
+        {"file_data": {"mime_type": "video/mp4", "file_uri": uri}},
+        {"text": prompt}]}],
+        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.3}}).encode()
+    modele = [model, "gemini-3.6-flash", "gemini-3.5-flash"]   # aliasii pot fi 503 -> ne coboram
+    ultima = None
+    d = None
+    for m in modele:
+        for incercare in range(3):
+            req = urllib.request.Request(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{m}:generateContent",
+                data=body, method="POST",
+                headers={"Content-Type": "application/json", "x-goog-api-key": cheie})
+            try:
+                with urllib.request.urlopen(req, timeout=300) as r:
+                    d = json.load(r)
+                break
+            except urllib.error.HTTPError as ex:
+                ultima = ex
+                if ex.code in (503, 500, 429):
+                    time.sleep(6 * (incercare + 1))
+                    continue
+                raise
+        if d:
+            break
+    if not d:
+        raise RuntimeError(f"Gemini n-a raspuns pe niciun model ({ultima})")
+    txt = d["candidates"][0]["content"]["parts"][0]["text"].strip()
+    if txt.startswith("```"):
+        txt = txt.strip("`").strip()
+        if txt.lower().startswith("json"):
+            txt = txt[4:].strip()
+    return json.loads(txt)
 
 
 def snap_taietura(video, t):
@@ -26,6 +118,27 @@ def snap_taietura(video, t):
         return best if abs(best - t) <= 25 else t
     except Exception:
         return t          # fara scenedetect pornim oricum (nu blocam)
+
+
+def verifica_idee_cu_video(ff, cheie, model, video, ide, tmp="/tmp/segment_idee.mp4"):
+    """NIVEL 2026: taie segmentul ideii (480p, mic) si il da Gemini sa-l VADA.
+    Raspunde: se confirma evenimentul? un singur joc? titlul corect? unde e hook-ul?"""
+    import subprocess
+    inc, sf = int(ide["inceput"]), int(ide["sfarsit"])
+    subprocess.run([ff, "-y", "-ss", str(max(0, inc - 5)), "-i", video, "-t", str(sf - inc + 10),
+                    "-vf", "scale=854:480", "-c:v", "libx264", "-preset", "veryfast", "-crf", "28",
+                    "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", tmp],
+                   check=True, capture_output=True)
+    prompt = (
+        "Esti editor senior. Urmareste clipul. Verifica daca poate fi episod:\n"
+        f"IDEEA propusa: \"{ide.get('titlu', '')}\" ({ide.get('de_ce', '')})\n"
+        'Raspunzi DOAR cu JSON: {"ok": true/false (true doar daca ideea CHIAR se intampla vizibil in clip), '
+        '"ce_se_intampla": "3 propozitii concrete cu ce VEZI in joc", '
+        '"un_joc": true/false (false daca vedezi trecerea Minecraft<->Roblox sau meniuri/setari), '
+        '"titlu_corectat": "titlul care descrie EXACT ce se vede, max 55 caractere, aceeasi idee", '
+        '"hook_sec": secunda din clip cu cel mai tare moment (numar), '
+        '"scor": 0-10 pt copii 8-15}')
+    return ia_gemini_video(cheie, model, prompt, tmp)
 
 
 def idei_cu_ai(ia_gemini, cheie, model, transcript, live_len, baza):

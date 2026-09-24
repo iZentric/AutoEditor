@@ -115,7 +115,7 @@ jobs:
       - name: Randare episoade (descarcare -> analiza -> episoade -> 2K)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
+          GEMINI_MODEL: gemini-3.6-flash,gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
           ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
           RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
