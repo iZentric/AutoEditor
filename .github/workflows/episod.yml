@@ -120,6 +120,7 @@ jobs:
           ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
           RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
+          SUBTITRARI: '1'   # TOT PACHETUL: subtitrari .srt per episod (whisper local, gratis)
           MAX_SH: ${{ env.MAX_SH || inputs.max_shorts || 'auto' }}
         run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 'auto' }}"
       - name: Publica in Releases (gata de download)
