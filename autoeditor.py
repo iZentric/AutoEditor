@@ -428,6 +428,7 @@ def scrie_ass(nume, durata, poveste, impact_words=None):
              "Style: WM,Arial,44,&H00FFFFFF,&H00000000,&H80000000,1,3,0,7,40,40,30,1",
              "Style: HYPE,Arial,96,&H0000E5FF,&H00000000,&H80000000,1,5,0,2,60,60,90,1",
              "Style: IMPACT,Arial,96,&H00FFFFFF,&H00000000,&H70000000,1,4,0,5,40,40,40,3",
+             "Style: POP,Arial,88,&H0000FFFF,&H00000000,&H80000000,1,6,0,2,60,60,150,1",
              "", "[Events]",
              "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
     if NUME_CANAL:
@@ -437,6 +438,10 @@ def scrie_ass(nume, durata, poveste, impact_words=None):
         linii.append(f"Dialogue: 0,{_ts(START_P3 - 10)},{_ts(START_P3 - 2)},HYPE,,0,0,0,,{HYPE_TEXT}")
     linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{CTA_TEXT}")
     linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{{\\fs56\\c&H0000E5FF&\\pos(960,700)}}ABONEAZĂ-TE ca să nu pierzi seria!")
+    # SUBTITRARI-POP: replici-cheie, MARI si GALBENE, doar la momentele alese de AI
+    if os.environ.get("AE_POPS", "1") != "0":
+        for t_pop, text_pop in (poveste.get("_pops") or []):
+            linii.append(f"Dialogue: 0,{_ts(t_pop)},{_ts(t_pop + 2.6)},POP,,0,0,0,,{text_pop}")
     # CUVINTE-IMPACT (stil JocuriHorror: „ZIAR" in cutie mare la obiecte): apar 0.8s, centrate, pe sunetele lui
     for t, cuvant in (impact_words or []):
         linii.append(f"Dialogue: 0,{_ts(t)},{_ts(t + 0.8)},IMPACT,,0,0,0,,"
@@ -863,6 +868,41 @@ def live_to_episod(t_live, scene):
             return offset + (t_live - start)
         offset += dur
     return None
+
+
+CUV_POP = ("ha", "haha", "hahaha", "lol", "uau", "wow", "boom", "nu se poate", "prins",
+           "prindem", "rar", "legendar", "incredibil", "atentie", "look", "frate", "boa",
+           "s-a dus", "a cazut", "epic", "serios")
+
+
+def pops_subtitrari(transcript, scene, durata):
+    """SUBTITRARI-POP: doar la momentele-cheie (rasete, prinderi, hype) apare pe ecran
+    replica, MARE si GALBENA (2.6s). Alege automat din transcriptul live-ului.
+    -> [(t_in_episod, text)]; max 6 pe episod, minim 18s intre ele."""
+    if not transcript:
+        return []
+    candit = []
+    for a0, _b, t in transcript:
+        tt = t.strip()
+        if not (8 <= len(tt) <= 48) or len(tt.split()) < 2:
+            continue
+        tl = tt.lower()
+        scor = sum(2 for c in CUV_POP if c in tl) + (1 if tt.isupper() or tt[:-1].isupper() else 0)
+        if scor <= 0:
+            continue
+        poz = live_to_episod(a0, scene)
+        if poz is None or poz < 14 or poz > durata - 9:
+            continue
+        candit.append((scor, poz, tt))
+    candit.sort(key=lambda x: (-x[0], x[1]))
+    alese = []
+    for _scor, poz, tt in candit:
+        if any(abs(poz - p) < 18 for p, _t in alese):
+            continue
+        alese.append((poz, tt.upper()))
+        if len(alese) >= 6:
+            break
+    return sorted(alese)
 
 
 def alege_sfx_inteligent(pool, durata, transcript, scene):
@@ -1459,6 +1499,10 @@ def main():
             ramas = durata_ep - sum(d for _, d in e["scene"][:-1])
             e["scene"][-1] = (e["scene"][-1][0], max(20, int(ramas)))
             print(f"   EP{k:02d}: FINAL ELASTIC {opt.durata}->{durata_ep}s (zona moarta de {int(dead_pct)}% taiata)")
+        if transcript and os.environ.get("AE_POPS", "1") != "0":
+            e["_pops"] = pops_subtitrari(transcript, e["scene"], durata_ep)
+            if e["_pops"]:
+                print(f"   EP{k:02d}: subtitrari-POP (mari, galbene) la {len(e['_pops'])} momente-cheie")
         sfx_rand = (alege_sfx_inteligent(pool_rand, durata_ep, transcript, e["scene"])
                     if pool_rand else None)
         e["_sfx"] = sfx_rand or []
