@@ -828,3 +828,23 @@
 - TESTAT: ytsearch merge partial din sandbox (1 rezultat din 12 — bot-limited) — nu e coloana vertebrala; RSS-ul ramane sursa primara.
 - BUG FIXAT: import os lipsa in distileaza() (LEARNING picat la testul de integrare, prins inainte de push final).
 - Viteza medie intreaga chat: sistemul are ACUM 4 pasi cu gate-uri; totul defensiv (skip, fallback) ca run-ul sa nu moara niciodata din cauza optionalurilor.
+
+## Sesiune 24.09 seara — REPARATII DUPA FEEDBACK DUR (captura + repetare user)
+- **CE ERA RAU (cu adevarat, confirmat vizual)**: watermark "iZentric" pe video, confetti (particule
+  colorate), faze plictisitoare (MENIU Shader Packs!!), episoade concatenate Minecraft+Roblox amestecate,
+  titlu sablon "Ep. 1". CAUZA RADACINA: --ai nu era pasat in CI (AI-ul nu rula deloc) + logo/confetti ON.
+- **FIX-URI (commit 605fcde + precedente)**: (1) cmd += ["--ai"] permanent in pipeline; (2) AE_LOGO env
+  (default OFF) pt logo pe video — miniaturile pastreaza logo; (3) AE_CONFETI (default OFF);
+  (4) prompt: meniu/setari/pauza = scor 1; doar evenimente VIZIBILE din joc (prinderi/raiduri/loot);
+  schimbare joc in moment = penalizare; (5) pipeline += ["--clasic"] = episoade O BUCATA CONTINUA,
+  un singur joc; teme (grupeaza_cu_ai) dezactivate in clasic; (6) shorts 16s (v - 11.0 context, -t 16).
+- **YouTube curatenie**: EP01/EP02 vechi STERS (xchKGBh7fEU 204 OK; 0Tyso3t-aig deja 404=duplicat murit);
+  shortul vechi hoNY1i1fCTY a ramas (cota) — robotul il sterge la inlocuire.
+- **Robot inlocuire** (/home/user/robot_inlocuire.py, start_process "Robot inlocuire YouTube"): poll vod-1;
+  la >=2 piese noi -> ruleaza inlocuieste_yt.py (sterge vechi+dubluri, urca noile PRIVATE cu titluri din
+  *_upload.txt, playlist curat); la cota 403 -> reia (retea/cota, pana la 14h). ATENTIE: nohup din bash
+  MOARE intre apeluri — doar start_process persista.
+- **Run #19 ANULAT** (era pe cod vechi), **Run #20 = CODUL BUN** (605fcde). Piesele noi vor fi: ~3min
+  continuu un joc, fara watermark/confetti, faze din joc, shorts 16s, titluri AI.
+- GIT: identitatea + remote SE PIERD des (duh sandbox); refixate din nou. edit_file pe episod.yml de
+  2x "success" fara efect -> folosi python replace cu assert.
