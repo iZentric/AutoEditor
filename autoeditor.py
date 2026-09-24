@@ -1313,10 +1313,13 @@ def main():
             p3 = opt.durata
         else:
             episoade, p3 = alege_povesti(varfuri_elita, scor, live_len, opt.durata, opt.max)
-            for e in episoade:                      # POVESTE = UN SINGUR JOC: scenele doar langa varf
-                e["scene"] = [sc for sc in e["scene"] if abs(sc[0] - e["varf"]) <= 720]
-                if not e["scene"]:
-                    e["scene"] = [(max(0, e["varf"] - 60), opt.durata)]
+            for e in episoade:                      # POVESTE = UN SINGUR JOC: setup+dezfasurare mutate langa varf
+                sc = e["scene"]
+                C = e["varf"]
+                inapoi_set = min(450, max(60, C - 5))    # setup: ~7.5 min inainte de explozie
+                inapoi_dez = min(240, max(30, C - 5))    # dezfasurare: ~4 min inainte (actiunea creste spre varf)
+                e["scene"] = [sc[0], (max(1, C - inapoi_set), sc[1][1]),
+                              (max(1, C - inapoi_dez), sc[2][1]), sc[3]]
             episoade += alege_clasic(varfuri_elita, scor, live_len, opt.durata, opt.max, episoade)
     if not episoade:
         sys.exit("Niciun moment nu a trecut poarta de calitate. NU fac episoade slabe — regula ta: doar cel mai bun.")
@@ -1403,7 +1406,7 @@ def main():
             sc = e["scene"]
             rap.append(f"## EP{k:02d} — POVESTEA (scor {e['scor']})")
             rap.append(f"- INTRO-REACTIE din {_ts(sc[0][0])} (teaserul momentului maxim)")
-            rap.append(f"- SETUP din {_ts(sc[1][0])} (cum a pornit totul — inceputul live-ului)")
+            rap.append(f"- SETUP din {_ts(sc[1][0])} (acelasi joc, cu cateva minute inainte de explozie)")
             rap.append(f"- DESFASURARE din {_ts(sc[2][0])} (actiunea creste — mijlocul)")
             rap.append(f"- MOMENTUL MAXIM din {_ts(sc[3][0])} (explozia completa)")
             rap.append(f"- Pe ecran: intrebare la 0:12 · hype la {_ts(START_P3-10)} · LIKE+comentariu la final (comentariile DESCHISE, public 9-15)")
