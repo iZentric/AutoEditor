@@ -56,12 +56,8 @@ jobs:
             YT_ID=$(printf '%s' "${{ github.event.release.body }}" | grep -oE '(v=|/live/|youtu\.be/)[A-Za-z0-9_-]{11}' | head -1 | grep -oE '[A-Za-z0-9_-]{11}$')
             if [ -n "$YT_ID" ]; then
               curl -s --max-time 20 "https://www.youtube.com/oembed?url=https%3A//www.youtube.com/watch%3Fv%3D$YT_ID&format=json" \
-                | python3 -c "import json,sys
-try:
-    d=json.load(sys.stdin)
-    print('TITLUL OFICIAL AL LIVE-ULUI:', d.get('title'))
-    print('CANALUL:', d.get('author_name'))
-except Exception: pass" >> context_creator.txt 2>/dev/null || true
+                | python3 -c "import json,sys; d=json.load(sys.stdin); print('TITLUL OFICIAL AL LIVE-ULUI:', d.get('title')); print('CANALUL:', d.get('author_name'))" \
+                >> context_creator.txt 2>/dev/null || true
             fi
             echo "AE_CONTEXT=$(pwd)/context_creator.txt" >> "$GITHUB_ENV"
             echo "── context pt AI ──"; cat context_creator.txt
