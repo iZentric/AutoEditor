@@ -9,8 +9,12 @@ on:
         required: true
         type: string
       max_episoade:
-        description: 'Max episoade (doar ce CHIAR merita; implicit 2)'
+        description: 'Max episoade (tu decizi; implicit 2)'
         default: '2'
+        type: string
+      max_shorts:
+        description: 'Cate shorturi (tu decizi; implicit 3, 0 = fara)'
+        default: '3'
         type: string
   release:
     types: [published]
@@ -47,10 +51,15 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
               | python3 -c "import json,sys; a=json.load(sys.stdin).get('assets',[]); print(a[0]['id'] if a else '')")
             if [ -z "$ASSET_ID" ]; then echo "!! release-ul $TAG nu are fisier atasat"; exit 1; fi
-            BODY_URL=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            BODY=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
               "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
-              | python3 -c "import json,sys,re; b=json.load(sys.stdin).get('body') or ''; m=re.search(r'https?://(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/live/)[A-Za-z0-9_-]{11}', b); print(m.group(0) if m else '')")
+              | python3 -c "import json,sys; print(json.load(sys.stdin).get('body') or '')")
+            BODY_URL=$(echo "$BODY" | grep -oE 'https?://(www\.)?(youtube\.com/watch\?v=|youtu\.be/|youtube\.com/live/)[A-Za-z0-9_-]{11}' | head -1)
             if [ -n "$BODY_URL" ]; then echo "CTX_URL=$BODY_URL" >> "$GITHUB_ENV"; echo "Context AI: $BODY_URL (din descrierea release-ului)"; fi
+            EP_N=$(echo "$BODY" | grep -oiE 'episoad[eu]+[: =]+[0-9]+' | grep -oE '[0-9]+' | head -1)
+            SH_N=$(echo "$BODY" | grep -oiE 'short(ur i|uri|s)?[: =]+[0-9]+' | grep -oE '[0-9]+' | head -1)
+            if [ -n "$EP_N" ]; then echo "MAX_EP=$EP_N" >> "$GITHUB_ENV"; echo "Creatorul cere $EP_N episoade"; fi
+            if [ -n "$SH_N" ]; then echo "MAX_SH=$SH_N" >> "$GITHUB_ENV"; echo "Creatorul cere $SH_N shorturi"; fi
             URL="https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
             echo "ASSET_TOKEN=$GH_TOKEN" >> "$GITHUB_ENV"
             echo "Sursa: fisierul din release $TAG (asset $ASSET_ID)"
@@ -95,7 +104,8 @@ jobs:
           GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
           ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
-        run: python3 pipeline_github.py "$URL" "${{ inputs.max_episoade || 2 }}"
+          MAX_SH: ${{ env.MAX_SH || inputs.max_shorts || 3 }}
+        run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 2 }}"
       - name: Publica in Releases (gata de download)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

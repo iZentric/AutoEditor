@@ -26,6 +26,12 @@ for e in varfuri:
 if not alese:
     alese = [float(varfuri[0]["varf"])]
 
+MAXS = int(os.environ.get("MAX_SH", "3") or 3)   # creatorul decide: MAX_SH in env (0 = fara shorts)
+if MAXS <= 0:
+    print("MAX_SH=0 -> creatorul nu vrea shorts, sarim", flush=True)
+    sys.exit(0)
+alese = alese[:MAXS]
+
 titluri = {}
 try:
     for linie in open("episodes/titluri.txt", encoding="utf-8"):
