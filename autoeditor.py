@@ -1352,7 +1352,8 @@ def main():
     print(f"   plan: {len(episoade)} episoade ({sum(1 for e in episoade if e['tip']=='poveste')} in modul poveste)")
 
     rap = ["# RAPORT AUTOEDITOR (POVESTEA) — " + datetime.now().strftime("%d.%m.%Y %H:%M"),
-           f"Sursa: {opt.video} ({live_len//60} min) · episod: {opt.durata}s", ""]
+           f"Sursa: {opt.video} ({live_len//60} min) · episod: {opt.durata}s",
+           f"**DECIZIE AI: {len(episoade)} episoade** — doar momentele care au trecut poarta de calitate; restul ar fi umplutura.", ""]
     for k, e in enumerate(episoade, 1):
         if e.get("manual"):
             rap.append(f"- MOMENT EXACT ales de tine: {_ts(e['varf'])}")

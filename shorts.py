@@ -21,16 +21,35 @@ for e in varfuri:
     if any(abs(v - x) < 300 for x in alese):     # minim 5 min intre shorturi
         continue
     alese.append(v)
-    if len(alese) >= 3:
+    if len(alese) >= 12:                         # rezerva de candidati (capul final decide)
         break
 if not alese:
     alese = [float(varfuri[0]["varf"])]
 
-MAXS = int(os.environ.get("MAX_SH", "3") or 3)   # creatorul decide: MAX_SH in env (0 = fara shorts)
-if MAXS <= 0:
-    print("MAX_SH=0 -> creatorul nu vrea shorts, sarim", flush=True)
+MAXS = (os.environ.get("MAX_SH", "auto") or "auto").strip().lower()
+if MAXS in ("auto", "ai"):
+    # AI-ul DECIDE cate shorturi: doar varfurile ELITA (scor >= 0.75 din maximul live-ului),
+    # minim 5 min intre ele, plafon 6 — calitate peste cantitate.
+    smax = max(float(e.get("scor") or 0) for e in varfuri)
+    prag = 0.75 * smax
+    alese = []
+    for e in varfuri:
+        v = float(e["varf"])
+        if v < 120 or float(e.get("scor") or 0) < prag:
+            continue
+        if any(abs(v - x) < 300 for x in alese):
+            continue
+        alese.append(v)
+        if len(alese) >= 6:
+            break
+    if not alese:
+        alese = [float(varfuri[0]["varf"])]
+    print(f"SHORTS: AI-ul decide -> {len(alese)} shorturi (doar scor >= {prag:.1f})", flush=True)
+elif int(MAXS or 0) <= 0:
+    print("MAX_SH=0 -> fara shorts (cerut explicit)", flush=True)
     sys.exit(0)
-alese = alese[:MAXS]
+else:
+    alese = alese[:int(MAXS)]
 
 titluri = {}
 try:

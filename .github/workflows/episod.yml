@@ -104,8 +104,8 @@ jobs:
           GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
           ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
-          MAX_SH: ${{ env.MAX_SH || inputs.max_shorts || 3 }}
-        run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 2 }}"
+          MAX_SH: ${{ env.MAX_SH || inputs.max_shorts || 'auto' }}
+        run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 'auto' }}"
       - name: Publica in Releases (gata de download)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

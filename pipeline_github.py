@@ -2,7 +2,11 @@
 import glob, os, re, sys, subprocess, time
 
 URL = (sys.argv[1] if len(sys.argv) > 1 else "").strip()
-MAXN = sys.argv[2] if len(sys.argv) > 2 else "2"
+MAXN = (sys.argv[2] if len(sys.argv) > 2 else "auto").strip() or "auto"
+if MAXN.lower() in ("auto", "ai"):
+    # AI-ul DECIDE cate episoade: poarta de calitate (AE_POARTA) taie tot ce nu merita — umplutura NU se face
+    MAXN = "99"
+    print("EPISOADE: AI-ul decide cate merita (poarta de calitate), nu un numar fix", flush=True)
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
 
 def sh(cmd, env=None):
