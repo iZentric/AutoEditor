@@ -158,9 +158,12 @@ if os.path.exists("episodes/plan.json"):
 
 # ── 2c) UPLOAD AUTOMAT pe YouTube (doar daca exista Secretele OAuth; altfel skip) ──
 if glob.glob("episodes/EP*.mp4"):
-    sh([sys.executable, "-m", "pip", "install", "-q", "google-api-python-client requests"])
-    r = subprocess.run([sys.executable, "auto_upload_yt.py"])
-    print("(upload YT: cod", r.returncode, "- 0=publicat, skip=in asteptare)", flush=True)
+    try:              # blocul NU are voie sa omoare livrarea: episoadele sunt deja pe release
+        sh([sys.executable, "-m", "pip", "install", "-q", "google-api-python-client", "requests"])
+        r = subprocess.run([sys.executable, "auto_upload_yt.py"])
+        print("(upload YT: cod", r.returncode, "- 0=publicat, skip=in asteptare)", flush=True)
+    except SystemExit as ex:
+        print("(upload YT sarit — pip a esuat, nu strica livrarea:", ex, ")", flush=True)
 
 # ── 3) URCARE 2K (2560x1440 lanczos+unsharp) ──
 sh([sys.executable, "urca_2k.py"])

@@ -42,8 +42,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" = "release" ]; then
-            TAG="${{ github.event.release.tag_name }}"
+          TAG="${{ github.event.release.tag_name }}"
+          if [ -z "$TAG" ]; then TAG="${{ inputs.release_tag }}"; fi
+          if [ -n "$TAG" ]; then
             case "$TAG" in
               ep-*) echo "Release de EPISOADE ($TAG) - nu reprocesam"; exit 0;;
             esac
@@ -67,7 +68,7 @@ jobs:
             # CONTEXT PENTRU AI: descrierea release-ului (link + notiza creatorului)
             printf '%s' "${{ github.event.release.body }}" > context_creator.txt
             # daca e link YouTube in descriere, luam si titlul/descrierea oficiala (oEmbed, fara cookies)
-            YT_ID=$(printf '%s' "${{ github.event.release.body }}" | grep -oE '(v=|/live/|youtu\.be/)[A-Za-z0-9_-]{11}' | head -1 | grep -oE '[A-Za-z0-9_-]{11}$')
+            YT_ID=$(printf '%s' "$BODY" | grep -oE '(v=|/live/|youtu\.be/)[A-Za-z0-9_-]{11}' | head -1 | grep -oE '[A-Za-z0-9_-]{11}$')
             if [ -n "$YT_ID" ]; then
               curl -s --max-time 20 "https://www.youtube.com/oembed?url=https%3A//www.youtube.com/watch%3Fv%3D$YT_ID&format=json" \
                 | python3 -c "import json,sys; d=json.load(sys.stdin); print('TITLUL OFICIAL AL LIVE-ULUI:', d.get('title')); print('CANALUL:', d.get('author_name'))" \
