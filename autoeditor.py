@@ -1067,6 +1067,12 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
         if os.path.exists(p_titluri):
             randuri = [r.strip() for r in open(p_titluri, encoding="utf-8") if r.strip()]
             vechi_t = "TITLURI DEJA FOLOSITE (nu le repeta, gaseste unghiuri noi): " + " | ".join(randuri[-25:]) + "\n\n"
+        # CONTEXTUL LIVE-ULUI (de la creator la publicarea release-ului: link + notiza)
+        p_ctx = os.environ.get("AE_CONTEXT", "")
+        if p_ctx and os.path.exists(p_ctx):
+            creier += ("CONTEXTUL ACESTUI LIVE (de la creator — prioritate MAXIMA, "
+                       "foloseste-l pentru titlu, in_joc si scor):\n" +
+                       open(p_ctx, encoding="utf-8").read()[:1200] + "\n\n")
         prompt = (
             creier + vechi_t +
             'Esti editor AI pentru canalul "PokeCity" (Minecraft + Pokemon, COPII 8-15 ani (public general), Romania). '
@@ -1177,6 +1183,11 @@ def grupeaza_cu_ai(cheie, model, episoade, transcript):
             except Exception:
                 ce = ""
         randuri.append(f"{i} | {_ts(e['varf'])} | scor {e['scor']} | {ce[:140]}")
+    ctx = ""
+    p_ctx = os.environ.get("AE_CONTEXT", "")
+    if p_ctx and os.path.exists(p_ctx):
+        ctx = ("\n\nCONTEXTUL LIVE-ULUI (de la creator — grupeaza pe temele lui): "
+               + open(p_ctx, encoding="utf-8").read()[:800] + "\n")
     prompt = ('Esti editor AI pentru canalul PokeCity (Minecraft+Pokemon, copii 8-15, RO). '
               "Mai jos sunt TOATE momentele tari dintr-un LIVE (index | timp | scor | ce se intampla). "
               "Grupeaza momentele in EPISOADE pe ACEEASI tema/quest: daca in 3+ momente se urmareste "
@@ -1184,8 +1195,8 @@ def grupeaza_cu_ai(cheie, model, episoade, transcript):
               "episod — de la inceput, mijloc si sfarsit al live-ului — ca sa formeze O POVESTE completa. "
               "Un moment apartine unui singur episod. Grup de MINIM 3 momente. "
               "Momentelor fara tema comuna NU le forta gruparea. "
-              'Raspunzi DOAR cu JSON: {"grupuri": [{"tema": "numele quest-ului", "indici": [0,3,5]}]}\n\n'
-              + "\n".join(randuri))
+              'Raspunzi DOAR cu JSON: {"grupuri": [{"tema": "numele quest-ului", "indici": [0,3,5]}]}\n'
+              + ctx + "\n" + "\n".join(randuri))
     try:
         r = ia_gemini(cheie, model, prompt, None)
         grupuri = (r or {}).get("grupuri") or []
