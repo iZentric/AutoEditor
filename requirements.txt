@@ -1,0 +1,10 @@
+# Runtime dependencies for the GitHub Actions editor.
+# Keep yt-dlp current; pip's download cache avoids re-fetching unchanged wheels.
+yt-dlp
+pillow
+imageio-ffmpeg
+faster-whisper
+scenedetect
+gdown
+requests
+google-api-python-client

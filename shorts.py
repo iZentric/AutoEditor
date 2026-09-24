@@ -1,82 +1,98 @@
-# SHORTS verticale (9:16, <60s) din varfurile cu cel mai mare scor ale live-ului
-import json, os, subprocess, sys
+"""16-second shorts: review the actual portrait cut, never reuse episode titles blindly."""
+import json
+import os
+import subprocess
+from pathlib import Path
 
-def sh(c):
-    print(">>", " ".join(c[:5]), "...", flush=True)
-    subprocess.run(c, check=True)
+from autoeditor import gaseste_ffmpeg, citeste_cheie_gemini, clasifica_sunet, FOLDERE_MELE, calibreaza_lufs
+from editorial import sound_catalogue, validate_review, validate_sounds, sound_filter
+from idei_ai import verifica_idee_cu_video
+from performance import file_digest
 
-ff = subprocess.run([sys.executable, "-c",
-                     "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"],
-                    capture_output=True, text=True).stdout.strip()
-plan = json.load(open("episodes/plan.json", encoding="utf-8"))
-varfuri = sorted([e for e in plan if e.get("varf")], key=lambda e: -float(e.get("scor") or 0))
-if not varfuri:
-    print("fara varfuri in plan -> sarim shorts", flush=True)
-    sys.exit(0)
-alese = []
-for e in varfuri:
-    v = float(e["varf"])
-    if v < 120:                                  # sarim primele 2 min (caldarea live-ului)
-        continue
-    if any(abs(v - x) < 300 for x in alese):     # minim 5 min intre shorturi
-        continue
-    alese.append(v)
-    if len(alese) >= 12:                         # rezerva de candidati (capul final decide)
-        break
-if not alese:
-    alese = [float(varfuri[0]["varf"])]
 
-MAXS = (os.environ.get("MAX_SH", "auto") or "auto").strip().lower()
-if MAXS in ("auto", "ai"):
-    # AI-ul DECIDE cate shorturi: doar varfurile ELITA (scor >= 0.75 din maximul live-ului),
-    # minim 5 min intre ele, plafon 6 — calitate peste cantitate.
-    smax = max(float(e.get("scor") or 0) for e in varfuri)
-    prag = 0.75 * smax
-    alese = []
-    for e in varfuri:
-        v = float(e["varf"])
-        if v < 120 or float(e.get("scor") or 0) < prag:
+def candidates(plan, maximum):
+    chosen = []
+    for episode in sorted(plan, key=lambda e: -float(e.get('scor') or 0)):
+        if episode.get('ai_verified') is not True or len(episode.get('scene', [])) != 1:
             continue
-        if any(abs(v - x) < 300 for x in alese):
+        start, duration = episode['scene'][0]
+        peak = float(episode['varf'])
+        if duration < 16 or not start <= peak < start + duration:
             continue
-        alese.append(v)
-        if len(alese) >= 6:
+        if any(abs(peak - other['peak']) < 300 for other in chosen):
+            continue
+        cut = max(start, min(peak - 11, start + duration - 16))
+        chosen.append({'inceput': cut, 'sfarsit': cut + 16, 'peak': peak,
+                       'titlu': episode.get('titlu', ''), 'de_ce': 'Candidat short; verifica povestea separat'})
+        if len(chosen) >= maximum:
             break
-    if not alese:
-        alese = [float(varfuri[0]["varf"])]
-    print(f"SHORTS: AI-ul decide -> {len(alese)} shorturi (doar scor >= {prag:.1f})", flush=True)
-elif int(MAXS or 0) <= 0:
-    print("MAX_SH=0 -> fara shorts (cerut explicit)", flush=True)
-    sys.exit(0)
-else:
-    alese = alese[:int(MAXS)]
+    return chosen
 
-titluri = {}
-try:
-    for linie in open("episodes/titluri.txt", encoding="utf-8"):
-        if ":" in linie:
-            k, t = linie.split(":", 1)
-            titluri[k.strip()] = t.strip()
-except FileNotFoundError:
-    pass
 
-for i, v in enumerate(sorted(alese), 1):
-    a = max(0.0, v - 11.0)   # 11s context inainte de varf
-    out = f"episodes/SHORT{i:02d}.mp4"
-    sh([ff, "-y", "-ss", f"{a:.1f}", "-i", "live_curent.mp4", "-t", "16",
-        "-vf", "crop=ih*9/16:ih,scale=1080:1920:flags=lanczos,unsharp=5:5:0.5",
-        "-af", "loudnorm=I=-14:TP=-1.5:LRA=11",
-        "-c:v", "libx264", "-preset", "veryfast", "-crf", "20",
-        "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", out])
-    titlu = titluri.get(f"EP{i:02d}", "") or "Cel mai tare moment de pe live"
-    desc = (f"{titlu}\n\nShort din live-ul complet. Episoadele intregi (2K) + miniaturile "
-            f"sunt in aceeasi pagina de Releases.\n\n#shorts #gaming #romania")
-    open(f"episodes/SHORT{i:02d}_upload.txt", "w", encoding="utf-8").write(
-        f"TITLU: {titlu[:100]}\n\nDESCRIERE:\n{desc}\n")
-    try:                      # LIVRARE PE RAND: shortul merge pe release imediat (numit dupa titlu)
+def render_command(ff, source, start, out, sounds):
+    cmd = [ff, '-y', '-ss', str(start), '-t', '16', '-i', source]
+    for sound in sounds:
+        cmd += ['-i', sound['path']]
+    filters = ['[0:v]crop=ih*9/16:ih,scale=1080:1920:flags=lanczos[v]',
+               '[0:a]atrim=duration=16,asetpts=PTS-STARTPTS,loudnorm=I=-16:TP=-1.5:LRA=11[a]']
+    for n, sound in enumerate(sounds, 1):
+        filters.append(sound_filter(n, sound['sec'], f's{n}'))
+    inputs = '[a]' + ''.join(f'[s{n}]' for n in range(1, len(sounds) + 1))
+    filters.append(f'{inputs}amix=inputs={len(sounds)+1}:duration=first:normalize=0,'
+                   'loudnorm=I=-14:TP=-1.5:LRA=11[aout]')
+    return cmd + ['-filter_complex', ';'.join(filters), '-map', '[v]', '-map', '[aout]',
+                  '-t', '16', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
+                  '-c:a', 'aac', '-b:a', '160k', '-movflags', '+faststart', str(out)]
+
+
+def main():
+    root = Path(__file__).resolve().parent
+    folder = root / 'episodes'
+    maximum = (os.environ.get('MAX_SH', 'auto') or 'auto').strip().lower()
+    limit = 6 if maximum in ('auto', 'ai') else max(0, int(maximum))
+    if not limit:
+        print('MAX_SH=0: fara shorts')
+        return
+    key = citeste_cheie_gemini(str(root))
+    if not key:
+        raise SystemExit('Shorts oprite: nu se livreaza fara verificare video.')
+    with (folder / 'plan.json').open(encoding='utf-8') as f:
+        plan = json.load(f)
+    catalogue = sound_catalogue([root / 'sunete_mele', root / 'assets' / 'efecte'],
+                               lambda p: FOLDERE_MELE.get(Path(p).parent.name.upper()) or clasifica_sunet(p))
+    ff = gaseste_ffmpeg()
+    source = str(root / 'live_curent.mp4')
+    source_sha = file_digest(source)
+    model = os.environ.get('GEMINI_MODEL', 'gemini-3.6-flash')
+    audit, completed = [], 0
+    for idea in candidates(plan, limit):
+        entry = {'idee': idea}
+        audit.append(entry)
+        try:
+            review = verifica_idee_cu_video(ff, key, model, source, idea,
+                                            catalogue=catalogue, vertical=True, source_fingerprint=source_sha)
+            entry['verificare'] = review
+            _, title, _ = validate_review(review, 16)
+            sounds, skipped = validate_sounds(review.get('sunete', []), catalogue, 16)
+            entry.update(status='aprobat', sunete=sounds, sunete_respinse=skipped)
+        except Exception as ex:
+            entry.update(status='respins', motiv=f'Verificare nereusita: {type(ex).__name__}')
+            continue
+        number = completed + 1
+        out = folder / f'SHORT{number:02d}.mp4'
+        subprocess.run(render_command(ff, source, idea['inceput'], out, sounds), check=True)
+        if not calibreaza_lufs(ff, str(out)):
+            raise SystemExit('Short respins: master audio neverificat.')
+        (folder / f'SHORT{number:02d}_upload.txt').write_text(
+            f'TITLU: {title}\n\nDESCRIERE:\n{review["ce_se_intampla"]}\n\n#shorts #gaming #romania\n',
+            encoding='utf-8')
         from upload_release import incarca_pe_release, slug_nume
-        incarca_pe_release(out, nume=slug_nume(titlu, nr=i))
-    except Exception:
-        pass
-    print(f"SHORT{i:02d} OK (16s vertical, fix momentul tare) + upload.txt", flush=True)
-print(f"SHORTS GATA: {len(alese)} bucati", flush=True)
+        incarca_pe_release(str(out), nume=slug_nume(title + " SHORT", nr=number))
+        completed += 1
+    with (folder / 'DECIZII_SHORTS.json').open('w', encoding='utf-8') as f:
+        json.dump(audit, f, ensure_ascii=False, indent=2)
+    print(f'SHORTS GATA: {completed} verificate individual; zero e un rezultat acceptabil.')
+
+
+if __name__ == '__main__':
+    main()

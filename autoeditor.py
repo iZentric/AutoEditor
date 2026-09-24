@@ -32,12 +32,15 @@ import os
 import random
 import time
 import urllib.request
+import urllib.error
 import re
 import shutil
 import subprocess
 import sys
 from datetime import datetime
-from idei_ai import idei_cu_ai, snap_taietura, verifica_idee_cu_video
+from idei_ai import idei_cu_ai, verifica_idee_cu_video
+from editorial import approved_episodes, sound_catalogue, sound_filter
+from performance import cached_json, file_digest, measured
 
 # ═══════════ SETĂRI ═══════════
 DURATA = 170          # lungime episod (2:50) — finalul taie BRUSC
@@ -210,70 +213,12 @@ SLOT_FOLDERE = {"INTRARE", "HYPE", "EXPLOZIE", "VICTORIE", "FINAL"}
 
 
 def aranjeaza_sunete_mele():
-    """Aranjatorul Automat: ce arunci tu in sunete_mele/ il punem la punct singuri:
-    1) DUPLICATELE (acelasi continut pus de 2 ori) -> se pastreaza o singura copie
-    2) MULTI-IN-UNU (un fisier lung cu mai multe sunete) -> despicat in sunete separate
-    Ruleaza singur la fiecare randare (si poate fi chemat oricand manual)."""
-    import hashlib
-    import re as _re
-    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sunete_mele")
-    if not os.path.isdir(d):
-        return
-    ff = gaseste_ffmpeg()
-    fisiere = []
-    for rad, _dosare, nume in os.walk(d):
-        for f in nume:
-            if f.startswith("."):
-                continue
-            if os.path.splitext(f)[1].lower() in EXT_AUDIO:
-                fisiere.append(os.path.join(rad, f))
-    vazute = {}
-    # la duplicate castiga copia din SUBFOLDER (are regula fixa de categorie), nu cea din radacina
-    for cale in sorted(fisiere, key=lambda c: (0 if os.path.dirname(c) != d else 1, c)):
-        try:
-            h = hashlib.md5(open(cale, "rb").read()).hexdigest()
-        except OSError:
-            continue
-        if h in vazute:
-            os.remove(cale)
-            print(f"   [sunete] duplicat sters: {os.path.basename(cale)} (= {os.path.basename(vazute[h])})")
-        else:
-            vazute[h] = cale
-    for cale in fisiere:
-        if not os.path.exists(cale):
-            continue
-        try:
-            r = subprocess.run([ff, "-i", cale, "-af", "silencedetect=noise=-35dB:d=0.4",
-                                "-f", "null", "-"], capture_output=True, text=True, timeout=60)
-        except Exception:
-            continue
-        starts = [float(x) for x in _re.findall(r"silence_start: ([0-9.]+)", r.stderr)]
-        ends = [float(x) for x in _re.findall(r"silence_end: ([0-9.]+)", r.stderr)]
-        bucati = []
-        cursor = 0.0
-        for s in starts:
-            if s - cursor >= 0.8:
-                bucati.append((cursor, s))
-            cursor = (ends.pop(0) if ends else s)
-        dur_atat = 0.0
-        m = _re.search(r"Duration: ([0-9:.]+)", r.stderr)
-        if m:
-            hh, mm, ss = m.group(1).split(":")
-            dur_atat = int(hh) * 3600 + int(mm) * 60 + float(ss)
-        if dur_atat - cursor >= 0.8:
-            bucati.append((cursor, dur_atat))
-        if len(bucati) < 2:
-            continue
-        baza, ext = os.path.splitext(cale)
-        idx = 0
-        for s, e in bucati:
-            idx += 1
-            piesa = f"{baza} {idx}{ext.lower()}"
-            subprocess.run([ff, "-y", "-ss", str(s), "-to", str(e), "-i", cale,
-                            "-c:a", "libmp3lame", "-q:a", "4", piesa],
-                           capture_output=True, timeout=120)
-        os.remove(cale)
-        print(f"   [sunete] despicat {os.path.basename(cale)} -> {idx} sunete separate")
+    """Compatibility no-op: creator originals are never deleted or rewritten.
+
+    Editorial indexing now happens in editorial.sound_catalogue(). The former
+    in-place deduplication/splitting could destroy supplied files on a failed cut.
+    """
+    return None
 
 # tu arunci fisierul cu ORICE nume natural — noi il aranjam dupa cuvinte
 CUVINTE_SUNET = {
@@ -479,16 +424,17 @@ def masoara_lufs(ff, cale):
         return None, None
 
 
+@measured("master-audio")
 def calibreaza_lufs(ff, cale):
     """MASTER pentru YouTube (normalizeaza la -14 LUFS, NU amplifica ce e linistit!).
     Metoda de studio: 2 treceri loudnorm in mod LINIAR (gain static — zero pompare,
     plafon true-peak exact). -> (LUFS inainte, LUFS dupa) sau None."""
     if os.environ.get("AE_LUFS") == "0":
         return None
-    i_in, _ = masoara_lufs(ff, cale)
-    if i_in is None:
+    i_in, peak = masoara_lufs(ff, cale)
+    if i_in is None or peak is None or not math.isfinite(i_in) or not math.isfinite(peak):
         return None
-    if abs(-14.0 - i_in) <= 0.4:                # deja in tinta
+    if abs(-14.0 - i_in) <= 0.4 and peak <= -1:                # deja in tinta
         return (i_in, i_in)
     tmp = cale.replace(".mp4", "_cal.mp4")
     i_out = i_in
@@ -507,13 +453,13 @@ def calibreaza_lufs(ff, cale):
         if r.returncode != 0 or not os.path.exists(tmp):
             return None
         os.replace(tmp, cale)
-        i_out, _ = masoara_lufs(ff, cale)
-        if i_out is None:
+        i_out, peak = masoara_lufs(ff, cale)
+        if i_out is None or peak is None or not math.isfinite(i_out) or not math.isfinite(peak):
             return None
-        if abs(-14.0 - i_out) <= 0.6:
+        if abs(-14.0 - i_out) <= 0.6 and peak <= -1:
             break
     print(f"   CALIBRARE YOUTUBE: {i_in:.1f} -> {i_out:.1f} LUFS (tinta -14, varfuri <= -1.5 dBTP)")
-    return (i_in, i_out)
+    return (i_in, i_out) if abs(-14.0 - i_out) <= 1 and peak <= -1 else None
 
 
 def masoara_lufs_json(ff, cale):
@@ -534,6 +480,7 @@ def expr_zoom(poz, sfarsit, varf, crestere, fps, urcare, coborare):
     return f"(between(in,{a},{b})*{crestere}*min((in-{a})/{max(1, int(urcare * fps))},1)*min(max(({b}-in)/{max(1, int(coborare * fps))},0),1))"
 
 
+@measured("render-episode")
 def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None, seria=None, meme=None):
     """O comanda ffmpeg: concateneaza scenele (+intro-reactia), pune logo, textele, muzica."""
     # cuvant-impact pe fiecare sunet al lui (ca „ZIAR"-ul de la JocuriHorror)
@@ -544,7 +491,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     cmd = [ff, "-y"]
     # sursa MARE (live intreg 2h+): 6+ decodatoare simultane pe acelasi fisier = RAM explosion.
     # pre-taiem fiecare scena o data in clip mic (refolosibil la rerulare) si randam din clipuri.
-    big = os.path.getsize(video) > 200 * 1024 * 1024
+    big = len(poveste["scene"]) > 1 and os.path.getsize(video) > 200 * 1024 * 1024
     tmp_sc = os.path.join(folder, "scene_tmp")
     if big:
         os.makedirs(tmp_sc, exist_ok=True)
@@ -662,7 +609,10 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
         for j, (t, cale, vol) in enumerate(sfx_rand):
             cmd += ["-i", cale]
             idx = baza_idx + j
-            filtre.append(f"[{idx}:a]adelay={int(t*1000)}:all=1,volume={vol:.2f}[x{idx}]")
+            if poveste.get("ai_verified"):
+                filtre.append(sound_filter(idx, t, f"x{idx}"))
+            else:
+                filtre.append(f"[{idx}:a]adelay={int(t*1000)}:all=1,volume={vol:.2f}[x{idx}]")
             intrari_rand.append(f"[x{idx}]")
     # MEME-uri greenscreen (assets/meme/): apar scurt (1.6s) pe momentele comice,
     # jos in stanga, decupate cu chromakey — ca la editorii de 40-120$/video
@@ -690,10 +640,10 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     filtre.append(f"[a0]afade=t=out:st={max(0, durata-2)}:d=2[aout]")
     harta_a = "[aout]"
     out = f"EP{nr:02d}.mp4"
-    crf = "20" if tinta_h else "23"
-    preset = "medium" if tinta_h else "veryfast"
+    crf = "20" if tinta_h or poveste.get("ai_verified") else "23"
+    preset = "medium" if tinta_h or poveste.get("ai_verified") else "veryfast"
     # mediu sarac (sandbox 2GB): 30fps + x264 econom (AE_USOR=1) — aceeasi calitate perceputa, RAM redus de 3-4x
-    usor = ["-r", "30", "-preset", "veryfast", "-x264opts", "rc-lookahead=20:ref=2:threads=2"] if os.environ.get("AE_USOR") == "1" else []
+    usor = ["-r", "30", "-preset", "veryfast", "-x264opts", "rc-lookahead=20:ref=2:threads=2"] if os.environ.get("AE_USOR") == "1" and not poveste.get("ai_verified") else []
     cmd += ["-filter_complex", ";".join(filtre), "-map", vmap, "-map", harta_a,
             "-c:v", "libx264", "-preset", preset, "-crf", crf, *usor,
             "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", out]
@@ -1014,6 +964,8 @@ def profil_retentie(sm, scene, durata):
     episodului; cauta finalul mort (energie sub baza ≥12s continuu pana la capat).
     intoarce (dead_pct, longest_dead, cut_ep) — cut_ep = unde se taie elastic (None=nu e nevoie)."""
     n = len(sm)
+    if not n:
+        return 0.0, 0, None
     baza = sorted(sm)[n // 2]
     ep = []                     # energia episodului, secunda cu secunda
     for start, dur in scene:
@@ -1073,12 +1025,31 @@ def ia_gemini(cheie, model, prompt, cadre_b64):
     body = json.dumps({"contents": [{"parts": parts}],
                        "generationConfig": {"responseMimeType": "application/json",
                                             "temperature": 0.3}}).encode()
-    req = urllib.request.Request(
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-        data=body, method="POST",
-        headers={"Content-Type": "application/json", "x-goog-api-key": cheie})
-    with urllib.request.urlopen(req, timeout=90) as r:
-        d = json.load(r)
+    data = None
+    last_error = None
+    for current_model in dict.fromkeys(m.strip() for m in model.split(",") if m.strip()):
+        for attempt in range(3):
+            req = urllib.request.Request(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{current_model}:generateContent",
+                data=body, method="POST",
+                headers={"Content-Type": "application/json", "x-goog-api-key": cheie})
+            try:
+                with urllib.request.urlopen(req, timeout=90) as r:
+                    data = json.load(r)
+                break
+            except urllib.error.HTTPError as ex:
+                last_error = ex
+                if ex.code in (429, 500, 503):
+                    time.sleep(2 * (attempt + 1))
+                    continue
+                if ex.code == 404:
+                    break
+                raise
+        if data is not None:
+            break
+    if data is None:
+        raise RuntimeError("Niciun model configurat nu a raspuns") from last_error
+    d = data
     txt = d["candidates"][0]["content"]["parts"][0]["text"].strip()
     if txt.startswith("```"):                      # uneori vine cu garduri markdown
         txt = txt.strip("`")
@@ -1171,7 +1142,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             e["ai_promite"] = "; ".join(str(x) for x in (r.get("promite") or [])[:3])
             e["ai_livrat"] = bool(r.get("livrat", True))
             e["ai_in_joc"] = str(r.get("in_joc", ""))[:220]
-            print(f"   AI {varf//60}:{varf%60:02d} -> scor {e['ai_scor']}/10 · {e['ai_de_ce'][:60]}")
+            print(f"   AI {varf//60}:{varf%60:02d} -> scor {e.get('ai_scor', '?')}/10 · {e['ai_de_ce'][:60]}")
             ramase.append(e)
         except Exception as ex:
             print(f"   ! AI a esuat la un moment ({str(ex)[:70]}) — il las sa treaca pe selectia pe energie")
@@ -1181,17 +1152,56 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
     return buni if buni else [max(ramase, key=lambda e: e.get("ai_scor", 0))]   # mereu pastram cel mai bun
 
 
-def transcrie_live(video, model_nume=None):
+def valid_transcript(value):
+    if not isinstance(value, list):
+        return False
+    for row in value:
+        if not isinstance(row, (list, tuple)) or len(row) != 3:
+            return False
+        a, b, text = row
+        if (isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float))
+                or not isinstance(b, (int, float)) or not math.isfinite(a) or not math.isfinite(b)
+                or not 0 <= a < b or not isinstance(text, str)):
+            return False
+    return True
+
+
+def transcrie_live(video, model_nume=None, source_fingerprint=None):
+    """Reuse the exact transcript when source bytes/model/decoding parameters match."""
+    from importlib.metadata import version, PackageNotFoundError
     model_nume = model_nume or os.environ.get("WHISPER_MODEL", "small")
-    """AI local (faster-whisper): 1 transcript cu timpi pentru TOT live-ul.
-    intoarce None daca pachetul nu e instalat (nu e obligatoriu)."""
     try:
-        from faster_whisper import WhisperModel
-    except ImportError:
-        return None
-    m = WhisperModel(model_nume, device="cpu", compute_type="int8")
-    segs, _ = m.transcribe(video, language="ro", vad_filter=True)
-    return [(s.start, s.end, s.text.strip()) for s in segs if s.text.strip()]
+        package_version = version('faster-whisper')
+    except PackageNotFoundError:
+        package_version = 'unavailable'
+    options = dict(language='ro', vad_filter=True, beam_size=5)
+    identity = dict(source=source_fingerprint or file_digest(video), model=model_nume, engine=package_version,
+                    compute='int8', device='cpu', options=options)
+
+    def compute():
+        try:
+            from faster_whisper import WhisperModel
+        except ImportError:
+            return None
+        model = WhisperModel(model_nume, device='cpu', compute_type='int8',
+                             cpu_threads=max(1, min(4, os.cpu_count() or 1)))
+        segments, _ = model.transcribe(video, **options)
+        return [(segment.start, segment.end, segment.text.strip())
+                for segment in segments if segment.text.strip()]
+
+    return cached_json('transcript-v1', identity, compute, valid_transcript)
+
+
+def durata_sursa(ff, video):
+    """Read duration from metadata; do not decode a multi-hour VOD just to count seconds."""
+    result = subprocess.run([ff, '-i', video], capture_output=True, text=True, timeout=60)
+    match = re.search(r'Duration: (\d+):(\d+):(\d+(?:\.\d+)?)', result.stderr or '')
+    if not match:
+        raise ValueError('Durata sursei nu poate fi citita')
+    duration = int(match[1]) * 3600 + int(match[2]) * 60 + float(match[3])
+    if not math.isfinite(duration) or duration <= 0:
+        raise ValueError('Durata sursei este invalida')
+    return duration
 
 
 def _fmt_srt(t):
@@ -1282,7 +1292,6 @@ def grupeaza_cu_ai(cheie, model, episoade, transcript):
 
 
 def main():
-    aranjeaza_sunete_mele()
     ap = argparse.ArgumentParser()
     ap.add_argument("video")
     ap.add_argument("--durata", type=int, default=DURATA)
@@ -1296,6 +1305,10 @@ def main():
     ap.add_argument("--ai", action="store_true", help="AI-minte (Gemini): intelege momentele semantic + titluri personalizate (cheie gratuita in autoeditor/.env)")
     ap.add_argument("--doar-analiza", action="store_true")
     opt = ap.parse_args()
+    if opt.max < 1:
+        ap.error("--max trebuie sa fie cel putin 1")
+    if opt.ai:
+        opt.clasic = True  # Strict AI mode always reviews a single continuous story.
 
     ff = gaseste_ffmpeg()
     baza = os.path.dirname(os.path.abspath(__file__))
@@ -1314,6 +1327,15 @@ def main():
     confeti_p = confeti_p if (os.path.exists(confeti_p) and os.environ.get("AE_CONFETI", "0") == "1") else None   # confetti OFF (user: "partile colorate pe ecran")
     pool_rand = gaseste_sfx_random(assets_dir)
     meme = gaseste_meme(assets_dir)
+    catalogue = sound_catalogue(
+        [os.path.join(baza, "sunete_mele"), os.path.join(assets_dir, "efecte")],
+        lambda path: FOLDERE_MELE.get(os.path.basename(os.path.dirname(path)).upper())
+        or clasifica_sunet(path))
+    if opt.ai:
+        # Fixed slots and random meme inserts cannot explain an event-specific choice.
+        efecte, meme = {}, []
+        if not citeste_cheie_gemini(baza):
+            sys.exit("Calitate AI: cheia lipseste; nu randez clipuri neverificate.")
     print(f"assets: muzica={'DA' if muzica else 'NU'} · logo={'DA' if logo else 'NU'} · "
           f"efecte={','.join(efecte) if efecte else 'niciunul'} · "
           f"confeti={'DA' if confeti_p else 'nu'} · sunete-random={len(pool_rand)} · sunete-mele={sum(len(v) for v in sunete_mele_pool().values())} · meme-greenscreen={len(meme)}")
@@ -1324,15 +1346,25 @@ def main():
     print(f"sursa: {w_src}x{h_src} -> export {'1440p (2K, lanczos+sharpen)' if tinta_h else 'rezolutie sursa'}")
     if opt.calitate == "2k" and h_src >= 1440:
         print("   live-ul TAIE deja in 2K+ -> pastram nativ, nimic de upscalat (cel mai bine)")
-    print("1/4 Ascult live-ul (volum pe fiecare secunda)...")
-    seria = analiza_audio(ff, opt.video)
-    live_len = seria[-1][0]
-    print(f"   live: {live_len//60} min · {len(seria)} secunde analizate")
+    if opt.ai:
+        seria = []
+        live_len = durata_sursa(ff, opt.video)
+        source_sha = file_digest(opt.video)
+        print(f"1/4 Sursa: {live_len/60:.1f} min; selectia AI nu necesita analiza RMS separata.")
+        varfuri, scor = [], []
+    else:
+        print("1/4 Ascult live-ul (volum pe fiecare secunda)...")
+        seria = analiza_audio(ff, opt.video)
+        live_len = seria[-1][0]
+        varfuri, scor = detecteaza_explozii(seria)
 
     print("2/4 Caut momentele si construiesc POVESTILE...")
-    varfuri, scor = detecteaza_explozii(seria)
-    print(f"   {len(varfuri) if len(varfuri)>0 else 0} momente-explozie detectate in tot live-ul")
-    if opt.momente:
+    if opt.ai:
+        episoade, p3 = [], opt.durata
+        momente = citeste_momente(opt.momente) if opt.momente else []
+        if opt.momente and not momente:
+            sys.exit("Fisierul de momente este gol sau invalid.")
+    elif opt.momente:
         momente = citeste_momente(opt.momente)
         if not momente:
             sys.exit(f"Nu am putut citi momente din {opt.momente} (format: m:ss sau h:mm:ss, unul pe linie)")
@@ -1361,13 +1393,14 @@ def main():
                 e["scene"] = [sc[0], (max(1, C - inapoi_set), sc[1][1]),
                               (max(1, C - inapoi_dez), sc[2][1]), sc[3]]
             episoade += alege_clasic(varfuri_elita, scor, live_len, opt.durata, opt.max, episoade)
-    if not episoade:
+    if not episoade and not opt.ai:
         sys.exit("Niciun moment nu a trecut poarta de calitate. NU fac episoade slabe — regula ta: doar cel mai bun.")
 
     # transcript (daca e cerut de subtitrari SAU de AI) — o singura data, refolosit
     transcript = None
     if opt.subtitrari or opt.ai or pool_rand:
-        tr = transcrie_live(os.path.abspath(opt.video))
+        tr = transcrie_live(os.path.abspath(opt.video),
+                            source_fingerprint=source_sha if opt.ai else None)
         if tr is None:
             print("   (faster-whisper nu e instalat — subtitrari + sunete-semantice inactive: pip install faster-whisper)")
         else:
@@ -1377,63 +1410,42 @@ def main():
             cu_dir = os.path.join(baza, "cunoastere", "transcripte")
             os.makedirs(cu_dir, exist_ok=True)
             nume = datetime.now().strftime("LIVE_%Y-%m-%d_%H%M") + ".json"
-            json.dump({"data": datetime.now().isoformat(), "sursa": os.path.basename(opt.video),
-                       "replici": tr}, open(os.path.join(cu_dir, nume), "w", encoding="utf-8"),
-                      ensure_ascii=False)
+            with open(os.path.join(cu_dir, nume), "w", encoding="utf-8") as f:
+                json.dump({"data": datetime.now().isoformat(), "sursa": os.path.basename(opt.video),
+                           "replici": tr}, f, ensure_ascii=False)
             print(f"   memorie: {nume} salvat in cunoastere/transcripte/")
 
     if opt.ai:
         cheie = citeste_cheie_gemini(baza)
-        if not cheie:
-            print("   MOD AI OPRIT: lipseste cheia. Gratis, 1 min: aistudio.google.com/apikey -> Get API key")
-            print("   -> creezi fisier autoeditor/.env cu linia:  GEMINI_API_KEY=cheia_ta")
-        else:
-            model = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")
-            idei = (idei_cu_ai(ia_gemini, cheie, model, transcript, live_len, baza)
-                    if (opt.clasic and transcript) else [])
-            if idei:
-                # EDITOR CU IDEI: episodul = interval CONTINUU care spune ideea; titlul = ideea
-                episoade = []
-                for i in idei:
-                    inc = snap_taietura(os.path.abspath(opt.video), i["inceput"])
-                    sf = min(inc + 170, i["sfarsit"])
-                    if sf - inc < 60:
-                        continue
-                    episoade.append({"varf": (inc + sf) // 2, "scor": float(i.get("scor", 7.5)),
-                                     "tip": "clasic", "scene": [(inc, sf - inc)],
-                                     "ai_titlu": str(i["titlu"])[:70],
-                                     "ai_de_ce": str(i.get("de_ce", ""))[:120], "idee": True})
-                # NIVEL 2026: Gemini PRIVESTE segmentul real si confirma ideea + titlul + hook-ul
-                verificate = []
-                for i, e in enumerate(episoade):
-                    try:
-                        v = verifica_idee_cu_video(ff, cheie, model, os.path.abspath(opt.video),
-                                                   {"titlu": e.get("ai_titlu", ""), "de_ce": e.get("ai_de_ce", ""),
-                                                    "inceput": e["scene"][0][0],
-                                                    "sfarsit": e["scene"][0][0] + e["scene"][0][1]})
-                        print(f"   VERIFICARE: {v.get('ce_se_intampla', '')[:90]}")
-                        if v.get("ok") and v.get("un_joc", False):
-                            if v.get("titlu_corectat"):
-                                e["ai_titlu"] = str(v["titlu_corectat"])[:70]
-                            verificate.append(e)
-                        else:
-                            print("   -> IDEE ARUNCATA (nu se confirma pe video / amestec jocuri)")
-                    except Exception as ex:
-                        print(f"   ! verificare a esuat ({str(ex)[:60]}) — pastrez ideea fara confirmare video")
-                        verificate.append(e)
-                episoade = verificate
-                print(f"   IDEI: {len(episoade)} episoade cu IDEE proprie, VERIFICATE pe video")
-            if idei and episoade:
-                print(f"   plan: {len(episoade)} episoade din IDEI (mod continuu)")
+        model = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash")
+        try:
+            if opt.momente:
+                idei = [{"inceput": max(0, t - 55), "sfarsit": min(live_len, max(0, t - 55) + 170),
+                         "titlu": "Moment indicat de creator", "de_ce": "Selectie manuala"}
+                        for t in momente]
             else:
-                print(f"   MOD AI ACTIV ({model}): {len(episoade)} candidati judecati semantic...")
-                episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript, baza)
-                print(f"   AI a pastrat {len(episoade)} episoade (cele cu scor mic au cazut)")
-            if len(episoade) >= 3 and not opt.clasic:   # temele amesteca momente din tot live-ul — interzise in modul continuu
-                if grupate:
-                    episoade = grupate
-                    teme = sum(1 for e in episoade if e.get("tema"))
-                    print(f"   TEME: momente din TOT live-ul, grupate in {teme} episoade tematice")
+                if not transcript:
+                    raise ValueError("Transcript indisponibil")
+                idei = idei_cu_ai(ia_gemini, cheie, model, transcript, live_len, baza)
+            episoade, audit = approved_episodes(
+                idei,
+                lambda idea: verifica_idee_cu_video(
+                    ff, cheie, model, os.path.abspath(opt.video), idea, catalogue=catalogue, transcript=transcript,
+                    source_fingerprint=source_sha),
+                catalogue, live_len, opt.max, transcript=transcript)
+        except Exception as ex:
+            episoade = []
+            audit = [{"status": "neverificat", "motiv": f"Selectie indisponibila: {type(ex).__name__}"}]
+        with open(os.path.join(folder, "DECIZII_AI.json"), "w", encoding="utf-8") as f:
+            json.dump(audit, f, ensure_ascii=False, indent=2)
+        if not episoade:
+            with open(os.path.join(folder, "plan.json"), "w", encoding="utf-8") as f:
+                json.dump([], f)
+            with open(os.path.join(folder, "RAPORT.md"), "w", encoding="utf-8") as f:
+                f.write("# Oprit: niciun episod verificat\nVezi DECIZII_AI.json. "
+                        "Nu se livreaza selectie dupa zgomot sau idei neconfirmate.\n")
+            sys.exit("Calitate AI: niciun episod aprobat. Vezi episodes/DECIZII_AI.json.")
+        print(f"   AI: {len(episoade)} povesti verificate; fara efecte aleatorii")
     print(f"   plan: {len(episoade)} episoade ({sum(1 for e in episoade if e['tip']=='poveste')} in modul poveste)")
 
     rap = ["# RAPORT AUTOEDITOR (POVESTEA) — " + datetime.now().strftime("%d.%m.%Y %H:%M"),
@@ -1457,7 +1469,7 @@ def main():
     titluri = []
     for k, e in enumerate(episoade, 1):
         if e.get("ai_titlu"):
-            rap.append(f"- TITLU AI (scor {e['ai_scor']}/10): {e['ai_titlu']}")
+            rap.append(f"- TITLU AI (scor {e.get('ai_scor', '?')}/10): {e['ai_titlu']}")
             if e.get("ai_in_joc"):
                 rap.append(f"- IN JOC: {e['ai_in_joc']}")
             if e.get("ai_promite"):
@@ -1467,19 +1479,24 @@ def main():
     if not titluri:
         rap.append("Titlurile sunt SABLON — le personalizezi dupa ce vizionezi.")
     if titluri:
-        open(os.path.join(folder, "titluri.txt"), "w", encoding="utf-8").write("\n".join(titluri) + "\n")
-    open(os.path.join(folder, "RAPORT.md"), "w", encoding="utf-8").write("\n".join(rap))
-    # PLAN.JSON: pt generatorul de shorts (shorts.py citeste varfurile + scorurile)
-    json.dump([{"nr": k, "varf": e.get("varf"), "scor": e.get("scor"), "tip": e.get("tip"),
-                "scene": e.get("scene")} for k, e in enumerate(episoade, 1)],
-              open(os.path.join(folder, "plan.json"), "w"), ensure_ascii=False)
+        with open(os.path.join(folder, "titluri.txt"), "w", encoding="utf-8") as f:
+            f.write("\n".join(titluri) + "\n")
+    with open(os.path.join(folder, "RAPORT.md"), "w", encoding="utf-8") as f:
+        f.write("\n".join(rap))
+    # Only verified source-relative peaks can seed the separate shorts review.
+    with open(os.path.join(folder, "plan.json"), "w", encoding="utf-8") as f:
+        json.dump([{"nr": k, "varf": e.get("varf"), "scor": e.get("scor"), "tip": e.get("tip"),
+                    "scene": e.get("scene"), "ai_verified": e.get("ai_verified", False),
+                    "titlu": e.get("ai_titlu")} for k, e in enumerate(episoade, 1)],
+                  f, ensure_ascii=False)
     print("   raport: episodes/RAPORT.md")
 
     if opt.doar_analiza:
         print("GATA (doar analiza). Scoate --doar-analiza ca sa randeze.")
         return
 
-    episoade = motiv_de_exista(episoade)
+    if not opt.ai:
+        episoade = motiv_de_exista(episoade)
     print("3/4 Randez episoadele (cea mai lunga parte)...")
     h_out = tinta_h if tinta_h else (rezolutie_sursa(ff, os.path.abspath(opt.video))[1])
     sm_full = [v for _, v in seria]
@@ -1488,34 +1505,43 @@ def main():
         eticheta = "POVESTEA" if e["tip"] == "poveste" else "clasic"
         # PROTECTIA RETENTIEI: daca finalul episodului e mort, il tai elastic (MrBeast:
         # tai cand s-a terminat povestea, nu cronometrul). Minim 90s.
-        if sm_full:
+        if sm_full and not e.get("ai_verified"):
             e["scene"], gol_taiat = comprima_zone_moarte(sm_full, e["scene"], opt.durata)
             if gol_taiat:
                 print(f"   EP{k:02d}: COMPRIMARE stil-JOH: {int(gol_taiat)}s de gol scoase din mijloc")
-        dead_pct, longest, cut_ep = profil_retentie(sm_full, e["scene"], opt.durata)
-        durata_ep = opt.durata
-        if cut_ep and cut_ep < opt.durata - 20:
+        dead_pct, longest, cut_ep = ((0, 0, None) if e.get("ai_verified") else
+                                      profil_retentie(sm_full, e["scene"], opt.durata))
+        durata_ep = sum(d for _, d in e["scene"])
+        if not e.get("ai_verified") and cut_ep and cut_ep < opt.durata - 20:
             durata_ep = max(90, cut_ep)
             ramas = durata_ep - sum(d for _, d in e["scene"][:-1])
             e["scene"][-1] = (e["scene"][-1][0], max(20, int(ramas)))
             print(f"   EP{k:02d}: FINAL ELASTIC {opt.durata}->{durata_ep}s (zona moarta de {int(dead_pct)}% taiata)")
-        if transcript and os.environ.get("AE_POPS", "1") != "0":
+        if transcript and not e.get("ai_verified") and os.environ.get("AE_POPS", "1") != "0":
             e["_pops"] = pops_subtitrari(transcript, e["scene"], durata_ep)
             if e["_pops"]:
                 print(f"   EP{k:02d}: subtitrari-POP (mari, galbene) la {len(e['_pops'])} momente-cheie")
-        sfx_rand = (alege_sfx_inteligent(pool_rand, durata_ep, transcript, e["scene"])
-                    if pool_rand else None)
+        if e.get("ai_verified"):
+            # Keep the reviewed timeline intact: no energy-based cuts after approval.
+            sfx_rand = [(s["sec"], s["path"], 1.0) for s in e["_sound_plan"]]
+        else:
+            sfx_rand = (alege_sfx_inteligent(pool_rand, durata_ep, transcript, e["scene"])
+                        if pool_rand or catalogue else None)
         e["_sfx"] = sfx_rand or []
         if sfx_rand:
             detalii = ", ".join(f"{int(t)//60}:{int(t)%60:02d} {os.path.basename(c)}" for t, c, _ in sfx_rand)
-            print(f"   EP{k:02d} ({eticheta}) · sfx random: {detalii}{' + confeti' if confeti_p else ''}")
+            print(f"   EP{k:02d} ({eticheta}) · sunete: {detalii}{' + confeti' if confeti_p else ''}")
         else:
             print(f"   EP{k:02d} ({eticheta})...")
         out = comanda_randare(ff, os.path.abspath(opt.video), e, durata_ep, folder, muzica, logo, k,
                               efecte, tinta_h, sfx_rand, confeti_p, h_out,
                               dim=(w_src, h_src, fps_live), seria=seria, meme=meme)
+        if opt.ai and not out:
+            sys.exit(f"EP{k:02d}: randare esuata; livrarea este oprita.")
         if out:
             lu = calibreaza_lufs(ff, os.path.join(folder, out))
+            if opt.ai and not lu:
+                sys.exit(f"EP{k:02d}: master audio neverificat; livrarea este oprita.")
             if lu:
                 e["_lufs"] = lu
             facute.append((k, e, out))
@@ -1551,11 +1577,13 @@ def main():
                 f"- EP{k:02d}: titlu {'AI: „' + e['ai_titlu'] + '”' if e.get('ai_titlu') else 'sablon (il personalizezi tu)'} · "
                 f"moment {'scor AI ' + str(e.get('ai_scor', '?')) + '/10' if e.get('ai_scor') else 'scor energie ' + str(e['scor'])} · "
                 f"sunete potrivite contextului: {len(e.get('_sfx', []))} · confeti: {'DA' if confeti_p else 'nu'} · "
-                f"texte engagement (intrebare+hype+CTA): DA · durata exacta: {opt.durata}s")
+                f"durata planificata: {sum(d for _, d in e['scene'])}s")
+            for sound in e.get("_sound_plan", []):
+                chk.append(f"  - {sound['sec']:.1f}s · {os.path.basename(sound['path'])}: {sound['motiv']}")
         for k, e, out in facute:
             if e.get("_lufs"):
                 chk.append(f"- {out}: AUDIO CALIBRAT YOUTUBE {e['_lufs'][0]:.1f} -> {e['_lufs'][1]:.1f} LUFS (tinta -14, varfuri <= -1.5 dBTP)")
-            chk.append(f"- {out}: FLOW MrBeast — respirat continuu + {e.get('_zoom_n', '?')} punch-uri (cold-open/HYPE/CLIMAX + pe energie)")
+            chk.append(f"- {out}: zoom activ: {os.environ.get('AE_ZOOM', '0') == '1'}")
             if e.get("_meme_n"):
                 chk.append(f"- {out}: {e['_meme_n']} meme-uri greenscreen pe momentele comice")
             chk.append(f"- {out}: GRADE culoare (saturatie 1.18, contrast 1.06 — pica in feed)")
@@ -1582,7 +1610,7 @@ def main():
               "pixelmon server, nocivanu horror, pixelmon romania, isentric, izentric, minecraft romania, "
               "gaming romania, supercity, nocivanu supercity, minecarft")
     for k, e, out in facute:
-        titlu_full = e.get("ai_titlu") or f"CE S-A INTAMPLAT PE POKECITY?! Ep. {k}"
+        titlu_full = e.get("ai_titlu") or "Moment din live — de verificat"
         cadru = os.path.join(folder, f"EP{k:02d}_cadru2.jpg")
         try:
             if os.path.exists(cadru):

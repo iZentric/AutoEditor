@@ -1,34 +1,39 @@
-# Denumire PUBLICA: EP01.mp4 -> numele din TITLU (fara "Ep. N" — userul nu vrea EP in nume).
-# Rulat din workflow inainte de publicarea finala; upload.ttl/miniaturi/srt primesc aceeasi baza.
-import glob
-import os
+"""Rename delivery files inside episodes/, never into the repository root."""
+from pathlib import Path
 import re
-
 from upload_release import slug_nume
 
-folosite = set()
-for txt in sorted(glob.glob("episodes/*_upload.txt")):
-    titlu = ""
-    randuri = open(txt, encoding="utf-8").read().splitlines()
-    for i, linie in enumerate(randuri):
-        if linie.startswith("TITLU:"):
-            titlu = linie.split(":", 1)[1].strip()
-            if not titlu and i + 1 < len(randuri):
-                titlu = randuri[i + 1].strip()      # titlul e pe linia urmatoare
-            break
-    baza_v = re.sub(r"_upload\.txt$", "", os.path.basename(txt))
-    nr = int(re.sub(r"\D", "", baza_v.split("_")[-1]) or 0) if re.search(r"\d", baza_v) else None
-    if not titlu:
-        titlu = baza_v
-    nou = slug_nume(titlu, nr=nr)
-    while nou in folosite:                     # siguranta anti-coliziune
-        nou = nou[:-4] + "_x" + nou[-4:]
-    folosite.add(nou)
-    for f in glob.glob(f"episodes/{baza_v}*"):
-        ext = os.path.splitext(f)[1]
-        rest = os.path.basename(f)[len(baza_v):]   # ex: "_miniatura_B.jpg" / "_upload.txt" / ".srt"
-        dst = nou[:-4] + rest
-        if f != dst and not os.path.exists(dst):
-            os.replace(f, dst)
-            print(f"   {os.path.basename(f)} -> {os.path.basename(dst)}")
-print("DENUMIRE PUBLICA GATA (fisierele poarta titlurile, nu EP)")
+
+def rename_deliverables(folder='episodes'):
+    folder = Path(folder)
+    used = set()
+    for metadata in sorted(folder.glob('*_upload.txt')):
+        old = metadata.name.removesuffix('_upload.txt')
+        if not re.fullmatch(r'(EP|SHORT)\d+', old):
+            continue  # Already public: repeat runs are idempotent.
+        lines = metadata.read_text(encoding='utf-8').splitlines()
+        title = ''
+        for n, line in enumerate(lines):
+            if line.startswith('TITLU:'):
+                title = line.split(':', 1)[1].strip()
+                if not title and n + 1 < len(lines):
+                    title = lines[n+1].strip()
+                break
+        if not title:
+            raise ValueError(f'Missing title: {metadata.name}')
+        index = int(re.search(r'\d+$', old).group())
+        base = slug_nume(title + (' SHORT' if old.startswith('SHORT') else ''),
+                         nr=index).removesuffix('.mp4')
+        sources = [f for f in folder.iterdir() if f.is_file()
+                   and (f.name.startswith(old + '.') or f.name.startswith(old + '_'))]
+        while base in used or any((folder / (base + f.name[len(old):])).exists() for f in sources):
+            base += '_x'
+        used.add(base)
+        for source in sources:
+            destination = folder / (base + source.name[len(old):])
+            source.rename(destination)
+            print(f'{source.name} -> {destination.name}')
+
+
+if __name__ == '__main__':
+    rename_deliverables()

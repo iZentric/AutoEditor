@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "note": "Reguli editoriale bazate pe indicatiile creatorului, foldere si numele fisierelor. Nu reprezinta o analiza acustica sau o confirmare a licentei.",
+  "sounds": {
+    "OASE_RUPTE/pumm.mp3": {
+      "category": "cadere",
+      "events": ["cadere", "impact_personaj"],
+      "description": "Efectul de oase rupte oferit de creator. Accent comic la impactul unei caderi sau unei lovituri a personajului.",
+      "avoid": "Nu la simpla discutie despre cadere, nu la mers normal, nu la o victorie.",
+      "identity_source": "creator_request_and_folder"
+    },
+    "SPERIAT/faaa.mp3": {
+      "category": "speriat",
+      "events": ["sperietura"],
+      "description": "Reactie de sperietura; eveniment surprinzator sau amenintare aparuta in joc.",
+      "avoid": "Nu peste o replica importanta si nu la fiecare schimbare de cadru.",
+      "identity_source": "creator_folder"
+    },
+    "Bamboo Hit (AnimeCartoon Bonk) - Sound Effect for Editing.mp3": {
+      "category": "hit",
+      "events": ["lovitura_comica"],
+      "description": "Bamboo/bonk: lovitura comica scurta. Foloseste rar, la impactul vizibil.",
+      "avoid": "Nu pe fiecare lovitura dintr-o lupta; maximum un efect hit pe episod.",
+      "identity_source": "filename_hint"
+    },
+    "bonk_7zPAD7C.mp3": {
+      "category": "hit",
+      "events": ["lovitura_comica"],
+      "description": "Bonk: accent la o lovitura sau greseala comica vizibila.",
+      "avoid": "Nu impreuna cu bamboo pentru acelasi moment.",
+      "identity_source": "filename_hint"
+    },
+    "metal_lovitura.mp3": {
+      "category": "hit",
+      "events": ["impact_obiect"],
+      "description": "Lovitura metalica: coliziune sau obiect cazut vizibil.",
+      "avoid": "Nu intr-o scena fara impact sau doar pentru ca se aude zgomot.",
+      "identity_source": "filename_hint"
+    },
+    "anime-wow-sound-effect.mp3": {
+      "category": "fericit",
+      "events": ["descoperire", "victorie"],
+      "description": "Anime wow: descoperire surprinzatoare sau reusita reala in joc.",
+      "avoid": "Nu anunta captura unui Pokemon daca nu este confirmata in imagini.",
+      "identity_source": "filename_hint"
+    },
+    "vine-boom-bass-boost-sound-effect.mp3": {
+      "category": "surpriza",
+      "events": ["revelatie", "esec_surprinzator"],
+      "description": "Vine boom: accent de surpriza la o revelatie sau un esec neasteptat.",
+      "avoid": "Nu peste voce si nu repetitiv; nu este muzica de fundal.",
+      "identity_source": "filename_hint"
+    },
+    "Awkward Moment 2.mp3": {
+      "category": "pauza",
+      "events": ["pauza_comica"],
+      "description": "Moment stanjenitor: pauza dupa o greseala sau gluma evidenta.",
+      "avoid": "Nu umple o asteptare plictisitoare cu efecte; respinge momentul daca nu exista poveste.",
+      "identity_source": "filename_hint"
+    },
+    "pop_7e9Is8L.mp3": {
+      "category": "accent",
+      "events": ["aparitie_obiect"],
+      "description": "Pop scurt: aparitia sau dezvaluirea unui obiect in joc.",
+      "avoid": "Nu pentru navigare in meniuri sau fiecare cuvant subtitrat.",
+      "identity_source": "filename_hint"
+    },
+    "basina.mp3": {
+      "category": "comic",
+      "events": ["gag_explicit"],
+      "description": "Efect comic corporal, numai daca exista un gag explicit potrivit in scena.",
+      "avoid": "Nu il adauga aleatoriu si nu il folosi pentru umilirea altui jucator.",
+      "identity_source": "filename_hint"
+    }
+  }
+}

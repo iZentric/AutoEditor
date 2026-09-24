@@ -19,3 +19,22 @@ client_secret.json
 *.flac
 *.aac
 *.opus
+
+# Private analysis/transcript cache; persisted in Actions, never in Git.
+.cache/
+.venv/
+
+# Credential exports and local overrides, including nested folders.
+.env.*
+!.env.example
+client_secret*.json
+cookies*.txt
+cookies*.b64
+*refresh_token*.json
+
+# Generated subtitles and metadata belong in episodes/, never at repository root.
+/*.ass
+/*_upload.txt
+
+# Local browser authorization environment.
+.venv-oauth/
