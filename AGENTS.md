@@ -69,8 +69,10 @@ production workflow. Old README documentation lives in docs/ISTORIC_README.md.
   organizer is now a compatibility no-op. Generated output belongs in episodes/.
 - Run `python tools/check_secrets.py`. It prints paths/types, never matching
   secrets; it is a limited guard, not a complete audit or a scan of chat/history.
-- A workflow-write permission error needs the GitHub integration updated by the
-  owner. Do not request a token or claim that local changes reached GitHub.
+- A workflow-write permission error requires checking the app permission request,
+  installation approval and effective connection permissions. The app publisher
+  requests permissions; the installing account approves them. Reconnecting alone
+  does not guarantee a fix. Never request tokens or claim a failed push succeeded.
 
 ## Validation and operational lessons
 

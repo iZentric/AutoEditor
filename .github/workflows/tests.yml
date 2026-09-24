@@ -1,13 +1,6 @@
 name: Editorial quality tests
-on:
-  push:
-    paths:
-      - '**.py'
-      - '.github/workflows/tests.yml'
-  pull_request:
-    paths:
-      - '**.py'
-      - '.github/workflows/tests.yml'
+# Check every change: credentials can also be leaked in docs or configuration.
+on: [push, pull_request, workflow_dispatch]
 permissions:
   contents: read
 jobs:

@@ -1047,3 +1047,30 @@
   nu s-a pornit o randare noua. Se pregateste PR draft, nu o activare partiala in productie.
 - PR draft creat: https://github.com/iZentric/AutoEditor/pull/3 . Codul este
   publicat, dar automatizarea noua necesita inca aprobarea modificarilor de workflow.
+
+## 25.09.2026 — Activare fara alte chei sau reconectari repetate
+- Creatorul reitereaza nevoia de editor automat bun, circa3 minute, sunete si
+  ritm inspirat de iSilent/JocuriHorrorSky. Nu s-a pretins calitate editoriala
+  demonstrata doar de teste; urmeaza un episod-pilot dupa activare si GO.
+- PR#3 reverificat: OPEN, draft. Ultimul run este tot cel vechi,36060259649.
+- Pregatit activare_automatizare.zip cu NUMAI episod.yml si tests.yml actuale,
+  pentru upload manual de catre proprietar in .github/workflows, pe ramura
+  arena/01a0d4bb-autoeditor. Arhiva verificata, patch reverse-check trece.
+  Aceasta este alternativa transparenta la dreptul Workflows lipsa al aplicatiei,
+  nu o actualizare deja executata. Nu contine chei, doar referinte Secrets.
+- Nu s-a pornit randare/upload si nu s-a integrat PR-ul. Nu cere alte materiale.
+
+## 25.09.2026 — PERMISIUNEA WORKFLOWS FUNCTIONEAZA ACUM
+- Dupa confirmarea creatorului, push real reusit pentru ambele workflow-uri:
+  ff9124b pe arena/01a0d4bb-autoeditor. NU mai cere ZIP, reconectare sau chei.
+- Checkout-ul sesiunii reaparuse la baza c11f937; fetch explicit al ramurii remote
+  si reset --mixed la aceasta au pastrat toate fisierele locale. Nu folosi rebase
+  simplu care reaplica baza shallow; verifica mereu varful remote real.
+- 62 teste locale trecute, credential guard curat, compilare Python, toate cele3
+  YAML-uri si scripturile bash validate. Testele Actions noi au trecut si pe GitHub:
+  36070865684 si36070870135, commit ff9124b. NU sunt randari video.
+- README corectat: patch-ul WORKFLOWS_PENDING.patch este acum doar copie istorica,
+  nu mai trebuie aplicat. CI verifica toate modificarile (inclusiv documentatia)
+  pentru a nu sari peste credential guard la commituri fara Python; dispatch permis.
+- Se finalizeaza PR#3 dupa reverificarea CI. Nicio randare noua sau incarcare YouTube
+  in acest pas; calitatea pe VOD real ramane de validat printr-un episod-pilot.
