@@ -1066,6 +1066,10 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
         if os.path.exists(p_adn):
             creier += "ADN CANALE CARE MERG (formule + ritualuri verificate — aplica-le la titluri si la ce momente ridici):\n" + \
                       open(p_adn, encoding="utf-8").read()[:2500] + "\n\n"
+        p_trend = os.path.join(baza, "cunoastere", "trending_ro.md")
+        if os.path.exists(p_trend):
+            creier += "TRENDING RO CITIT ACUM (ce publicau concurenta zilele astea — aliniaza titlurile la ce merge ACUM):\n" + \
+                      open(p_trend, encoding="utf-8").read()[:2500] + "\n\n"
         p_ctx = "context_sursa.txt"
         ctx_txt = ""
         if os.path.exists(p_ctx):

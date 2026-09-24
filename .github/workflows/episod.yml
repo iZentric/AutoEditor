@@ -77,6 +77,10 @@ jobs:
         with:
           path: live_curent.mp4
           key: ${{ steps.afla.outputs.vodkey }}
+      - name: Invata TRENDING RO (RSS canale top — gratis, fara chei)
+        run: |
+          mkdir -p cunoastere
+          python3 invata_trending.py || echo "(trending n/a — continuam fara)"
       - name: Cookies YouTube (Secret COOKIES_YT sau cookies.b64 din repo)
         env:
           COOKIES_YT: ${{ secrets.COOKIES_YT }}
@@ -102,3 +106,14 @@ jobs:
           TAG="ep-$(date -u +%Y%m%d-%H%M)"
           gh release create "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura.jpg episodes/EP*_upload.txt episodes/*.srt episodes/SHORT*.mp4 episodes/SHORT*_upload.txt \
             --title "Episoade $TAG" --notes "Episoade 2K + SHORTS verticale gata de upload pe YouTube. Vezi EP*_upload.txt / SHORT*_upload.txt pentru titlu/descriere/tag-uri."
+      - name: MEMORIE — titlurile proprii intra in creier (nu le mai repeta niciodata)
+        run: |
+          mkdir -p cunoastere
+          touch cunoastere/titluri_folosite.txt
+          for f in episodes/EP*_upload.txt; do
+            [ -f "$f" ] && head -1 "$f" | sed 's/^TITLU:\s*//' >> cunoastere/titluri_folosite.txt
+          done
+          sort -u -o cunoastere/titluri_folosite.txt cunoastere/titluri_folosite.txt
+          git config user.email "agent@autoeditor.local" && git config user.name "AutoEditor Agent"
+          git add cunoastere/ && git commit -m "memorie: titluri publicate la $TAG" || echo "(nimic nou de memorat)"
+          git push || echo "(push memorie skip)"
