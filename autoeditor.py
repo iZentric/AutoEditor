@@ -1068,7 +1068,7 @@ def ia_frames_ai(ff, video, centru):
 def ia_gemini(cheie, model, prompt, cadre_b64):
     """Apel REST Gemini (format din docs oficiale ai.google.dev, verificat 09.2026):
     POST /v1beta/models/{model}:generateContent, header x-goog-api-key."""
-    parts = [{"inline_data": {"mime_type": "image/jpeg", "data": d}} for d in cadre_b64]
+    parts = [{"inline_data": {"mime_type": "image/jpeg", "data": d}} for d in (cadre_b64 or [])]
     parts.append({"text": prompt})
     body = json.dumps({"contents": [{"parts": parts}],
                        "generationConfig": {"responseMimeType": "application/json",

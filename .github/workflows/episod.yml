@@ -135,11 +135,13 @@ jobs:
             # LIVRARE PE RAND: piesele mari au urcat deja (cu nume din titlu); aici se urca RESTUL
             TAG="$RELEASE_TAG"
             python3 nume_public.py
+            rm -rf episodes/scene_tmp
             gh release upload "$TAG" episodes/* --clobber
             echo "restul fisierelor urcate pe $TAG (cu numele din titluri)"
           else
             TAG="ep-$(date -u +%Y%m%d-%H%M)"
             python3 nume_public.py
+            rm -rf episodes/scene_tmp
             gh release create "$TAG" episodes/* \
               --title "Episoade $TAG" --notes "Episoade 2K + SHORTS verticale gata de upload pe YouTube. Vezi *_upload.txt pentru titlu/descriere/tag-uri."
           fi
