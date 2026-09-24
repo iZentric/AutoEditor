@@ -160,6 +160,7 @@ if not sursa_gata():
 env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.6"))
 cmd = [sys.executable, "autoeditor.py", "live_curent.mp4", "--calitate", "1080p", "--max", MAXN]
 cmd += ["--ai"]   # CREIERUL MEREU PORNIT: fara el momentele se aleg doar dupa zgomot (greseala r17/r18)
+cmd += ["--clasic"]   # EPISOD = O BUCATA CONTINUA (un singur joc) — user: "ai combinat roblox cu minecraft, nu e bine"
 if os.environ.get("SUBTITRARI", "0") == "1":   # whisper pe live 2h = ~10 min; default OFF pt viteza
     cmd += ["--subtitrari"]
 sh(cmd, env=env)

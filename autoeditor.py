@@ -1094,7 +1094,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             'IN JOC: ce face jucatorul (lupta, prinde pokemon, construieste, exploreaza, moare, raid, '
             'gasesc ceva rar), cu ce pokemon, ce eveniment de joc s-a petrecut. Raspunzi DOAR cu JSON '
             'si un camp nou "in_joc": descriere concreta a evenimentului din joc (1-2 propozitii). ' 
-            '{"scor": 0-10 pt COPII 8-15; PRIORITATE MAXIMA: FAZE FAINE DIN JOC, PRECISE — prindere de pokemon (mai ales rar/legendar), lupta/raid, moarte comică, loot rar, build amuzant, eveniment din joc care se VEDE pe ecran; rasete/trolluri doar daca legate de joc; vorba de la soare la ploi sau grind fara eveniment in joc = scor 2-4; evenimente rare in joc, neprevazut; vorba goala sau grind fara nimic amuzant = scor 2-4; ', 
+            '{"scor": 0-10 pt COPII 8-15; PRIORITATE MAXIMA: FAZE FAINE DIN JOC, PRECISE — prindere de pokemon (mai ales rar/legendar), lupta/raid, moarte comică, loot rar, build amuzant, eveniment din joc care se VEDE pe ecran; rasete/trolluri doar daca legate de joc; MENIU/SETARI/inventar/pauza/harti-vazute-pe-ecran (ex: ecran de Shader Packs, optiuni, pause) = scor 1 — NU e faza din joc; vorba de la soare la ploi sau grind fara eveniment in joc = scor 2-4; evenimente rare in joc, neprevazut; vorba goala sau grind fara nimic amuzant = scor 2-4; ', 
             '"de_ce": "o propozitie scurta", '
             '"titlu": "titlu YouTube max 60 caractere, stil MrBeast: PRIMELE 3 CUVINTE = soc/FOMO '
             '(AM GASIT, L-AM PRINS, NIMENI NU STIE, PRIMUL DIN...), apoi misterul; cuvintele-cheie in MAJUSCULE; romaneste. '
@@ -1111,7 +1111,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             "varianta poate fi si intrebare. Scrie 3 variante: una CE am gasit, una intrebare scurta, una cu consecinta emotionala. "
             '"promite": ["ce promite titlul, max 3 lucruri"], '
             '"livrat": true/false — TRUE doar daca TOT ce promite titlul chiar se vede/se aude in moment}. '
-            'REGULA DE AUR: titlul descrie DOAR ce chiar se intampla in moment (vezi cadrele + ce s-a vorbit). '
+            'Daca in moment se SCHIMBA jocul (Minecraft->Roblox sau invers), e faza regresie: ia DOAR segmentul intr-un singur joc. ''REGULA DE AUR: titlul descrie DOAR ce chiar se intampla in moment (vezi cadrele + ce s-a vorbit). '
             'Daca in moment nu se prinde niciun Pokemon, titlul nu are voie sa promita asta. Fara clickbait fals. '
             'Scor mic daca: plictisitor, doar zgomot fara eveniment, sau nu se intelege ce se intampla.')
         try:
@@ -1267,10 +1267,10 @@ def main():
     muzica = os.path.join(assets_dir, "muzica.mp3")
     muzica = muzica if os.path.exists(muzica) else None
     logo = os.path.join(assets_dir, "logo.png")
-    logo = logo if os.path.exists(logo) else None
+    logo = logo if (os.path.exists(logo) and os.environ.get("AE_LOGO", "0") == "1") else None   # watermark pe video OFF (user: "ai scris pe ecran iZentric"); miniaturile il pastreaza
     efecte = gaseste_efecte(assets_dir)
     confeti_p = os.path.join(assets_dir, "efecte", "confeti.webm")
-    confeti_p = confeti_p if os.path.exists(confeti_p) else None
+    confeti_p = confeti_p if (os.path.exists(confeti_p) and os.environ.get("AE_CONFETI", "0") == "1") else None   # confetti OFF (user: "partile colorate pe ecran")
     pool_rand = gaseste_sfx_random(assets_dir)
     meme = gaseste_meme(assets_dir)
     print(f"assets: muzica={'DA' if muzica else 'NU'} · logo={'DA' if logo else 'NU'} · "
@@ -1344,8 +1344,7 @@ def main():
             print(f"   MOD AI ACTIV ({model}): {len(episoade)} candidati judecati semantic...")
             episoade = evalueaza_cu_ai(ff, cheie, model, episoade, os.path.abspath(opt.video), transcript, baza)
             print(f"   AI a pastrat {len(episoade)} episoade (cele cu scor mic au cazut)")
-            if len(episoade) >= 3:
-                grupate = grupeaza_cu_ai(cheie, model, episoade, transcript)
+            if len(episoade) >= 3 and not opt.clasic:   # temele amesteca momente din tot live-ul — interzise in modul continuu
                 if grupate:
                     episoade = grupate
                     teme = sum(1 for e in episoade if e.get("tema"))
