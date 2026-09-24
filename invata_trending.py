@@ -40,7 +40,13 @@ def tab_canal(handle, n=25):
 
 def distileaza():
     linii, tot_bun = [], []
-    for nume, cid in CANALE:
+    # canale extra pot fi adaugate de creator in cunoastere/canale_extra.txt (un ID per linie)
+    extra = []
+    p_ex = "cunoastere/canale_extra.txt"
+    if os.path.exists(p_ex):
+        extra = [(f"extra-{i+1}", l.strip()) for i, l in enumerate(open(p_ex, encoding="utf-8"))
+                 if l.strip().startswith("UC") and len(l.strip()) > 20]
+    for nume, cid in CANALE + extra:
         tab = tab_canal(nume)                      # views (uneori partial)
         try:
             rss = rss_canale(nume, cid)            # titluri + date (sigur)

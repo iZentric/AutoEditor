@@ -1,5 +1,5 @@
 # PIPELINE GITHUB ACTIONS: sursa -> episoade 2K -> Release
-import os, re, sys, subprocess, time
+import glob, os, re, sys, subprocess, time
 
 URL = (sys.argv[1] if len(sys.argv) > 1 else "").strip()
 MAXN = sys.argv[2] if len(sys.argv) > 2 else "2"
@@ -151,6 +151,12 @@ sh(cmd, env=env)
 # ── 2b) SHORTS (verticale 9:16, <60s, din varfurile maxime) ──
 if os.path.exists("episodes/plan.json"):
     sh([sys.executable, "shorts.py"])
+
+# ── 2c) UPLOAD AUTOMAT pe YouTube (doar daca exista Secretele OAuth; altfel skip) ──
+if glob.glob("episodes/EP*.mp4"):
+    sh([sys.executable, "-m", "pip", "install", "-q", "google-api-python-client requests"])
+    r = subprocess.run([sys.executable, "auto_upload_yt.py"])
+    print("(upload YT: cod", r.returncode, "- 0=publicat, skip=in asteptare)", flush=True)
 
 # ── 3) URCARE 2K (2560x1440 lanczos+unsharp) ──
 sh([sys.executable, "urca_2k.py"])

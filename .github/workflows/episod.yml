@@ -117,3 +117,17 @@ jobs:
           git config user.email "agent@autoeditor.local" && git config user.name "AutoEditor Agent"
           git add cunoastere/ && git commit -m "memorie: titluri publicate la $TAG" || echo "(nimic nou de memorat)"
           git push || echo "(push memorie skip)"
+      - name: NOTIFICARE — Issue cu link-urile gata (canalul de comunicare al repo-ului)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          NUMAR=$(ls episodes/EP*.mp4 2>/dev/null | wc -l); SHORTS=$(ls episodes/SHORT*.mp4 2>/dev/null | wc -l)
+          LINK="https://github.com/${{ github.repository }}/releases/tag/$TAG"
+          if gh issue list --search "EPISOADE GATA in:title" --state open --json number -q '.[0].number' 2>/dev/null | grep -q .; then
+            N=$(gh issue list --search "EPISOADE GATA in:title" --state open --json number -q '.[0].number')
+            gh issue comment "$N" --body "**GATA ✅** $NUMAR episoade + $SHORTS shorts -> [Release $TAG]($LINK)"
+          else
+            gh issue create --title "EPISOADE GATA — episod nou livrat" \
+              --body "**GATA ✅** $NUMAR episoade + $SHORTS shorts -> [Release $TAG]($LINK)
+              _Comentati aici daca vreo piesa nu v-a placut — AI-ul citeste Issue-urile._" || true
+          fi
