@@ -1,0 +1,31 @@
+name: Proba descarcare YouTube
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL-ul de testat (live/VOD YouTube)'
+        required: true
+        type: string
+jobs:
+  proba:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: yt-dlp FRESH
+        run: pip install --force-reinstall --no-deps https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
+      - name: Cookies din Secret
+        env:
+          COOKIES_YT: ${{ secrets.COOKIES_YT }}
+        run: |
+          if [ -n "$COOKIES_YT" ]; then printf '%s' "$COOKIES_YT" > cookies.txt; echo "cookies prezente";
+          grep -q SAPISID cookies.txt && echo "COMPLETE (SAPISID ✓)" || echo "!! INCOMPLETE"; fi
+      - name: PROBA — titlu (simulate)
+        run: |
+          echo "== SIMULATE (doar metadate) =="; yt-dlp --cookies cookies.txt --simulate --print "%(title)s | %(duration_string)s | %(channel)s" "${{ inputs.url }}" || echo "SIMULATE ESUAT"
+      - name: PROBA — bucată reală (max 25MB, calitate proastă)
+        run: |
+          echo "== DOWNLOAD REAL (bucata) =="; yt-dlp --cookies cookies.txt -f "worst[ext=mp4]/worst" --max-filesize 25M -o proba.mp4 "${{ inputs.url }}" && ls -la proba.mp4 && echo "DOWNLOAD REAL OK ✓" || echo "DOWNLOAD REAL ESUAT"

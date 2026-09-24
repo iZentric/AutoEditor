@@ -51,8 +51,19 @@ else:
     yt = bool(re.fullmatch(r'[A-Za-z0-9_-]{11}', URL)) or any(
         d in URL for d in ("youtube.com", "youtu.be", "download_my_video"))
 
-    # ── 1a) YOUTUBE: token de download extras AUTOMAT din pagina Studio (3 reincercari) ──
-    if yt and os.path.exists("cookies.txt") and "SAPISID" in open("cookies.txt").read():
+    # ── 1a-prime) YOUTUBE: yt-dlp intai (calea moderna; cookies ajuta daca exista) ──
+    if yt:
+        _cmd = [sys.executable, "-m", "yt_dlp", "--no-playlist",
+                "-f", "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]/b",
+                "--merge-output-format", "mp4", "-o", "live_curent.mp4"]
+        if os.path.exists("cookies.txt"):
+            _cmd += ["--cookies", "cookies.txt"]
+        _cmd += [URL]
+        r = subprocess.run(_cmd)
+        if sursa_gata():
+            print("YOUTUBE OK (yt-dlp):", os.path.getsize("live_curent.mp4") // (1024 * 1024), "MB", flush=True)
+    # ── 1a) YOUTUBE fallback: token de download extras AUTOMAT din pagina Studio (3 reincercari) ──
+    if yt and not sursa_gata() and os.path.exists("cookies.txt") and "SAPISID" in open("cookies.txt").read():
         m = (re.search(r'[?&]v=([A-Za-z0-9_-]{11})', URL) or
              re.search(r'/(?:live|shorts)/([A-Za-z0-9_-]{11})', URL))
         vid = m.group(1) if m else (URL if re.fullmatch(r'[A-Za-z0-9_-]{11}', URL)

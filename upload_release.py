@@ -1,7 +1,24 @@
 # LIVRARE PE RAND: fiecare episod/short urca pe release IMEDIAT ce e gata,
 # ca sa poti descarca EP01 in timp ce se face EP02 (fara asteptare la grămada).
 import os
+import re
 import subprocess
+import unicodedata
+
+
+def slug_nume(text, nr=None, ext=".mp4"):
+    """Nume de fisier PUBLIC din titlu (fara 'Ep. N' — userul nu vrea EP in nume).
+    'CE S-A ÎNTÂMPLAT PE POKECITY?! Ep. 1' + nr=1 -> 'CE_S-A_INTAMPLAT_PE_POKECITY_1.mp4'"""
+    t = re.sub(r"\bEp\.?\s*\d+\b", "", str(text))          # scoatem Ep. N din titlu
+    t = unicodedata.normalize("NFKD", t).encode("ascii", "ignore").decode()
+    t = re.sub(r"[^A-Za-z0-9]+", "_", t).strip("_").upper()
+    if len(t) > 44:
+        t = t[:44].strip("_")
+    if not t:
+        t = "EPISOD"
+    if nr:
+        t = f"{t}_{nr}"
+    return t + ext
 
 
 def incarca_pe_release(fisier, nume=None):

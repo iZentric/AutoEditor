@@ -54,7 +54,9 @@ def principal():
         body = {"snippet": {"title": titlu[:100], "description": desc[:4900],
                             "categoryId": "20", "defaultLanguage": "ro",
                             "defaultAudioLanguage": "ro"},
-                "status": {"privacyStatus": "public", "selfDeclaredMadeForKids": False}}
+                "status": {"privacyStatus": os.environ.get("YT_PRIVACY", "private"),
+                           "selfDeclaredMadeForKids": False,
+                           "notifySubscribers": False}}
         media = MediaFileUpload(f, chunksize=8 * 1024 * 1024, resumable=True)
         req = yt.videos().insert(part="snippet,status", body=body, media_body=media)
         rasp = None
@@ -68,8 +70,33 @@ def principal():
                          f"?videoId={vid}", headers={"Authorization": f"Bearer {creds.token}"},
                          data=open(mini, "rb").read(), timeout=120)
         publicate.append((f, titlu, vid))
-        print(f"  PUBLICAT: {titlu} -> https://youtu.be/{vid}", flush=True)
+        print(f"  URCAT (privacy={os.environ.get('YT_PRIVACY', 'private')}): {titlu} -> https://youtu.be/{vid}", flush=True)
     if publicate:
+        # PLAYLISTUL SPECIAL "FĂCUTE DE AI": toate piesele facute de AI intra aici automat
+        try:
+            pid = ""
+            if os.path.exists("cunoastere/ai_playlist_id.txt"):
+                pid = open("cunoastere/ai_playlist_id.txt", encoding="utf-8").read().strip()
+            if not pid:
+                gasit = yt.playlists().list(part="snippet", mine=True, maxResults=50).execute()
+                for p in gasit.get("items", []):
+                    if p["snippet"]["title"].strip().upper() == "FĂCUTE DE AI":
+                        pid = p["id"]
+                        break
+                if not pid:
+                    nou = yt.playlists().insert(part="snippet,status", body={
+                        "snippet": {"title": "FĂCUTE DE AI",
+                                    "description": "Episoade + shorts generate automat din live-uri (AutoEditor)."},
+                        "status": {"privacyStatus": "public"}}).execute()
+                    pid = nou["id"]
+                os.makedirs("cunoastere", exist_ok=True)
+                open("cunoastere/ai_playlist_id.txt", "w").write(pid)
+            for _, _, vid in publicate:
+                yt.playlistItems().insert(part="snippet", body={
+                    "snippet": {"playlistId": pid, "resourceId": {"kind": "youtube#video", "videoId": vid}}}).execute()
+            print(f"  ADAUGATE IN PLAYLIST 'FĂCUTE DE AI': https://www.youtube.com/playlist?list={pid}", flush=True)
+        except Exception as ex:
+            print(f"  (playlist skip: {str(ex)[:80]})", flush=True)
         linii = "\n".join(f"- [{t}](https://youtu.be/{v})" for _, t, v in publicate)
         open("episodes/PUBLICATE_ON_YT.md", "w", encoding="utf-8").write(
             "# Publicate automat pe YouTube\n\n" + linii + "\n")
