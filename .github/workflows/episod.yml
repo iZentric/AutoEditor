@@ -60,6 +60,7 @@ jobs:
             SH_N=$(echo "$BODY" | grep -oiE 'short(ur i|uri|s)?[: =]+[0-9]+' | grep -oE '[0-9]+' | head -1)
             if [ -n "$EP_N" ]; then echo "MAX_EP=$EP_N" >> "$GITHUB_ENV"; echo "Creatorul cere $EP_N episoade"; fi
             if [ -n "$SH_N" ]; then echo "MAX_SH=$SH_N" >> "$GITHUB_ENV"; echo "Creatorul cere $SH_N shorturi"; fi
+            echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
             URL="https://api.github.com/repos/${{ github.repository }}/releases/assets/$ASSET_ID"
             echo "ASSET_TOKEN=$GH_TOKEN" >> "$GITHUB_ENV"
             echo "Sursa: fisierul din release $TAG (asset $ASSET_ID)"
@@ -104,6 +105,8 @@ jobs:
           GEMINI_MODEL: gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
           ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
+          RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ env.RELEASE_TAG }}
           MAX_SH: ${{ env.MAX_SH || inputs.max_shorts || 'auto' }}
         run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 'auto' }}"
       - name: Publica in Releases (gata de download)
@@ -113,9 +116,17 @@ jobs:
           shopt -s nullglob
           files=(episodes/EP*.mp4)
           if [ ${#files[@]} -eq 0 ]; then echo "nu sunt episoade de publicat"; exit 0; fi
-          TAG="ep-$(date -u +%Y%m%d-%H%M)"
-          gh release create "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura.jpg episodes/EP*_upload.txt episodes/*.srt episodes/SHORT*.mp4 episodes/SHORT*_upload.txt \
-            --title "Episoade $TAG" --notes "Episoade 2K + SHORTS verticale gata de upload pe YouTube. Vezi EP*_upload.txt / SHORT*_upload.txt pentru titlu/descriere/tag-uri."
+          if [ -n "$RELEASE_TAG" ]; then
+            # LIVRARE PE RAND: episoadele mari au urcat deja pe release; aici se urca RESTUL (miniaturi, upload.txt, srt, shorts ramase)
+            TAG="$RELEASE_TAG"
+            gh release upload "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura*.jpg episodes/EP*_upload.txt episodes/*.srt episodes/SHORT*.mp4 episodes/SHORT*_upload.txt --clobber
+            echo "restul fisierelor urcate pe $TAG (episoadele au urcat deja, pe rand)"
+          else
+            TAG="ep-$(date -u +%Y%m%d-%H%M)"
+            gh release create "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura.jpg episodes/EP*_upload.txt episodes/*.srt episodes/SHORT*.mp4 episodes/SHORT*_upload.txt \
+              --title "Episoade $TAG" --notes "Episoade 2K + SHORTS verticale gata de upload pe YouTube. Vezi EP*_upload.txt / SHORT*_upload.txt pentru titlu/descriere/tag-uri."
+          fi
+          echo "TAG_PUBLISH=$TAG" >> "$GITHUB_ENV"
       - name: MEMORIE — titlurile proprii intra in creier (nu le mai repeta niciodata)
         run: |
           mkdir -p cunoastere
@@ -125,14 +136,14 @@ jobs:
           done
           sort -u -o cunoastere/titluri_folosite.txt cunoastere/titluri_folosite.txt
           git config user.email "agent@autoeditor.local" && git config user.name "AutoEditor Agent"
-          git add cunoastere/ && git commit -m "memorie: titluri publicate la $TAG" || echo "(nimic nou de memorat)"
+          git add cunoastere/ && git commit -m "memorie: titluri publicate la ${TAG_PUBLISH:-auto}" || echo "(nimic nou de memorat)"
           git push || echo "(push memorie skip)"
       - name: NOTIFICARE — Issue cu link-urile gata (canalul de comunicare al repo-ului)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           NUMAR=$(ls episodes/EP*.mp4 2>/dev/null | wc -l); SHORTS=$(ls episodes/SHORT*.mp4 2>/dev/null | wc -l)
-          LINK="https://github.com/${{ github.repository }}/releases/tag/$TAG"
+          LINK="https://github.com/${{ github.repository }}/releases/tag/$TAG_PUBLISH"
           if gh issue list --search "EPISOADE GATA in:title" --state open --json number -q '.[0].number' 2>/dev/null | grep -q .; then
             N=$(gh issue list --search "EPISOADE GATA in:title" --state open --json number -q '.[0].number')
             gh issue comment "$N" --body "**GATA ✅** $NUMAR episoade + $SHORTS shorts -> [Release $TAG]($LINK)"

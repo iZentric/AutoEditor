@@ -73,5 +73,10 @@ for i, v in enumerate(sorted(alese), 1):
             f"sunt in aceeasi pagina de Releases.\n\n#shorts #gaming #romania")
     open(f"episodes/SHORT{i:02d}_upload.txt", "w", encoding="utf-8").write(
         f"TITLU: {titlu[:100]}\n\nDESCRIERE:\n{desc}\n")
+    try:                      # LIVRARE PE RAND: shortul merge pe release imediat
+        from upload_release import incarca_pe_release
+        incarca_pe_release(out)
+    except Exception:
+        pass
     print(f"SHORT{i:02d} OK (50s vertical) + upload.txt", flush=True)
 print(f"SHORTS GATA: {len(alese)} bucati", flush=True)

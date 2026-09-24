@@ -1431,6 +1431,11 @@ def main():
                 e["_lufs"] = lu
             facute.append((k, e, out))
             print(f"   OK -> episodes/{out}")
+            try:                      # LIVRARE PE RAND: episodul merge pe release imediat
+                from upload_release import incarca_pe_release
+                incarca_pe_release(os.path.join(folder, out))
+            except Exception:
+                pass
 
     print("4/4 Cadre pt miniaturi (reale, din clip)...")
     for k, e, out in facute:
