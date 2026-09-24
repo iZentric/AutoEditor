@@ -1,62 +1,56 @@
-# 🔗 CONECTARE GITHUB — 3 pași (5 minute) și apoi eu sunt „conectat"
+# Configurare unica, fara chei in chat
 
-## Cum funcționează legătura (onest și simplu)
+## 1. Conectarea GitHub in Arena
 
-```
-EU (aici, în workspace):   repar/actualizez codul → git push → GitHub
-TU (pe PC-ul tău):         git pull → ai modificările instant
-TU (având o problemă):     îmi scrii → eu fix + push în aceeași minută
-```
-Nu e un „robot care stă în GitHub 24/7" — e mai bun: **token-ul salvat în .env face
-orice sesiune cu mine capabilă să trimită și să tragă modificări în secunde.**
+Foloseste integrarea GitHub din Arena pentru `iZentric/AutoEditor`.
+Aceasta trebuie sa permita modificarea codului si a **Workflows**.
+Daca GitHub refuza push-ul cu `without workflows permission`, actualizeaza
+permisiunile instalarii/conexiunii GitHub din interfata Arena/GitHub.
 
----
+**Nu crea si nu trimite un token GitHub in chat.** Agentul foloseste autentificarea
+configurata de platforma. Nu pune credentiale in URL-ul remote-ului Git.
 
-## PASUL 1 — Creezi repo-ul (2 minute)
-1. Intri pe **github.com** → login → colț dreapta-sus **+** → **New repository**
-2. Nume: `autoeditor-pokecity`
-3. Bifezi **Private** (e unealta ta de business!) → **Create repository**
-4. NU bifa nimic din „Add README" (deja avem)
+## 2. Setarile editorului
 
-## PASUL 2 — Cheia pentru mine (2 minute)
-1. **github.com → Settings → Developer settings → Personal access tokens → Fine-grained**
-2. **Generate new token**:
-   - Repository access: **Only select repositories** → alegi `autoeditor-pokecity`
-   - Permissions → Repository → **Contents: Read and write**
-   - Expirare: 90 zile (reînnoim ușor)
-3. **Generate** → copiezi cheia (începe cu `github_pat_...`)
+In repository: **Settings → Secrets and variables → Actions**.
 
-## PASUL 3 — Îmi dai cheia (1 minut)
-**Varianta curată (recomand):** adaugi în fișierul `autoeditor/.env` o linie nouă:
-```
-GITHUB_TOKEN=cheia_ta_aici
-GITHUB_USER=numele_tau_de_pe_github
-GITHUB_REPO=autoeditor-pokecity
-```
-**Sau** simplu îmi scrii cheia în chat și eu o pun în .env (nu ajunge în repo —
-.gitignore o exclude mereu).
+| Sectiune | Nume | Continut |
+|---|---|---|
+| Secrets | `GEMINI_API_KEY` | Cheia contului tau pentru verificarea video |
+| Variables, optional | `GEMINI_MODEL` | Modelele disponibile contului, separate prin virgule |
 
-Apoi îmi zici **„gata"** → eu fac push-ul primului commit (v2.9) → repo-ul e LIVE.
+Verificarea initiala confirma prezenta setarilor, nu validitatea cheii sau
+calitatea rezultatului. Acestea se confirma prin apelul API si proba reala.
 
----
+## 3. OPTIONAL: incarcare privata pe YouTube
 
-## Bucla de lucru de atunci încolo
+Mai intai citeste [SECURITY.md](SECURITY.md) daca ai publicat vreodata credentialele
+in chat. **Nu refolosi valorile expuse.** Rotirea secretului clientului singur nu
+inlocuieste revocarea tokenului de autorizare.
 
-| Situație | Ce se întâmplă |
-|---|---|
-| Găsești un bug folosind tool-ul | Îmi scrii aici → eu repar → `git push` → tu faci `git pull` pe PC |
-| Vrei o funcție nouă | O ceri aici → eu o construiesc + testez în sandbox → push |
-| Vrei să contribuie și altcineva | Îi dai acces la repo (collaborator) |
-| Îmi schimbi calculatorul | `git clone` + `pip install` → totul e acolo |
+Pentru a genera si salva tokenul nou fara copiere manuala, foloseste
+[kitul local de autorizare](docs/AUTORIZARE_YOUTUBE.md):
+`CONFIGUREAZA_YOUTUBE.bat` pe Windows sau `python oauth_setup.py auth --enable-upload`
+pe PC-ul tau, cu client_secret.json nou. Scriptul confirma canalul si trimite
+valorile direct in Secrets; nu ruleaza in sandbox.
 
-**Pe PC-ul tău, ca să-l folosești direct din repo:**
-```
-git clone https://github.com/NUMELE_TAU/autoeditor-pokecity.git
-cd autoeditor-pokecity
-pip install faster-whisper pillow imageio-ffmpeg
-python autoeditor.py LIVE.mp4 --calitate 2k --subtitrari --ai
-```
+Alternativ, adauga valori noi in **Secrets**, fiecare separat:
+- `YT_CLIENT_ID`
+- `YT_CLIENT_SECRET`
+- `YT_REFRESH_TOKEN`
 
-## Ce NU urcă în repo (protejate de .gitignore)
-- `.env` (cheile!) · `client_secret.json` · video-uri (episodes/, prindere/) · cache
-- Repo-ul ține: **codul + README-urile + confeti.webm + exemplele**
+Dupa revocare/reautorizare si salvarea valorilor noi, activeaza o singura data
+variabila din sectiunea **Variables**: `YT_UPLOAD_ENABLED` = `true`.
+Implicit este `false`: editorul livreaza prin Releases, fara sa acceseze canalul.
+
+Upload-urile automate raman **private**. Publicarea pe YouTube o decizi tu.
+Nu este nevoie sa dai agentului valorile secretelor. Agentul nu poate deduce
+ca sunt configurate doar pentru ca numele lor apar in cod.
+
+## 4. Folosire obisnuita
+
+Live nou → release cu tag `vod-N` si inregistrarea originala atasata → Actions
+proceseaza → primesti titlul si linkul de download. Pentru proba initiala exista
+sursa `vod-1` si sunetele tale, deci nu trebuie sa le retrimiti.
+
+Nicio randare noua de VOD nu se porneste de agent fara acordul tau.

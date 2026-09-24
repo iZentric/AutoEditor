@@ -4,6 +4,8 @@ import os
 import re
 import subprocess
 import unicodedata
+import tempfile
+import shutil
 
 
 def slug_nume(text, nr=None, ext=".mp4"):
@@ -37,8 +39,17 @@ def incarca_pe_release(fisier, nume=None):
     env = dict(os.environ, GH_TOKEN=token, GH_REPO=repo)
     try:
         print(f"   LIVRARE PE RAND: {nume} ({os.path.getsize(fisier) // 1048576} MB) -> release {tag} ...", flush=True)
-        subprocess.run(["gh", "release", "upload", tag, fisier, "--clobber"],
-                       check=True, env=env, capture_output=True, text=True)
+        if os.path.basename(nume) != nume:
+            raise ValueError("Release filename must be a basename")
+        # gh uses the local basename as the asset name. A label is not a rename.
+        with tempfile.TemporaryDirectory(prefix="autoeditor-delivery-") as directory:
+            upload_path = os.path.join(directory, nume)
+            try:
+                os.link(os.path.abspath(fisier), upload_path)
+            except OSError:
+                shutil.copyfile(fisier, upload_path)
+            subprocess.run(["gh", "release", "upload", tag, upload_path, "--clobber"],
+                           check=True, env=env, capture_output=True, text=True)
         print(f"   >>> {nume} e GATA DE DESCARCAT ACUM in Releases (restul inca se lucreaza)", flush=True)
         return True
     except subprocess.CalledProcessError as ex:

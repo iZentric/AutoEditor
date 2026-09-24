@@ -1,5 +1,9 @@
 # PIPELINE GITHUB ACTIONS: sursa -> episoade 2K -> Release
-import glob, os, re, sys, subprocess, time
+import glob, os, re, sys, subprocess, time, shutil
+import imageio_ffmpeg
+
+FFMPEG = shutil.which("ffmpeg") or imageio_ffmpeg.get_ffmpeg_exe()
+YOUTUBE_FORMAT = "bv*[height<=1440]+ba/b[height<=1440]"
 
 URL = (sys.argv[1] if len(sys.argv) > 1 else "").strip()
 MAXN = (sys.argv[2] if len(sys.argv) > 2 else "auto").strip() or "auto"
@@ -54,7 +58,7 @@ else:
     # ── 1a-prime) YOUTUBE: yt-dlp intai (calea moderna; cookies ajuta daca exista) ──
     if yt:
         _cmd = [sys.executable, "-m", "yt_dlp", "--no-playlist",
-                "-f", "bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080]/b",
+                "--ffmpeg-location", FFMPEG, "-f", YOUTUBE_FORMAT,
                 "--merge-output-format", "mp4", "-o", "live_curent.mp4"]
         if os.path.exists("cookies.txt"):
             _cmd += ["--cookies", "cookies.txt"]
@@ -96,7 +100,7 @@ else:
     # ── 1b) GOOGLE DRIVE ──
     elif "drive.google.com" in URL or "docs.google.com" in URL:
         print(">> sursa: Google Drive", flush=True)
-        sh([sys.executable, "-m", "pip", "install", "-q", "gdown"])
+        # gdown is installed with the other runtime dependencies.
         if "/d/" in URL:
             fid = URL.split("/d/")[1].split("/")[0]
         elif "id=" in URL:
@@ -140,7 +144,7 @@ else:
         for s in strategii:
             cmd = [sys.executable, "-m", "yt_dlp", "--merge-output-format", "mp4",
                    "--concurrent-fragments", "8", "-o", "live_curent.%(ext)s", "--no-playlist"] + s + \
-                  ["-f", "299+140/312+140/best[height<=1080][vcodec^=avc1]+bestaudio", URL]
+                  ["--ffmpeg-location", FFMPEG, "-f", YOUTUBE_FORMAT, URL]
             print(">> strategie descarcare:", " ".join(s) or "default", flush=True)
             if subprocess.run(cmd).returncode == 0 and sursa_gata():
                 gata = True
@@ -150,15 +154,16 @@ else:
             sys.exit("!! descarcarea YouTube a picat -> pune cookies proaspete in Secret COOKIES_YT (sau link pixeldrain/Drive)")
         v, a = "live_curent.f299.mp4", "live_curent.f140.m4a"
         if os.path.exists(v) and os.path.exists(a) and not os.path.exists("live_curent.mp4"):
-            subprocess.run(["ffmpeg", "-y", "-i", v, "-i", a, "-c", "copy", "-shortest",
+            subprocess.run([FFMPEG, "-y", "-i", v, "-i", a, "-c", "copy", "-shortest",
                             "live_curent.mp4"], check=True)
 
 if not sursa_gata():
     sys.exit("!! nicio sursa disponibila")
 
 # ── 2) RANDARE (runner 7GB) + poarta STRICTA: doar ce chiar merita ──
-env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.6"))
-cmd = [sys.executable, "autoeditor.py", "live_curent.mp4", "--calitate", "1080p", "--max", MAXN]
+env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.6"),
+           AE_PERFORMANCE_REPORT="episodes/PERFORMANTA_editor.json")
+cmd = [sys.executable, "autoeditor.py", "live_curent.mp4", "--calitate", "2k", "--max", MAXN]
 cmd += ["--ai"]   # CREIERUL MEREU PORNIT: fara el momentele se aleg doar dupa zgomot (greseala r17/r18)
 if os.environ.get("SUBTITRARI", "0") == "1":   # whisper pe live 2h = ~10 min; default OFF pt viteza
     cmd += ["--subtitrari"]
@@ -166,17 +171,18 @@ sh(cmd, env=env)
 
 # ── 2b) SHORTS (verticale 9:16, <60s, din varfurile maxime) ──
 if os.path.exists("episodes/plan.json"):
-    sh([sys.executable, "shorts.py"])
+    sh([sys.executable, "shorts.py"], env=dict(os.environ,
+       AE_PERFORMANCE_REPORT="episodes/PERFORMANTA_shorts.json"))
 
 # ── 2c) UPLOAD AUTOMAT pe YouTube (doar daca exista Secretele OAuth; altfel skip) ──
 if glob.glob("episodes/EP*.mp4"):
     try:              # blocul NU are voie sa omoare livrarea: episoadele sunt deja pe release
-        sh([sys.executable, "-m", "pip", "install", "-q", "google-api-python-client", "requests"])
+        # Dependencies are installed once by the workflow, not once per stage.
         r = subprocess.run([sys.executable, "auto_upload_yt.py"])
         print("(upload YT: cod", r.returncode, "- 0=publicat, skip=in asteptare)", flush=True)
     except SystemExit as ex:
         print("(upload YT sarit — pip a esuat, nu strica livrarea:", ex, ")", flush=True)
 
 # ── 3) URCARE 2K (2560x1440 lanczos+unsharp) ──
-sh([sys.executable, "urca_2k.py"])
+# Episodes are already rendered at 1440p before per-piece delivery and YouTube upload.
 print("PIPELINE GITHUB GATA", flush=True)

@@ -1,0 +1,4 @@
+*.bat text eol=crlf
+
+# Unified patches contain significant single-space context lines.
+*.patch -whitespace

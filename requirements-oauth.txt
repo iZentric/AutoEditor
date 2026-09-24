@@ -1,0 +1,2 @@
+# Local authorization helper only; not needed by the video-rendering workflow.
+google-auth-oauthlib>=1.2,<2

@@ -883,3 +883,194 @@
   5) Secrete repo: COOKIES_YT (16:36 azi), GEMINI_API_KEY. Lipsesc inca YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN (pt upload din CI).
 - Regula de aur a userului: raspunsuri SCURTE in romana + tabele, autonomy maxima, verify-before-done.
 
+
+## 25.09.2026 — Preluare si calitate editoriala stricta (Arena)
+- Cerinta: clipuri de calitate, sunetele creatorului alese inteligent dupa evenimente,
+  nu efecte random si nu selectie doar dupa zgomot.
+- Preluate AGENTS.md si completarea MEMORY.md de pe origin/main; sesiunea lucreaza
+  exclusiv pe `arena/01a0d4bb-autoeditor`, in `/home/user/AutoEditor`.
+- Stare verificata la preluare: run 36043128387 esuat la publicarea Releases;
+  vod-1 are livrare partiala. Fisierele OAuth din vechiul sandbox nu exista aici.
+- `editorial.py` NOU: validare stricta booleeni/scor >=7/10/poveste completa/titlu/
+  hook in clip; intervale 150–170s, fara suprapuneri, respecta --max. Refuz si la
+  raspuns malformat/API indisponibil. Niciun episod fortat daca toate sunt slabe.
+- `idei_ai.py`: transcript INTEGRAL paginat cu suprapunere (nu primii 9000 caractere),
+  maximum 12 idei pentru verificare video. Se verifica intervalul EXACT, fara +/-5s
+  care stricau timestamp-urile. Hook-ul validat devine varful real al planului.
+- `--ai` forteaza povesti continue, inclusiv cand nu exista explozii audio. Nicio
+  taiere dupa energie DUPA verificare. Lipsa cheii/transcriptului/API opreste fluxul.
+- Sunete: catalog al fisierelor reale, ID-uri, eveniment+motiv+incredere >=0.85;
+  0–4/episod, >=12s intre ele, max un hit, fara repetare sau completare random.
+  Sloturile fixe si meme-urile aleatorii dezactivate in AI. Efecte max2s, -24 LUFS
+  inainte de mix, master -14 LUFS verificat incluzand true peak. Originale nemodificate.
+  LIMITA: catalogul foloseste nume/categorie, nu asculta acustic fiecare asset.
+- POP: AI alege ID-uri de replici reale, max6, >=18s; text exact, fara markup ASS.
+- SHORTS: verificare proprie a crop-ului vertical de 16s, titlu propriu, sunete validate.
+  Nu se mosteneste titlul episodului si nu exista short fortat.
+- 2K este randat INAINTE de upload; eliminata re-encodarea 2K tardiva din pipeline.
+- Livrare reparata: nume_public.py muta ACUM in episodes/ (vechiul cod muta in root,
+  demonstrabil prin cod/test). Publish trimite doar fisiere livrabile, nu scene_tmp/.
+  incarca_pe_release respecta numele public cerut, fara sa mute originalul.
+- Decizii in DECIZII_AI.json / DECIZII_SHORTS.json + raport; artifact la esec in CI.
+- Teste standard-library + workflow separat de teste, fara VOD/API real. Nu s-a
+  descarcat/randat niciun video real si nu s-a pornit workflow-ul de productie.
+- IMPORTANT: aceste schimbari NU sunt inca validate editorial pe un live real.
+  Urmeaza rulare Actions autorizata + vizionare/ascultare a rezultatului. Nu promite
+  judecata identica unui om sau performanta YouTube garantata.
+- Verificare locala: 24 teste trecute (API/FFmpeg simulate), compilare Python verde,
+  YAML si sintaxa bash din toate workflow-urile validate. Nicio proba cu VOD real.
+- Commit local 99c1f82. Push pe ramura sesiunii REFUZAT de GitHub: conexiunea GitHub App
+  nu are permisiunea `workflows` pentru .github/workflows/episod.yml. Modificarile sunt
+  salvate local, NU activate pe GitHub. Este necesara actualizarea/reconectarea integrarii
+  GitHub din Arena cu permisiunea corespunzatoare; nu solicita tokenuri in chat.
+
+## 25.09.2026 — Optimizare pentru viteza fara scurtaturi editoriale
+- Recitite AGENTS.md, MEMORY.md si ISTORIC_COMPLET.md (adus din origin/main).
+  Codul ramane pe ramura arena/01a0d4bb-autoeditor. Fix-ul upstream pentru
+  cadre_b64=None a fost integrat; stergerea scene_tmp din upstream este inlocuita
+  local de selectarea exclusiva a fisierelor livrabile, fara upload de directoare.
+- Run verificat la inceput: 36060259649, main f47ef86, in_progress la randare.
+  Este CODUL VECHI. Nu l-am pornit, anulat sau inlocuit. vod-1 contine sursa 1.88GB.
+- Verificate 10 sunete existente; catalog.json cu semantica + evenimente permise:
+  pumm=cadere/impact, faaa=sperietura, bamboo/bonk=lovitura comica etc. Alegerea
+  trebuie sa includa tipul evenimentului; oase rupte la victorie se respinge.
+  Nu s-a facut ascultare acustica a fisierelor si nu s-au descarcat sunete noi.
+- performance.py: cache JSON atomic dupa intrari exacte, transcriere refolosita
+  dupa SHA256 sursa/model/parametri, idei + verificari aprobate refolosite max24h,
+  invalidare la prompt/model/catalog/crop diferit, erori sau date corupte = reanaliza.
+- REGRESIE PRINSA de test: memoizarea SHA numai dupa size/mtime/ctime poate rata
+  un overwrite de aceeasi marime pe acest filesystem. Inlocuit cu SHA integral,
+  calculat o data pentru VOD-ul imuabil al procesului si transmis explicit etapelor.
+- Eliminata scanarea RMS separata a live-ului in modul AI (nu mai influenta selectia).
+  Durata se citeste din metadate. Transcrierea si verificarea video NU sunt eliminate.
+- Actions pregatit: cache pachete pip/model Whisper/analize, salvare si dupa esec,
+  coada de randare in loc de anulare automata, preflight inainte de download VOD,
+  optional OAuth YT transmis scriptului. Secret listing a dat 403; NU stim daca
+  secretele OAuth sunt configurate acum. Nu solicita valori in chat.
+- Sursa YouTube pana la1440p (era limitata1080p); ffmpeg explicit pt yt-dlp; CRF20
+  medium si la sursa nativa2K, fara reducere automata la30fps in AI. Fara encode2K
+  suplimentar dupa livrare. Rapoarte PERFORMANTA pe etape + hit/miss de cache.
+- Upload YouTube: reparate snippet lipsa in channels.list, notifySubscribers mutat
+  in parametrul insert, thumbnail prin SDK POST, descriere pastrata cu paragrafe.
+  Formele insert/thumbnail verificate in documentatia oficiala developers.google.com.
+- Verificat: 45 teste unitare/integrari simulate trec; NU benchmark de viteza/calitate
+  pe VOD real. Cele10 sunete si sursa exista, nu trebuie retrimise. Blocajul anterior
+  de permisiune Workflows necesita reverificare la push; nu pretinde deploy in main.
+- Verificare finala: 45 teste trecute, compilare Python si YAML/bash verde.
+  Run 36060259649 este inca in_progress la randare, pe main (cod vechi).
+- Push pentru commit 37d3f35 REFUZAT din nou: GitHub App nu are `workflows` permission.
+  Totul este salvat local pe arena/01a0d4bb-autoeditor, NU activat in productie.
+  Actiunea obligatorie a creatorului: actualizarea/reconectarea integrarii GitHub
+  din Arena cu drept de modificare Workflows. Nu sunt necesare sunete/live retrimise.
+- Aflare sursa: parametri workflow trecuti prin env, nu interpolati in shell;
+  metadatele optionale (numar episoade/shorts/link YT) nu mai opresc scriptul la lipsa.
+
+## 25.09.2026 — Curatenie prudenta si incident de credentiale
+- Userul a cerut curatenie si a publicat credentiale OAuth in chat. Valorile NU au
+  fost copiate in fisiere/comenzi, NU au fost folosite pentru apeluri Google.
+  Indicat: revocarea autorizarii/tokenului, rotirea secretului, reautorizare si
+  salvarea valorilor NOI numai in GitHub Secrets. Nu reproduce valorile in memorie.
+- Upload YouTube dezactivat implicit; se activeaza explicit prin variabila
+  YT_UPLOAD_ENABLED=true dupa configurarea sigura. Upload ramane strict PRIVATE.
+  Fara activare, editarea si livrarea prin Releases continua independent.
+- Eliminat din radacina: doua *_upload.txt de test cu descrierea "x" si un ASS vechi.
+  Sunetele, momentele creatorului, istoricul, sursa din Releases si scripturile de
+  compatibilitate sunt pastrate. Nu s-au sters materiale din GitHub Releases/YouTube.
+- Eliminat vechiul cod destructiv de deduplicare/despicare in-place a sunetelor;
+  functia veche ramane no-op pentru compatibilitate, fara stergeri/recodari originale.
+- README scurt, docs/OPERARE.md pentru detalii actuale, docs/ISTORIC_README.md pentru
+  documentatia veche; AGENTS.md si GH_SETUP.md refacute fara instructiuni nesigure
+  de a cere tokenuri in chat sau a le pune in remote URLs. Istoricul nu se pierde.
+- SECURITY.md: pasi de revocare/rotire, protectia materialelor, limitele scanarii.
+  .gitignore extins pentru .env.*, client_secret*.json, cookies, exporturi de token
+  si rezultate generate in radacina. Exemplul .env.example ramane versionabil.
+- tools/check_secrets.py + verificare in CI: raporteaza doar cale/tip, niciodata
+  valoarea gasita. Scanner limitat la fisiere candidate, nu audit complet/chat/Git history.
+- 52 teste trecute (inclusiv gate upload, ignorarea exporturilor, scanner si
+  garantarea ca organizatorul vechi nu mai sterge/recodifica originale).
+- gh secret list inca da403: prezenta secretelor NU este confirmata. Ultimul run
+  observat: 36060259649, main, in_progress. Niciun VOD nou pornit in aceasta sesiune.
+- Verificare finala: 52 teste trecute; Python/YAML/bash valide; cele10 fisiere audio
+  comparate SHA256 cu baza c11f937 sunt identice. Guardul de credentiale nu a gasit
+  formatele acoperite in230 de cai candidate (nu este o garantie de audit complet).
+- Commit local e82486a; push REFUZAT din nou: GitHub App fara permisiunea Workflows.
+  Credentialele YouTube nu acorda permisiuni GitHub. Modificarile raman salvate aici,
+  NU sunt activate pe main. Nu s-a pornit un VOD sau upload YouTube nou.
+
+## 25.09.2026 — Kit local pentru autorizare YouTube
+- Userul a raportat revocarea tokenului vechi si stergerea lui din Secrets. Raportul
+  este al userului; nu s-au folosit credentialele expuse pentru verificari independente.
+- oauth_setup.py NU exista in repo; creat acum, impreuna cu CONFIGUREAZA_YOUTUBE.bat,
+  requirements-oauth.txt si docs/AUTORIZARE_YOUTUBE.md. Ruleaza pe PC-ul creatorului,
+  NU in sandbox/Actions. Nu folosi linkul demonstrativ oauth.example.com.
+- Flux oficial InstalledAppFlow, PKCE, redirect loopback cu port aleator, timeout5min.
+  Clientul trebuie sa fie Desktop; endpoint-uri Google validate inainte de folosire.
+  Verifica numele canalului prin API si cere confirmare locala DA.
+- Tokenul ramane in memorie si este trimis direct in GitHub Secrets prin stdin la gh,
+  niciodata in argv/chat/.env. Salveaza toate3 valorile potrivite intre ele; upload-ul
+  dezactivat inainte de actualizare, activat numai dupa toate salvarile reusite si
+  optiunea --enable-upload. Erorile furnizorilor sunt afisate doar ca tip, fara date.
+- Documentatia oficiala google-auth-oauthlib pentru run_local_server verificata.
+  62 teste trecute, inclusiv10 pentru helperul OAuth (simulate, fara login real).
+- Livrabil separat: kit_autorizare_youtube.zip, fara client JSON/credentiale/media.
+  Nu modifica permisiunea Workflows a conexiunii Arena si nu porneste randari/uploaduri.
+- Commit412f528 salvat local. Push verificat si REFUZAT din nou pentru lipsa permisiunii
+  Workflows a integrarii GitHub. Kitul este livrat ca fisier descarcabil separat,
+  astfel incat configurarea locala OAuth nu depinde de publicarea acestui commit.
+
+## 25.09.2026 — Testare ceruta explicit de creator
+- Rerulate62 teste: PASS; compilare Python, guard credentiale si sintaxa YAML/bash
+  verificate. Cele10 sunete originale sunt identice SHA256 cu baza c11f937.
+- Ultimul run36060259649 este ACUM success pe main/f47ef86 (codul vechi).
+  vod-1 contine sursa, EP01.mp4, SHORT01.mp4 si fisiere auxiliare; nu s-au
+  descarcat/randat VOD-uri in sandbox. Continutul RAPORT.md/plan.json de pe Release
+  nu a putut fi preluat in aceasta verificare; nu se certifica vizual calitatea.
+- Lista Secrets si lista Variables prin gh api dau403, deci nu sunt verificate
+  credentialele din Actions. Nu exista credentiale configurate local; cele trimise
+  in chat nu au fost copiate sau folosite. Rularea reala cu noul cod necesita deploy.
+- GitHub CLI local nu are subcomanda variable; verificarea setarilor a fost facuta
+  prin gh api (rezultat403), nu interpretata ca dovada ca variabilele lipsesc.
+
+## 25.09.2026 — DEBLOCARE PARTIALA: codul este pe GitHub
+- Schimbata abordarea dupa refuzuri: separat modificarile de cod de workflow-uri.
+  Primul push doar-cod pe baza veche c11f937 a fost si el refuzat, deoarece acea
+  baza avea o versiune diferita a episod.yml fata de main curent.
+- Ramura sesiunii realiniata prin rebase explicit --onto origin/main c11f937
+  (checkout-ul are istoric trunchiat; rebase simplu incerca sa reaplice commitul-baza).
+  Conflictele exclusiv de documentatie au fost rezolvate pastrand memoria actuala.
+- PUSH REUSIT pe arena/01a0d4bb-autoeditor, commit b250270: cod, catalog sunete,
+  kit autorizare, teste, documentatie. NU este integrare in main si NU e proba VOD.
+- Cele doua workflow-uri noi raman necomise local, pastrate integral. Patch aplicabil
+  in docs/WORKFLOWS_PENDING.patch, verificat cu git apply --check --reverse pe copia
+  locala modificata. Necesita aplicare/aprobare de un utilizator cu drept Workflows.
+- 62 teste locale trec dupa realiniere. Nu s-a folosit niciun token din chat si
+  nu s-a pornit o randare noua. Se pregateste PR draft, nu o activare partiala in productie.
+- PR draft creat: https://github.com/iZentric/AutoEditor/pull/3 . Codul este
+  publicat, dar automatizarea noua necesita inca aprobarea modificarilor de workflow.
+
+## 25.09.2026 — Activare fara alte chei sau reconectari repetate
+- Creatorul reitereaza nevoia de editor automat bun, circa3 minute, sunete si
+  ritm inspirat de iSilent/JocuriHorrorSky. Nu s-a pretins calitate editoriala
+  demonstrata doar de teste; urmeaza un episod-pilot dupa activare si GO.
+- PR#3 reverificat: OPEN, draft. Ultimul run este tot cel vechi,36060259649.
+- Pregatit activare_automatizare.zip cu NUMAI episod.yml si tests.yml actuale,
+  pentru upload manual de catre proprietar in .github/workflows, pe ramura
+  arena/01a0d4bb-autoeditor. Arhiva verificata, patch reverse-check trece.
+  Aceasta este alternativa transparenta la dreptul Workflows lipsa al aplicatiei,
+  nu o actualizare deja executata. Nu contine chei, doar referinte Secrets.
+- Nu s-a pornit randare/upload si nu s-a integrat PR-ul. Nu cere alte materiale.
+
+## 25.09.2026 — PERMISIUNEA WORKFLOWS FUNCTIONEAZA ACUM
+- Dupa confirmarea creatorului, push real reusit pentru ambele workflow-uri:
+  ff9124b pe arena/01a0d4bb-autoeditor. NU mai cere ZIP, reconectare sau chei.
+- Checkout-ul sesiunii reaparuse la baza c11f937; fetch explicit al ramurii remote
+  si reset --mixed la aceasta au pastrat toate fisierele locale. Nu folosi rebase
+  simplu care reaplica baza shallow; verifica mereu varful remote real.
+- 62 teste locale trecute, credential guard curat, compilare Python, toate cele3
+  YAML-uri si scripturile bash validate. Testele Actions noi au trecut si pe GitHub:
+  36070865684 si36070870135, commit ff9124b. NU sunt randari video.
+- README corectat: patch-ul WORKFLOWS_PENDING.patch este acum doar copie istorica,
+  nu mai trebuie aplicat. CI verifica toate modificarile (inclusiv documentatia)
+  pentru a nu sari peste credential guard la commituri fara Python; dispatch permis.
+- Se finalizeaza PR#3 dupa reverificarea CI. Nicio randare noua sau incarcare YouTube
+  in acest pas; calitatea pe VOD real ramane de validat printr-un episod-pilot.

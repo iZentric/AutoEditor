@@ -1,98 +1,90 @@
-# AGENTS.md — AutoEditor (read me FIRST)
+# AGENTS.md — AutoEditor (read first)
 
-You are taking over an existing project. Read this + MEMORY.md, then verify state yourself.
+## Handoff
 
-## What this repo is
-An autonomous AI video editor for the YouTube channel **iZentric** (RO, Minecraft/Pixelmon
-server "PokeCity" + Roblox, audience kids 8-15). It turns raw live-stream VODs into
-story-driven YouTube episodes + vertical shorts, publishes them as GitHub release assets,
-and can auto-upload them to YouTube (private) into the "FĂCUTE DE AI" playlist.
+Read this file, the latest dated sections of MEMORY.md, and ISTORIC_COMPLET.md.
+The latter is historical, not live state. Verify `git status`, `gh run list --limit 3`
+and the release assets before claiming anything is delivered. Follow the checkout
+and branch assigned by Arena; never use historic paths/credentials from MEMORY.md.
 
-Owner (the user) is NOT a developer. He talks in Romanian, wants short answers with tables,
-numbers, and no abbreviations. He decides WHAT, you decide HOW.
+The owner is a Romanian-speaking creator, not a developer. Answer briefly in
+Romanian; choose implementation details yourself, test changes, explain blockers.
+For larger tasks, give a short plan. Never promise perfection or unmeasured speedups.
 
-## Golden rules (learned the hard way, do not violate)
-1. ALWAYS answer in Romanian. Code/comments/git commits: English.
-2. Max autonomy: pick the variant, execute, report. Do not ask the user to choose.
-3. Self-correct after EVERY change: run, read logs, fix, re-run until green.
-4. 5 failures on the same error -> change the approach entirely.
-5. Verify before claiming "done" (API state, file listing, log lines).
-6. >3 steps -> post a short plan first.
-7. NEVER guess API shapes; check the docs / probe with a test call.
-8. NO secrets in the repo or chat: keys live in `.env` (sandbox) and repo Secrets (CI).
-9. After every big task append to MEMORY.md and push.
-10. YouTube cookies (COOKIES_YT secret) die fast: 1 export = max 1 full download.
-    Ask for a fresh Studio export when downloads start failing.
+## Standing editorial requirements
 
-## Architecture (who does what)
-- `.github/workflows/episod.yml` — the engine (GitHub Actions, ubuntu runner):
-  * Triggers: `release published` (the user attaches the VOD file + YouTube link in the
-    release description), `workflow_dispatch` (inputs: live_url, max_episoade, max_shorts,
-    release_tag to reprocess an existing release without re-uploading), push on declansa/live.txt.
-  * Steps: install deps (yt-dlp FRESH master build, google-genai, pillow, imageio-ffmpeg,
-    faster-whisper, scenedetect) -> learn RO trending (RSS, no keys) -> cookies from secret
-    -> locate source (release asset via ASSET_TOKEN, or direct YouTube URL in the release
-    body; yt-dlp first, Studio download-my-video token fallback) -> `pipeline_github.py`
-    -> publish release assets -> memory (used titles) -> Issue notification with
-    TITLE + download links.
-- `pipeline_github.py` — orchestrates: source download (cache-skip), oEmbed context,
-  `autoeditor.py --ai --subtitrari` (WHISPER_MODEL=base for speed), `shorts.py`
-  (MAX_SH env, "auto" = AI picks), YouTube auto-upload block (non-fatal), `urca_2k.py` (2K).
-- `autoeditor.py` — the editor brain (~1600 lines): scene cutting, story episodes
-  (4 acts: cold-open teaser -> setup -> rising action -> CLIMAX, all scenes within the
-  same game session +-12 min around the peak), AI scoring/titles (Gemini), zoom OFF by
-  default (AE_ZOOM=1 to enable), watermark OFF by default (AE_LOGO=1), confetti OFF
-  (AE_CONFETI=1), POP subtitles (AE_POPS, big yellow on-screen quotes at key moments,
-  max 6/episode), .srt per episode, thumbnails A/B/C from real frames, -14 LUFS,
-  upload.txt kit (title/description/tags), RAPORT.md, plan.json, memory writes.
-- `idei_ai.py` — 2026-level video understanding: Gemini File API (resumable upload,
-  1 FPS sampling), each episode idea is VERIFIED by letting Gemini WATCH the actual
-  segment (ok / single game / corrected title / hook second). Model fallback chain:
-  requested model -> gemini-3.6-flash -> gemini-3.5-flash (aliases often 503).
-- `shorts.py` — 16s vertical shorts cut exactly at the strongest moment (MAX_SH env).
-- `invata_trending.py` — daily learning from RO channels via YouTube RSS (no keys).
-- `nume_public.py` — renames EPxx.* to public names derived from titles (no "Ep." numbers).
-- `auto_upload_yt.py` — CI YouTube upload (needs YT_CLIENT_ID/SECRET/REFRESH_TOKEN
-  secrets; default privacy PRIVATE, notifySubscribers=false, adds to playlist).
-- `upload_release.py` — per-piece immediate release upload ("livrare pe rand").
-- `livreaza_linkuri.py` — TITLE + direct download links posting (Issue #2).
+- Episodes: 150–170 seconds, one understandable story, one game, actual in-game
+  events. No menu/settings filler, no forced weak episode, no false title claims.
+- Shorts: 16 seconds, separately reviewed on the actual portrait crop.
+- No channel watermark, confetti or random zooms. Yellow POP captions only at
+  key moments; verbatim transcript quotes, full SRT delivered separately.
+- 2K output, verified audio mastering targeting -14 LUFS, real-frame thumbnails.
+  Do not imply upscaling restores source detail. No AI-generated thumbnails.
+- Use creator-supplied sounds in sunete_mele/. No random filler, no downloads of
+  new effects/music/memes without authorization. Preserve every original file.
+- YouTube uploads must be private; the creator publishes manually.
+- Deliver titles and download links through GitHub Releases/Issues.
+- Never download/render real VODs in the sandbox. Heavy work is GitHub Actions.
+  Do not start a new VOD run without the creator's go-ahead.
 
-## User requirements (standing, all confirmed repeatedly — do NOT undo)
-- Titles in the style of RO channels iSilent + JocuriHorrorSky (see cunoastere/adn_canale.md),
-  NO "Ep. N" in titles or file names, titles must mean exactly what the video shows.
-- Every episode = one STORY with meaning (beginning-rising-climax), single game per episode
-  (never mix Minecraft and Roblox inside one episode), only in-game moments (menus/settings
-  = score 1, discard), ~3 min (150-170s), shorts are 16 seconds.
-- NO on-screen channel watermark, NO confetti, NO random zooms (zoom only if he asks).
-- POP subtitles: big + yellow, ONLY at key moments (AI picks). Full .srt ships separately.
-- 2K upscale mandatory, -14 LUFS audio, thumbnails from REAL frames (3 variants).
-- Delivery: per-piece release uploads + final Issue comment with TITLE + download link
-  per piece. The user clicks, file lands on his PC.
-- YouTube: auto-upload PRIVATE (user publishes manually when he wants) into playlist
-  "FĂCUTE DE AI" (id in cunoastere/ai_playlist_id.txt). Daily quota 10k units resets
-  ~09:00 Europe/Bucharest; each upload costs ~1600 units.
-- The AI learns daily: trending RO channels (RSS), its own used titles (never repeat),
-  transcripts saved to cunoastere/transcripte/.
+## Active architecture
 
-## Sandbox specifics (this machine)
-- Repo at /home/user/autoeditor, origin remote uses x-access-token with GITHUB_TOKEN from
-  /home/user/autoeditor/.env (also GEMINI_API_KEY, YOUTUBE_REFRESH_TOKEN, GEMINI_MODEL).
-- Sandbox loses git identity + remote between sessions: re-set them before every push
-  (user.email agent@autoeditor.local, user.name AutoEditor Agent, remote URL with token).
-- OAuth for YouTube works from sandbox: /home/user/.env + /home/user/client_secret.json
-  (installed client). Quota may be exhausted -> HTTP 403 with "quota" in body.
-- Long-running background processes must use the platform process tools (nohup dies).
-- When editing episod.yml with fuzzy editors, VERIFY with grep afterwards (edits reported
-  success without effect twice); prefer python read->replace with asserts.
-- `python script.py | head -N` kills the process (SIGPIPE) — redirect to a file instead.
-- urllib raises on HTTP 308 (YouTube resumable uploads) — catch HTTPError, read Range.
-- GitHub release asset content: Accept "application/octet-stream" (raw/json return JSON).
+- `.github/workflows/episod.yml`: configuration preflight, dependencies/caches,
+  source selection/download, editor, shorts, delivery and optional private upload.
+- `pipeline_github.py`: orchestrator. 2K is rendered BEFORE any delivery, not as
+  a second video encode after upload. Source YouTube download allows up to1440p.
+- `autoeditor.py --ai`: strict continuous-story mode. No energy fallback; no
+  post-approval energy cuts. Full transcript, proposal, exact video review.
+- `idei_ai.py`: overlapping full-transcript pages; up to12 candidate ideas; review
+  exact segments via Gemini. Models are configurable, not presumed available.
+- `editorial.py`: strict review validation, non-overlap, sound event validation,
+  exact quote IDs for captions. API failure/invalid response cannot approve a clip.
+- `sunete_mele/catalog.json`: explicit usage rules for the10 supplied sound files.
+  The pumm effect belongs to falling/impact, not victory. These rules come from
+  creator descriptions/filenames, NOT acoustic listening or license verification.
+- `shorts.py`: independent portrait review and title/sound plan for each short.
+- `performance.py`: exact-input JSON cache, atomic writes, stage timings. Transcript
+  keyed by full source fingerprint/model/settings; approved reviews expire after24h
+  and include prompt/model/crop/catalogue. Cache hits are revalidated. Failures and
+  rejected reviews are not cached as approvals. Never weaken checks for speed.
+- `nume_public.py` / `upload_release.py`: public filenames remain in episodes/;
+  upload aliases are respected without moving originals. Publish files, not temp dirs.
+- `auto_upload_yt.py`: opt-in private upload, only with YT_UPLOAD_ENABLED=true plus
+  YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN from Actions Secrets.
+- `preflight.py`: checks configuration presence only, NOT actual API authentication.
+- `invata_trending.py`, `cunoastere/`: channel context and editorial memory.
 
-## Current state & next steps
-See MEMORY.md (top sections = freshest). Verify with:
-  git -C /home/user/autoeditor fetch origin && git status
-  curl -s -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/iZentric/AutoEditor/actions/runs?per_page=1
-The work loop for a new VOD: user creates a GitHub release (tag vod-N) with the video file
-attached and the YouTube VOD link in the description -> workflow does everything ->
-you monitor runs (gh api), fix failures by reading job logs, and deliver TITLE + download
-links to the user in Romanian, short, with tables.
+Local legacy CLI scripts remain for compatibility. They are not the primary
+production workflow. Old README documentation lives in docs/ISTORIC_README.md.
+
+## Security and source protection
+
+- Use Arena's configured git/gh authentication. Never request GitHub tokens in
+  chat, embed credentials in remote URLs, or assume old local OAuth files exist.
+- Credentials pasted in chat on2026-09-25 must be revoked/rotated by the owner.
+  Never copy, store or use those values. Record only the incident, not the values.
+- Upload is disabled by default. The owner sets fresh OAuth Secrets and then
+  explicitly enables YT_UPLOAD_ENABLED=true. See SECURITY.md and GH_SETUP.md.
+- Never delete, split or recode creator originals. The old destructive sound
+  organizer is now a compatibility no-op. Generated output belongs in episodes/.
+- Run `python tools/check_secrets.py`. It prints paths/types, never matching
+  secrets; it is a limited guard, not a complete audit or a scan of chat/history.
+- A workflow-write permission error requires checking the app permission request,
+  installation approval and effective connection permissions. The app publisher
+  requests permissions; the installing account approves them. Reconnecting alone
+  does not guarantee a fix. Never request tokens or claim a failed push succeeded.
+
+## Validation and operational lessons
+
+- `python -m unittest discover -s tests -v`
+- `python -m compileall -q .`
+- Validate workflow YAML/shell syntax and inspect the actual diff after edits.
+- Unit tests mock API/media processing. Passing them does NOT certify real-VOD
+  editorial quality or runtime. First real delivery still needs watching/listening.
+- Same-size writes can have identical timestamps: stat-only digest memoization
+  failed a regression test. Hash all source bytes; pass the fingerprint explicitly
+  within a process working on an immutable downloaded VOD.
+- Long-lived processes use platform process tools, not nohup. Do not pipe long
+  processes into head. GitHub asset downloads require application/octet-stream.
+- Append meaningful progress, validation and blockers to MEMORY.md. Commit and
+  push only the assigned session branch. Confirm push succeeded before saying so.

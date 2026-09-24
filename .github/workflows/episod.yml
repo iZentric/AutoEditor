@@ -25,11 +25,14 @@ on:
 
 concurrency:
   group: episod
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   episod:
     runs-on: ubuntu-latest
     timeout-minutes: 150
+    env:
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-3.6-flash,gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest' }}
+      AE_CACHE_DIR: ${{ github.workspace }}/.cache/autoeditor
     permissions:
       contents: write
       issues: write
@@ -38,17 +41,28 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Verifica configuratia inainte de procesare
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YT_UPLOAD_ENABLED: ${{ vars.YT_UPLOAD_ENABLED || 'false' }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python3 preflight.py
       - name: Instaleaza dependinte
-        run: pip install yt-dlp google-genai pillow imageio-ffmpeg faster-whisper scenedetect
-      - name: yt-dlp FRESH (build master — YouTube se schimba saptamanal)
-        run: pip install --force-reinstall --no-deps https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
+        run: pip install -r requirements.txt
       - name: Aflare sursa (input SAU declansa/live.txt SAU fisier din Release)
         id: afla
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_RELEASE_TAG: ${{ github.event.release.tag_name }}
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+          INPUT_LIVE_URL: ${{ inputs.live_url }}
         run: |
-          TAG="${{ github.event.release.tag_name }}"
-          if [ -z "$TAG" ]; then TAG="${{ inputs.release_tag }}"; fi
+          TAG="$EVENT_RELEASE_TAG"
+          if [ -z "$TAG" ]; then TAG="$INPUT_RELEASE_TAG"; fi
           if [ -n "$TAG" ]; then
             case "$TAG" in
               ep-*) echo "Release de EPISOADE ($TAG) - nu reprocesam"; exit 0;;
@@ -60,10 +74,10 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG" \
               | python3 -c "import json,sys; print(json.load(sys.stdin).get('body') or '')")
             if [ -z "$ASSET_ID" ] && [ -z "$BODY" ]; then echo "!! release-ul $TAG nu are fisier atasat nici descriere"; exit 1; fi
-            BODY_URL=$(echo "$BODY" | grep -oE 'https?://(www\.)?(youtube\.com/watch\?v=|youtu\.be/|youtube\.com/live/)[A-Za-z0-9_-]{11}' | head -1)
+            BODY_URL=$(echo "$BODY" | grep -oE 'https?://(www\.)?(youtube\.com/watch\?v=|youtu\.be/|youtube\.com/live/)[A-Za-z0-9_-]{11}' | head -1 || true)
             if [ -n "$BODY_URL" ]; then echo "CTX_URL=$BODY_URL" >> "$GITHUB_ENV"; echo "Context AI: $BODY_URL (din descrierea release-ului)"; fi
-            EP_N=$(echo "$BODY" | grep -oiE 'episoad[eu]+[: =]+[0-9]+' | grep -oE '[0-9]+' | head -1)
-            SH_N=$(echo "$BODY" | grep -oiE 'short(ur i|uri|s)?[: =]+[0-9]+' | grep -oE '[0-9]+' | head -1)
+            EP_N=$(echo "$BODY" | grep -oiE 'episoad[eu]+[: =]+[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
+            SH_N=$(echo "$BODY" | grep -oiE 'short(ur i|uri|s)?[: =]+[0-9]+' | grep -oE '[0-9]+' | head -1 || true)
             if [ -n "$EP_N" ]; then echo "MAX_EP=$EP_N" >> "$GITHUB_ENV"; echo "Creatorul cere $EP_N episoade"; fi
             if [ -n "$SH_N" ]; then echo "MAX_SH=$SH_N" >> "$GITHUB_ENV"; echo "Creatorul cere $SH_N shorturi"; fi
             echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
@@ -80,7 +94,7 @@ jobs:
             # CONTEXT PENTRU AI: descrierea release-ului (link + notiza creatorului)
             printf '%s' "$BODY" > context_creator.txt
             # daca e link YouTube in descriere, luam si titlul/descrierea oficiala (oEmbed, fara cookies)
-            YT_ID=$(printf '%s' "$BODY" | grep -oE '(v=|/live/|youtu\.be/)[A-Za-z0-9_-]{11}' | head -1 | grep -oE '[A-Za-z0-9_-]{11}$')
+            YT_ID=$(printf '%s' "$BODY" | grep -oE '(v=|/live/|youtu\.be/)[A-Za-z0-9_-]{11}' | head -1 | grep -oE '[A-Za-z0-9_-]{11}$' || true)
             if [ -n "$YT_ID" ]; then
               curl -s --max-time 20 "https://www.youtube.com/oembed?url=https%3A//www.youtube.com/watch%3Fv%3D$YT_ID&format=json" \
                 | python3 -c "import json,sys; d=json.load(sys.stdin); print('TITLUL OFICIAL AL LIVE-ULUI:', d.get('title')); print('CANALUL:', d.get('author_name'))" \
@@ -89,7 +103,7 @@ jobs:
             echo "AE_CONTEXT=$(pwd)/context_creator.txt" >> "$GITHUB_ENV"
             echo "── context pt AI ──"; cat context_creator.txt
           else
-            URL="${{ inputs.live_url }}"
+            URL="$INPUT_LIVE_URL"
             if [ -z "$URL" ] && [ -f declansa/live.txt ]; then URL=$(tr -d '[:space:]' < declansa/live.txt); fi
             if [ -z "$URL" ]; then echo "nicio sursa"; exit 1; fi
           fi
@@ -100,6 +114,18 @@ jobs:
         with:
           path: live_curent.mp4
           key: ${{ steps.afla.outputs.vodkey }}
+      - name: Refoloseste analizele exacte si modelul Whisper
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache/autoeditor
+          key: analysis-v2-${{ steps.afla.outputs.vodkey }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            analysis-v2-${{ steps.afla.outputs.vodkey }}-
+      - name: Cache model Whisper (aceeasi calitate, fara re-download)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface/hub
+          key: whisper-small-v1-${{ runner.os }}
       - name: Invata TRENDING RO (RSS canale top — gratis, fara chei)
         run: |
           mkdir -p cunoastere
@@ -115,14 +141,18 @@ jobs:
       - name: Randare episoade (descarcare -> analiza -> episoade -> 2K)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-3.6-flash,gemini-3.5-flash,gemini-3.8-flash,gemini-flash-latest
           AE_POARTA: '0.6'
           ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
           RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
           SUBTITRARI: '1'
-          WHISPER_MODEL: base   # RAPID: transcriere de 2-3x mai rapida   # TOT PACHETUL: subtitrari .srt per episod (whisper local, gratis)
+          WHISPER_MODEL: small   # Prefer transcription quality over the previous base model.
           MAX_SH: ${{ env.MAX_SH || inputs.max_shorts || 'auto' }}
+          YT_UPLOAD_ENABLED: ${{ vars.YT_UPLOAD_ENABLED || 'false' }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_PRIVACY: private
         run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 'auto' }}"
       - name: Publica in Releases (gata de download)
         env:
@@ -135,14 +165,14 @@ jobs:
             # LIVRARE PE RAND: piesele mari au urcat deja (cu nume din titlu); aici se urca RESTUL
             TAG="$RELEASE_TAG"
             python3 nume_public.py
-            rm -rf episodes/scene_tmp
-            gh release upload "$TAG" episodes/* --clobber
+            mapfile -d '' files < <(find episodes -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.jpg' -o -name '*_upload.txt' -o -name '*.srt' -o -name 'RAPORT.md' -o -name 'DECIZII*.json' -o -name 'PERFORMANTA*.json' \) -print0)
+            gh release upload "$TAG" "${files[@]}" --clobber
             echo "restul fisierelor urcate pe $TAG (cu numele din titluri)"
           else
             TAG="ep-$(date -u +%Y%m%d-%H%M)"
             python3 nume_public.py
-            rm -rf episodes/scene_tmp
-            gh release create "$TAG" episodes/* \
+            mapfile -d '' files < <(find episodes -maxdepth 1 -type f \( -name '*.mp4' -o -name '*.jpg' -o -name '*_upload.txt' -o -name '*.srt' -o -name 'RAPORT.md' -o -name 'DECIZII*.json' -o -name 'PERFORMANTA*.json' \) -print0)
+            gh release create "$TAG" "${files[@]}" \
               --title "Episoade $TAG" --notes "Episoade 2K + SHORTS verticale gata de upload pe YouTube. Vezi *_upload.txt pentru titlu/descriere/tag-uri."
           fi
           echo "TAG_PUBLISH=$TAG" >> "$GITHUB_ENV"
@@ -150,7 +180,7 @@ jobs:
         run: |
           mkdir -p cunoastere
           touch cunoastere/titluri_folosite.txt
-          for f in episodes/EP*_upload.txt; do
+          for f in episodes/*_upload.txt; do
             [ -f "$f" ] && head -1 "$f" | sed 's/^TITLU:\s*//' >> cunoastere/titluri_folosite.txt
           done
           sort -u -o cunoastere/titluri_folosite.txt cunoastere/titluri_folosite.txt
@@ -183,3 +213,23 @@ jobs:
           else
             gh issue create --title "EPISOADE GATA — episod nou livrat" --body-file mesaj_livrare.md || true
           fi
+
+      - name: Pastreaza deciziile editoriale (inclusiv la refuz sau eroare)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: decizii-editoriale
+          path: |
+            episodes/DECIZII*.json
+            episodes/RAPORT.md
+            episodes/plan.json
+            episodes/PERFORMANTA*.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Salveaza analizele terminate chiar daca publicarea a esuat
+        if: always() && steps.afla.outputs.vodkey != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .cache/autoeditor
+          key: analysis-v2-${{ steps.afla.outputs.vodkey }}-${{ github.run_id }}-${{ github.run_attempt }}

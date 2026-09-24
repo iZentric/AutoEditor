@@ -1,0 +1,19 @@
+name: Editorial quality tests
+# Check every change: credentials can also be leaked in docs or configuration.
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Guard against accidentally committed credentials
+        run: python tools/check_secrets.py
+      - name: Test editorial decisions without media or API credentials
+        run: python -m unittest discover -s tests -v
+      - name: Compile Python modules
+        run: python -m compileall -q -x '/\.git/' .

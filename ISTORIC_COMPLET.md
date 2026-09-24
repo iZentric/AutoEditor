@@ -1,4 +1,7 @@
-# TOT ISTORICUL PROIECTULUI AutoEditor (de la primul mesaj pana azi, 24.09.2026)
+# TOT ISTORICUL PROIECTULUI AutoEditor (de la primul mesaj pana la 24.09.2026)
+
+> Istoric, nu stare live. Pentru actualizarile din 25.09.2026: vezi sectiunile
+> recente din MEMORY.md, regulile curente din AGENTS.md si inceputul README.md.
 
 ## 1. CINE ESTE USERUL SI CE A VRUT
 - Creator YouTube romanesc: canalul **iZentric** (@izentric1), ~1.310 abonati la inceput.
