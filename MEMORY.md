@@ -848,3 +848,25 @@
   continuu un joc, fara watermark/confetti, faze din joc, shorts 16s, titluri AI.
 - GIT: identitatea + remote SE PIERD des (duh sandbox); refixate din nou. edit_file pe episod.yml de
   2x "success" fara efect -> folosi python replace cu assert.
+
+## Sesiune 24.09 seara II — UPGRADE „EDITOR AI 2026" (cerinta user: intelege CE se intampla pe video)
+- **CERCETARE NET**: Gemini File API video = 1 FPS + timestamps, prompt DUPA video in parts, ~140
+  tokeni/min; modelele alias (gemini-flash-latest, 3.5, 3.8) au picat 503 "high demand" — eroarea a
+  dezvaluit modelul CURENT: **gemini-3.6-flash** (2.0 pensionat). Eklipse 2026: full-VOD + game-event
+  detection + verificare vizuala — modelul nostru de referinta.
+- **idei_ai.py NOU**: incarca_video_gemini (File API resumable: start->upload/finalize->poll ACTIVE;
+  finalize intoarce file.uri) + ia_gemini_video (file_data part; fallback modele [cerut, 3.6-flash,
+  3.5-flash]; 3x retry pe 503/429/500; parser robust ```json). **TEST REAL VERDE**: Gemini a descris
+  corect clipul de test generat cu ffmpeg („mira de testare TV color cu numarator") — VEDERE video
+  functionala cap-coada din sandbox.
+- **FLUX NOU in autoeditor (modul --clasic)**: idei_cu_ai (harta vorbelor -> 2-3 IDEI intervale
+  continue 150-170s, titlu=fara Ep.) -> snap_taietura (PySceneDetect, adaugat in pip workflow) ->
+  **verifica_idee_cu_video**: taie segmentul la 480p, urca la File API, Gemini VEDE clipul si
+  raspunde JSON {ok, ce_se_intampla, un_joc, titlu_corectat, hook_sec, scor}; ideile nefConfirmate
+  sunt aruncate; titlul corectat suprascrie. Fallback fara verificare daca API-ul cade (nu blocheaza).
+- **Livrare TITLU+LINK**: livreaza_linkuri.py (titlul din *_upload.txt via octet-stream + link
+  browser_download_url) postat pe Issue #2; workflow NOTIFICARE rescris cu body-file mesaj_livrare.md
+  (TITLU + DESCARCA per piesa). Robotul ruleaza livreaza_linkuri dupa inlocuire reusita.
+- Run #21 anulat (cod fara verificare video); **Run #22 = codul complet** (605fcde + idei + verificare).
+- Robot inlocuire RE-pornit de 2x (procesele nohup mor intre apeluri; doar start_process persista).
+- Workflow GEMINI_MODEL: gemini-3.6-flash primul.
