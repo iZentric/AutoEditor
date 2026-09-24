@@ -18,3 +18,14 @@
 ## PACING: schimbare cadru 3-6s in varf; zoom pe fete la reactii; text pe ecran la intrebari; muzica se opreste BRUSC la soc
 
 ## PENTRU AI (alegerea momentelor): ridica beat-uri cu REACTIE PUTERNICA (tipat/ras), RITUAL declansat (nota, surpriza, "fugiti", "care e realul"), sau eveniment de joc rar. EVITA: plug-uri merch/like lungi,"Well liniistite fara eveniment" — nu-s momente.
+
+
+## LEGILE MRBEAST (invatate 2026-09-24, de la user: "toate secretele mr beast")
+1. RETENTIA > TOT: tai episodul cand s-a terminat POVESTEA, nu cand cronometrul a ajuns la 0
+   (final elastic, minim 90s). Fara zone moarte la final — copilul pleaca si nu mai revine.
+2. COMPRIMAREA TIMPULUI: golul din mijloc se scoate (stil-JOH), scena slaba se sparge.
+   Nu umplem minutele — umplem OCHII si URECHILE.
+3. PRIMELE 3 CUVINTE din titlu = soc/FOMO (AM GASIT, L-AM PRINS, NIMENI NU STIE) —
+   titlul se testeaza: "ar da click un copil de 10 ani vazand DOAR titlul?" Daca nu -> rescrie.
+4. FIECARE episod promite ceva si IL LIVREAZA (promis = livrat, altfel publicul te pierde).
+5. POVESTEA = intotdeauna o CALATORIE cu miza (ceva rar/ceva mare/ceva care poate esua).

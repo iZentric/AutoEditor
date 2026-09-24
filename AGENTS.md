@@ -54,6 +54,7 @@ For larger tasks, give a short plan. Never promise perfection or unmeasured spee
 - `preflight.py`: checks configuration presence only, NOT actual API authentication.
 - `invata_trending.py`, `cunoastere/`: channel context and editorial memory.
 
+<<<<<<< HEAD
 Local legacy CLI scripts remain for compatibility. They are not the primary
 production workflow. Old README documentation lives in docs/ISTORIC_README.md.
 
@@ -88,3 +89,22 @@ production workflow. Old README documentation lives in docs/ISTORIC_README.md.
   processes into head. GitHub asset downloads require application/octet-stream.
 - Append meaningful progress, validation and blockers to MEMORY.md. Commit and
   push only the assigned session branch. Confirm push succeeded before saying so.
+=======
+## Current state & next steps
+See MEMORY.md (top sections = freshest). Verify with:
+  git -C /home/user/autoeditor fetch origin && git status
+  curl -s -H "Authorization: Bearer $GITHUB_TOKEN" https://api.github.com/repos/iZentric/AutoEditor/actions/runs?per_page=1
+The work loop for a new VOD: user creates a GitHub release (tag vod-N) with the video file
+attached and the YouTube VOD link in the description -> workflow does everything ->
+you monitor runs (gh api), fix failures by reading job logs, and deliver TITLE + download
+links to the user in Romanian, short, with tables.
+
+## CE SA CITESTI CA SA "INVEȚI TOT" (checklist preluare, in ordine)
+1. ISTORIC_COMPLET.md  — cine e userul, ce a cerut, de la primul mesaj
+2. AGENTS.md           — cum lucrezi (reguli de fier, capcane sandbox)
+3. MEMORY.md           — toate detaliile tehnice per sesiune
+4. cunoastere/*        — ADN canale (iSilent/JocuriHorrorSky + legile MrBeast), formate episod,
+   canal (linkuri reale), titluri folosite, trending RO
+5. in cod (autoeditor.py): cauta "MrBeast", "PROTECTIA RETENTIEI", "FINAL ELASTIC",
+   "COMPRIMARE stil-JOH", "PRIMELE 3 CUVINTE" — aceleasi legi, aplicate in cod
+>>>>>>> 01b1a86 (learning pack: MrBeast laws + onboarding checklist)
