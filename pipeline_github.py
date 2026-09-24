@@ -129,6 +129,10 @@ if os.environ.get("SUBTITRARI", "0") == "1":   # whisper pe live 2h = ~10 min; d
     cmd += ["--subtitrari"]
 sh(cmd, env=env)
 
+# ── 2b) SHORTS (verticale 9:16, <60s, din varfurile maxime) ──
+if os.path.exists("episodes/plan.json"):
+    sh([sys.executable, "shorts.py"])
+
 # ── 3) URCARE 2K (2560x1440 lanczos+unsharp) ──
 sh([sys.executable, "urca_2k.py"])
 print("PIPELINE GITHUB GATA", flush=True)

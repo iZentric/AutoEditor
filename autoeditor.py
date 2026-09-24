@@ -1359,6 +1359,10 @@ def main():
     if titluri:
         open(os.path.join(folder, "titluri.txt"), "w", encoding="utf-8").write("\n".join(titluri) + "\n")
     open(os.path.join(folder, "RAPORT.md"), "w", encoding="utf-8").write("\n".join(rap))
+    # PLAN.JSON: pt generatorul de shorts (shorts.py citeste varfurile + scorurile)
+    json.dump([{"nr": k, "varf": e.get("varf"), "scor": e.get("scor"), "tip": e.get("tip"),
+                "scene": e.get("scene")} for k, e in enumerate(episoade, 1)],
+              open(os.path.join(folder, "plan.json"), "w"), ensure_ascii=False)
     print("   raport: episodes/RAPORT.md")
 
     if opt.doar_analiza:

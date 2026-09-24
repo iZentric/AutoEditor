@@ -85,5 +85,5 @@ jobs:
           files=(episodes/EP*.mp4)
           if [ ${#files[@]} -eq 0 ]; then echo "nu sunt episoade de publicat"; exit 0; fi
           TAG="ep-$(date -u +%Y%m%d-%H%M)"
-          gh release create "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura.jpg episodes/EP*_upload.txt episodes/*.srt \
-            --title "Episoade $TAG" --notes "Episoade 2K gata de upload pe YouTube. Vezi EP*_upload.txt pentru titlu/descriere/tag-uri."
+          gh release create "$TAG" episodes/EP*.mp4 episodes/EP*_miniatura.jpg episodes/EP*_upload.txt episodes/*.srt episodes/SHORT*.mp4 episodes/SHORT*_upload.txt \
+            --title "Episoade $TAG" --notes "Episoade 2K + SHORTS verticale gata de upload pe YouTube. Vezi EP*_upload.txt / SHORT*_upload.txt pentru titlu/descriere/tag-uri."
