@@ -119,13 +119,17 @@ def descrie_scena(cheie, cadre_b64):
     req = urllib.request.Request(
         f"https://generativelanguage.googleapis.com/v1beta/models/{model_text}:generateContent",
         data=body, headers={"Content-Type": "application/json", "x-goog-api-key": cheie})
-    try:
-        with urllib.request.urlopen(req, timeout=120) as r:
-            resp = json.loads(r.read().decode())
-        return (resp.get("candidates") or [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
-    except Exception as ex:
-        print(f"   ! descriere scena: {ex}")
-        return None
+    import time as _t
+    for incerc in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=120) as r:
+                resp = json.loads(r.read().decode())
+            return (resp.get("candidates") or [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+        except Exception as ex:
+            print(f"   ! descriere scena (incercarea {incerc + 1}): {ex}")
+            if incerc < 2:
+                _t.sleep(20)
+    return None
 
 
 def genereaza_pollinations(prompt, out):
