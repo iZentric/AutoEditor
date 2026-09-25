@@ -83,7 +83,12 @@ def _apeleaza(cheie, model, prompt, cadre_b64):
                 resp = json.loads(r.read().decode())
             break
         except urllib.error.HTTPError as ex:
-            print(f"   ! miniatura AI {model} (incercarea {incerc + 1}): {ex}")
+            det = ""
+            try:
+                det = ex.read().decode()[:220].replace("\n", " ")
+            except Exception:
+                pass
+            print(f"   ! miniatura AI {model} (incercarea {incerc + 1}): {ex} {det}")
             if ex.code in (429, 500, 503) and incerc < 3:
                 import time as _t
                 _t.sleep(25 * (incerc + 1))   # 429 = limita de ritm: asteptam si reincercam
@@ -104,6 +109,46 @@ def _apeleaza(cheie, model, prompt, cadre_b64):
     return None
 
 
+def descrie_scena(cheie, cadre_b64):
+    """Modelul TEXT (merge intotdeauna) descrie EXACT scena din cadrele reale ->
+    descrierea hrana generatorul de imagine (Pollinations, keyless)."""
+    parts = [{"inline_data": {"mime_type": "image/jpeg", "data": d}} for d in cadre_b64]
+    parts.append({"text": "Describe this Minecraft gameplay scene for an image generator, in English, exactly and concretely: 1) the player character(s) skin (colors, helmet, outfit, items held), 2) creatures/mobs/objects visible (types, colors, materials), 3) the place/biome/structure, 4) what action happens, 5) camera angle. Max 120 words, only what is really visible."})
+    body = json.dumps({"contents": [{"parts": parts}]}).encode()
+    model_text = os.environ.get("AE_MODEL_TEXT", "gemini-3.6-flash")
+    req = urllib.request.Request(
+        f"https://generativelanguage.googleapis.com/v1beta/models/{model_text}:generateContent",
+        data=body, headers={"Content-Type": "application/json", "x-goog-api-key": cheie})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            resp = json.loads(r.read().decode())
+        return (resp.get("candidates") or [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
+    except Exception as ex:
+        print(f"   ! descriere scena: {ex}")
+        return None
+
+
+def genereaza_pollinations(prompt, out):
+    """Generator keyless, gratuit (flux). Returneaza calea sau None."""
+    import urllib.parse
+    url = ("https://image.pollinations.ai/prompt/" + urllib.parse.quote(prompt[:1800]) +
+           "?width=1280&height=720&nologo=true&model=flux&enhance=false")
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=240) as r:
+            data = r.read()
+    except Exception as ex:
+        print(f"   ! pollinations: {ex}")
+        return None
+    if len(data) < 20000:
+        print(f"   ! pollinations: raspuns prea mic ({len(data)} B)")
+        return None
+    open(out, "wb").write(data)
+    _la_1280x720(out)
+    print(f"   miniatura AI GATA (pollinations/flux): {os.path.basename(out)}")
+    return out
+
+
 def genereaza_din_cadre(cheie, cadre_b64, out):
     """Incearca toate modelele din MODELE. Returneaza calea sau None."""
     if not cheie or not cadre_b64:
@@ -115,6 +160,13 @@ def genereaza_din_cadre(cheie, cadre_b64, out):
             _la_1280x720(out)
             print(f"   miniatura AI GATA ({model}): {os.path.basename(out)}")
             return out
+    # PLAN B keyless: descriem scena cu modelul TEXT (quota separata, merge) ->
+    # Pollinations o deseneaza in stilul canale-top. Scena ramane DIN CLIP.
+    if cheie:
+        descriere = descrie_scena(cheie, cadre_b64)
+        if descriere:
+            prompt_final = PROMPT + "\n\nEXACT SCENE TO RENDER (from the real clip):\n" + descriere
+            return genereaza_pollinations(prompt_final, out)
     return None
 
 
