@@ -1567,8 +1567,25 @@ def main():
                         source_fingerprint=source_sha),
                     catalogue, live_len, opt.max, transcript=transcript)
             except Exception as ex2:
-                episoade = []
-                audit = [{"status": "neverificat", "motiv": f"Selectie indisponibila: {type(ex2).__name__}"}]
+                # A 3-a incercare: clasicul pe varfuri audio (fara AI) — episodul IASA oricum.
+                # Gemini are zile proaste; creatorul are nevoie de livrare, nu de scuze.
+                print("   ! si a 2-a incercare a picat -> PLAN C: momente clasice pe varfuri audio")
+                try:
+                    analiza = analiza_audio(ff, opt.video)
+                    varfuri = [(t, s2) for t, s2 in (analiza or [])]
+                    if varfuri:
+                        scor_min = {t: s2 for t, s2 in varfuri}   # _top_scor cere dict
+                        povesti, _ = alege_povesti(varfuri, scor_min, live_len, opt.durata, opt.max)
+                        # fallback-clasic = titluri de rezerva pana le reface AI-ul maine
+                        for i2, pp in enumerate(povesti, 1):
+                            pp.setdefault("ai_titlu", f"MOMENTUL CEL MAI TARE {i2} DIN LIVE")
+                    else:
+                        povesti = []
+                    episoade = povesti
+                    audit = [{"status": "fallback-clasic", "motiv": f"AI indisponibil: {type(ex2).__name__}"}]
+                except Exception as ex3:
+                    episoade = []
+                    audit = [{"status": "neverificat", "motiv": f"Selectie indisponibila: {type(ex3).__name__}"}]
         with open(os.path.join(folder, "DECIZII_AI.json"), "w", encoding="utf-8") as f:
             json.dump(audit, f, ensure_ascii=False, indent=2)
         if not episoade:
