@@ -853,7 +853,7 @@ def gaseste_avatar(assets_dir):
     return None
 
 
-def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None, avatar=None):
+def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None, avatar=None, badge=None):
     """MINIATURA in stil Minecraft, EDITATA din cadru REAL al live-ului
     (niciodata generata cu AI — regula canalului):
     crop 16:9 -> saturatie/contrast/sharpness boost -> logo -> text mare cu contur."""
@@ -875,6 +875,42 @@ def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None, avatar=No
         lg = Image.open(logo).convert("RGBA")
         lg.thumbnail((170, 170))
         img.paste(lg, (24, 24), lg)
+    if badge and os.path.exists(badge):
+        # LOGO-ul SERIEI (ex: POKECITY cand e Minecraft cu pokemoni) — doar pe
+        # MINIATURI (pe video watermark interzis). Fundal negrul din jurul logo-ului
+        # dispare prin FLOOD-FILL de la margini (contururile negre din litere raman),
+        # + umbră soft sub logo ca sa se citeasca pe orice fundag aglomerat.
+        bd = Image.open(badge).convert("RGBA")
+        bd.thumbnail((320, 320))
+        px = bd.load()
+        w2, h2 = bd.size
+        from collections import deque
+        fundal = set()
+        coada = deque()
+        for xx in range(w2):
+            for yy in (0, h2 - 1):
+                if max(px[xx, yy][:3]) < 46 and (xx, yy) not in fundal:
+                    fundal.add((xx, yy)); coada.append((xx, yy))
+        for yy in range(h2):
+            for xx in (0, w2 - 1):
+                if max(px[xx, yy][:3]) < 46 and (xx, yy) not in fundal:
+                    fundal.add((xx, yy)); coada.append((xx, yy))
+        while coada:
+            cx, cy = coada.popleft()
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = cx + dx, cy + dy
+                if 0 <= nx < w2 and 0 <= ny < h2 and (nx, ny) not in fundal and max(px[nx, ny][:3]) < 46:
+                    fundal.add((nx, ny)); coada.append((nx, ny))
+        for (xx, yy) in fundal:
+            r2, g2, b2, a2 = px[xx, yy]
+            px[xx, yy] = (r2, g2, b2, 0)
+        bx, by = 1280 - bd.width - 20, 20
+        umbra = Image.new("RGBA", bd.size, (0, 0, 0, 0))
+        umbra.putalpha(bd.split()[3].point(lambda v: 150 if v else 0))
+        from PIL import ImageFilter as _IF
+        umbra = umbra.filter(_IF.GaussianBlur(5))
+        img.paste((0, 0, 0), (bx + 5, by + 6), umbra.split()[3])
+        img.paste(bd, (bx, by), bd)
     # AVATARUL (fata ta din joc) in coltul stanga-jos, cerc decupat + contur ALB gros — stil creator-top
     if avatar and os.path.exists(avatar):
         try:
@@ -1922,12 +1958,15 @@ def main():
             if os.path.exists(cadru):
                 dst_clasic = os.path.join(folder, f"EP{k:02d}_miniatura_fallback.jpg") if mini_ai \
                     else os.path.join(folder, f"EP{k:02d}_miniatura.jpg")
-                p = fa_miniatura(cadru, dst_clasic, titlu_full, logo, sageata=(820, 240), avatar=AVATAR)
+                _tl = (titlu_full + " " + str(e.get("ai_in_joc", "")) + " " + str(e.get("ai_de_ce", ""))).lower()
+                badge_serie = os.path.join(baza, "assets", "logo_pokecity.png") if any(
+                    k in _tl for k in ("pokecity", "pokemon", "pixelmon")) else None
+                p = fa_miniatura(cadru, dst_clasic, titlu_full, logo, sageata=(820, 240), avatar=AVATAR, badge=badge_serie)
                 print(f"   miniatura {'fallback' if mini_ai else 'A'}: {os.path.basename(p)}")
                 for suf, sageata2 in (("B", (400, 600)), ("C", (640, 140))):
                     try:
                         p2 = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura_{suf}.jpg"),
-                                          titlu_full, logo, sageata=sageata2, avatar=AVATAR)
+                                          titlu_full, logo, sageata=sageata2, avatar=AVATAR, badge=badge_serie)
                         print(f"   miniatura {suf}: {os.path.basename(p2)}")
                     except Exception:
                         pass
