@@ -167,6 +167,9 @@ cmd = [sys.executable, "autoeditor.py", "live_curent.mp4", "--calitate", "2k", "
 cmd += ["--ai"]   # CREIERUL MEREU PORNIT: fara el momentele se aleg doar dupa zgomot (greseala r17/r18)
 if os.environ.get("SUBTITRARI", "0") == "1":   # whisper pe live 2h = ~10 min; default OFF pt viteza
     cmd += ["--subtitrari"]
+if os.path.exists("momente.txt"):   # MOD MANUAL: creatorul zice momentele (unul pe linie)
+    cmd += ["--momente", "momente.txt"]
+    print("MOD MANUAL: momente.txt prezent ->", open("momente.txt").read().strip().splitlines())
 sh(cmd, env=env)
 
 # ── 2b) SHORTS (verticale 9:16, <60s, din varfurile maxime) ──

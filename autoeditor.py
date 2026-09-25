@@ -1630,9 +1630,32 @@ def main():
                         source_fingerprint=source_sha),
                     catalogue, live_len, opt.max, transcript=transcript)
             except Exception as ex2:
-                # A 3-a incercare: clasicul pe varfuri audio (fara AI) — episodul IASA oricum.
-                # Gemini are zile proaste; creatorul are nevoie de livrare, nu de scuze.
-                print(f"   ! si a 2-a incercare a picat: {type(ex2).__name__}: {str(ex2)[:300]} -> PLAN C: momente clasice pe varfuri audio")
+                # MOD MANUAL = SACRU (creatorul a ALES momentul — nu-l tradeaza nici
+                # un AI cazut): construim episodul pe momentul lui, fara Gemini.
+                if opt.momente:
+                    print(f"   ! verificarea AI a picat ({type(ex2).__name__}) -> MOD MANUAL: episod pe momentul TAU (fara Gemini)")
+                    episoade, p3n = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max)
+                    for i2, pp in enumerate(episoade, 1):
+                        pp.setdefault("tip", "poveste")
+                        # REGULA DE AUR: titlul = ce se spune/vede EXACT acolo —
+                        # fara AI folosim replica TA din acea secunda (verbatim)
+                        try:
+                            from editorial import quote_catalogue
+                            sc0 = pp.get("scene", [[max(0, pp.get("varf", 0) - 60), 60]])[0]
+                            citate = quote_catalogue(transcript, sc0[0], sc0[0] + sum(d for _, d in pp.get("scene", [(0, 60)])) or 60)
+                            if citate:
+                                primul = sorted(citate.values(), key=lambda c: c["sec"])[0]
+                                t2 = str(primul["text"]).strip().upper().rstrip(".!?")
+                                if 8 <= len(t2) <= 60:
+                                    pp.setdefault("ai_titlu", t2)
+                        except Exception:
+                            pass
+                        pp.setdefault("ai_titlu", f"MOMENTUL ALES DE TINE {i2}")
+                    audit = [{"status": "manual-fara-ai", "motiv": f"AI indisponibil ({type(ex2).__name__}); episod construit pe momentul ales de creator"}]
+                else:
+                    # A 3-a incercare: clasicul pe varfuri audio (fara AI) — episodul IASA oricum.
+                    # Gemini are zile proaste; creatorul are nevoie de livrare, nu de scuze.
+                    print(f"   ! si a 2-a incercare a picat: {type(ex2).__name__}: {str(ex2)[:300]} -> PLAN C: momente clasice pe varfuri audio")
                 try:
                     analiza = analiza_audio(ff, opt.video)
                     varfuri = [(t, s2) for t, s2 in (analiza or [])]
@@ -1651,6 +1674,15 @@ def main():
                     audit = [{"status": "neverificat", "motiv": f"Selectie indisponibila: {type(ex3).__name__}"}]
         with open(os.path.join(folder, "DECIZII_AI.json"), "w", encoding="utf-8") as f:
             json.dump(audit, f, ensure_ascii=False, indent=2)
+        if not episoade and opt.momente:
+            # manual = sacru: AI le-a respins pe toate (sau nu a putut) -> episodul
+            # pe momentul ales de creator se construieste local, fara Gemini
+            print("   ! AI nu a aprobat nimic -> MOD MANUAL: episod pe momentul TAU")
+            episoade, _ = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max)
+            for pp in episoade:
+                pp.setdefault("tip", "poveste")
+                pp.setdefault("ai_titlu", "MOMENTUL ALES DE TINE")
+            audit = [{"status": "manual-fara-ai", "motiv": "AI nu a aprobat; episod construit pe momentul creatorului"}]
         if not episoade:
             with open(os.path.join(folder, "plan.json"), "w", encoding="utf-8") as f:
                 json.dump([], f)
