@@ -1698,6 +1698,11 @@ def main():
     sm_full = [v for _, v in seria]
     facute = []
     for k, e in enumerate(episoade, 1):
+        # TURBO-SHORTS (AE_EPISOADE_OFF=1): run dedicat shorturilor — planul se
+        # scrie exact la fel, dar NU se mai randeaza episoadele (nu le dublam).
+        if os.environ.get("AE_EPISOADE_OFF") == "1":
+            print(f"   EP{k:02d}: TURBO-SHORTS: randare sarita (run dedicat shorturilor)")
+            continue
         eticheta = "POVESTEA" if e["tip"] == "poveste" else "clasic"
         # PROTECTIA RETENTIEI: daca finalul episodului e mort, il tai elastic (MrBeast:
         # tai cand s-a terminat povestea, nu cronometrul). Minim 90s.

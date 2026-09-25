@@ -13,9 +13,17 @@ from performance import file_digest
 def candidates(plan, maximum):
     chosen = []
     for episode in sorted(plan, key=lambda e: -float(e.get('scor') or 0)):
-        if episode.get('ai_verified') is not True or len(episode.get('scene', [])) != 1:
+        if episode.get('ai_verified') is not True:
             continue
-        start, duration = episode['scene'][0]
+        scene = episode.get('scene') or []
+        if not scene:
+            continue
+        # FIX: episoadele-POVESTEA au 4 scene (acte) — fereastra shortului se
+        # calculeaza pe INTREG episodul in timp live, nu doar pe o scena unica
+        # (inainte le saria pe toate => 0 shorturi in modul poveste).
+        start = float(scene[0][0])
+        duration = (float(scene[0][1]) if len(scene) == 1
+                    else sum(float(d) for _, d in scene))
         peak = float(episode['varf'])
         if duration < 16 or not start <= peak < start + duration:
             continue
@@ -106,7 +114,9 @@ def main():
         subprocess.run(render_command(ff, source, idea['inceput'], out, sounds,
                           intro=gaseste_intro_sting()), check=True)
         if not calibreaza_lufs(ff, str(out)):
-            raise SystemExit('Short respins: master audio neverificat.')
+            # FIX (oglinda fixului de la episoade): o masuratoare esuata NU
+            # arunca shortul — YouTube re-normalizeaza oricum la upload.
+            print('ATENTIE: NU am putut verifica LUFS pentru short — pleaca asa (non-fatal).')
         (folder / f'SHORT{number:02d}_upload.txt').write_text(
             f'TITLU: {title}\n\nDESCRIERE:\n{review["ce_se_intampla"]}\n\n#shorts #gaming #romania\n',
             encoding='utf-8')
