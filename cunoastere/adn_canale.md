@@ -29,3 +29,31 @@
    titlul se testeaza: "ar da click un copil de 10 ani vazand DOAR titlul?" Daca nu -> rescrie.
 4. FIECARE episod promite ceva si IL LIVREAZA (promis = livrat, altfel publicul te pierde).
 5. POVESTEA = intotdeauna o CALATORIE cu miza (ceva rar/ceva mare/ceva care poate esua).
+
+## FORMULA POVESTEI — deconstruita DIN TRANSCRIPTURI REALE (JH Mimic Party 162K, iSilent GUGU 138K, Klorna Cat in the Hat 278K — studiate 25.09.2026)
+
+### Ce au in comun TOTURor clipurilor de top (structura pe acte, identica la toti 3):
+1. **INTRARE-SHOC (primele 5-8s)**: se intampla CEVA imediat (televizor spart, monstru apare, personajul striga) — zero preambul lung. Abia dupa shoc saluta/si explica intr-o fraza.
+2. **MISIUNE CLARA intr-o fraza**: "emisiunea noastra e sa luam cheia rosie", "afmam ce contine GUGU", "o sa imitam manele". Copilul stie EXACT ce se va intampla.
+3. **ESCALADARE PE RUNDE/INCERCARI**: aceeasi actiune se repeta cu miza mai mare sau schimbare (runda noua, monstrul devine mai rapid, aroma noua). Fiecare runda = mici victorii + esecuri comice.
+4. **ESEC COMIC LA MIJLOC** (obligatoriu!): "am uitat canga", "zero puncte", "mi-a mancat cheia", restart. Copilul rade de greseala creatorului, NU doar de joc.
+5. **CLIMAX cu intoarcere**: finalul nu e previzibil — apare ceva neasteptat (cheia rosie, cantecul, perfect score).
+6. **FINAL + ÎNTREBARE PENTRU COMENTARII**: "scrieti in comentarii care e aroma voastra preferata", "jucam actul doi?". Întrebarea = comentarii = algoritmul.
+
+### TITLURILE — 6 sabloane dovedite (cu views reale):
+| Sablon | Exemplu real | Views |
+|---|---|---|
+| CE s-a intamplat cu {PERSONAJ} ? | "CE s-a intamplat cu COPILUL ?" | 220K |
+| FUGI de {PERSONAJ} cu {CAPACITATE} ! | "FUGI de Cat in the Hat cu VITEZA INFINITA !" | 158K |
+| Am GASIT {LUCRU} in {LOC}.. | "Am gasit CAT in the HAT in Lumea MEA.." | 269K |
+| Mor de {EMOTIE} pe {LUCRU}.. | "Mor de CRINGE pe Acest SUNET.." | 171K |
+| {PERSONAJ} in {JOC}.. | "Cat in the Hat in Hello Neighbor.." | 278K |
+| CINE {actiune} mai {BINE/RAPID} ? | "CINE a facut mai BINE SUNETUL ?" | 215K |
+
+REGULI TITLU: cuvinte-cheie in CAPS (personaj, obiect, capacitate); intrebare SAU "..." mister la final; PERSONAJ CONCRET (nume, nu "ceva"); promite o INTORSATURA, nu o activitate; max 55 caractere; fara "Ep. N".
+
+### CUM TESTEZ daca o poveste e "ca la ei" (checklist in 4 intrebari):
+1. In primele 8 secunde se intampla un SHOC sau se anunta MISIUNEA? (nu "bun venit pe canal")
+2. Se intelege OBIECTIVUL intr-o fraza? (gasi X, scapa de Y, castiga Z)
+3. Exista un ESEC COMIC pe parcurs si o INTOARCERE la final?
+4. Titlul da click SINGUR? (personaj + miza, sablonul de mai sus)
