@@ -1067,11 +1067,15 @@ def ia_gemini(cheie, model, prompt, cadre_b64):
             except urllib.error.HTTPError as ex:
                 last_error = ex
                 if ex.code in (429, 500, 503):
-                    time.sleep(2 * (attempt + 1))
+                    time.sleep(5 * (attempt + 1))
                     continue
                 if ex.code == 404:
                     break
                 raise
+            except (TimeoutError, urllib.error.URLError) as ex:
+                last_error = ex   # stall de retea/limita Gemini: NU aruncam — reincercam
+                time.sleep(10 * (attempt + 1))
+                continue
         if data is not None:
             break
     if data is None:
@@ -1462,8 +1466,26 @@ def main():
                     source_fingerprint=source_sha),
                 catalogue, live_len, opt.max, transcript=transcript)
         except Exception as ex:
-            episoade = []
-            audit = [{"status": "neverificat", "motiv": f"Selectie indisponibila: {type(ex).__name__}"}]
+            # Run #29 lecția: un TimeoutError după 52 min de transcript a aruncat TOT.
+            # Gemini are crize tranzitorii (503/timeout) -> o singura reincercare completa.
+            print(f"   ! selectia a picat ({type(ex).__name__}) -> reincerc dupa 60s")
+            time.sleep(60)
+            try:
+                if opt.momente:
+                    idei = [{"inceput": max(0, t - 55), "sfarsit": min(live_len, max(0, t - 55) + 170),
+                             "titlu": "Moment indicat de creator", "de_ce": "Selectie manuala"}
+                            for t in momente]
+                else:
+                    idei = idei_cu_ai(ia_gemini, cheie, model, transcript, live_len, baza)
+                episoade, audit = approved_episodes(
+                    idei,
+                    lambda idea: verifica_idee_cu_video(
+                        ff, cheie, model, os.path.abspath(opt.video), idea, catalogue=catalogue, transcript=transcript,
+                        source_fingerprint=source_sha),
+                    catalogue, live_len, opt.max, transcript=transcript)
+            except Exception as ex2:
+                episoade = []
+                audit = [{"status": "neverificat", "motiv": f"Selectie indisponibila: {type(ex2).__name__}"}]
         with open(os.path.join(folder, "DECIZII_AI.json"), "w", encoding="utf-8") as f:
             json.dump(audit, f, ensure_ascii=False, indent=2)
         if not episoade:
