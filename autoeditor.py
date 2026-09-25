@@ -322,8 +322,13 @@ def gaseste_efecte(folder_assets):
     return gasite
 
 
+# NUME DE PERSOANE DIN CHAT (creator 25.09: "zic Maria de pe chatul live — sa nu apara"):
+# se pot adauga usor nume noi despartite de |
+_NUME_CHAT = r"(?i)\b(maria|antonia|edward|ioana|andrei|alexandru|mihai|mihaela|stefan|diana|elena|andreea|george|matei|david|rares|daniel|vlad|cristi|cristina|gabriel|gabriela|nicolas|nicu|denis|denisa)\b"
 LEGI_ABSOLITE = re.compile(
-    r"\b(salut|salutare|bine ai venit|buna seara|buna ziua|multumesc|mul[țt]umesc|mersi|abonat|aboneaz[ăa]|follow|donat|donat[íi]e|superchat)\b", re.I)
+    r"\b(salut|salutare|bine ai venit|buna seara|buna ziua|multumesc|mul[țt]umesc|mersi|abonat|aboneaz[ăa]|follow|donat|donat[íi]e|superchat|scuze|pa pa|pa [\-—])\b"
+    r"|\b(salut|buna|pa|multumesc|mersi)\s+[A-ZĂÂÎȘȚ][a-zăâîșț]+\b"
+    r"|" + _NUME_CHAT, re.I)   # + nume de persoane din chat (Maria etc.) = respins direct
 
 
 def moment_bun_transcript(transcript, C, fereastra=45):
@@ -335,6 +340,9 @@ def moment_bun_transcript(transcript, C, fereastra=45):
              if C - fereastra <= a <= C + fereastra and str(t).strip()]
     if not linii:
         return False, "niciun dialog in jurul momentului (nimic-nimic)"
+    cu_nume = sum(1 for _, t in linii if re.search(_NUME_CHAT, t))
+    if cu_nume:
+        return False, f"vorbit cu o persoana din chat ({cu_nume} replici cu nume) — regula creatorului"
     saluturi = sum(1 for _, t in linii if LEGI_ABSOLITE.search(t))
     if saluturi >= max(2, len(linii) // 3):
         return False, f"salutari/citit nume de abonati ({saluturi}/{len(linii)} replici)"
@@ -1084,6 +1092,8 @@ def pops_subtitrari(transcript, scene, durata):
         if not (8 <= len(tt) <= 48) or len(tt.split()) < 2:
             continue
         tl = tt.lower()
+        if LEGI_ABSOLITE.search(tt):
+            continue          # nu punem pe ecran saluturi/vorbit cu o persoana din chat
         scor = sum(2 for c in CUV_POP if c in tl) + (1 if tt.isupper() or tt[:-1].isupper() else 0)
         if scor <= 0:
             continue
