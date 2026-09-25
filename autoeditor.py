@@ -659,6 +659,16 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
                  "victorie": max(0, durata - 8), "final": max(0, durata - 5)}
         for k, (slot, cale) in enumerate(efecte.items()):
             cmd += ["-i", cale]
+            # FIX: mp3-urile creatorului au COPERTA (attached pic = stream video) ->
+            # selectam EXPLICIT audio-ul cel mai bun al input-ului (0:a? nu merge in
+            # filter_complex) => adaugam mapping-ul prin [-map inainte] NU se poate in
+            # filter_complex; corect: eticheta pe stream-ul audio cu cel mai lung duration
+            # folosind [idx:0:a]? ffmpeg alege automat primul audio cu 0:a — dar attached
+            # pic e la 5:1, deci audio-ul e 5:0. Solutia robusta: alegem la indexarea
+            # input-ului doar stream-ul audio (optiunea -an pe input nu opreste audio).
+            # => vom detecta la randare: daca inputul are video attached, il ignoram cu
+            # optiunea de input -vn (sare stream-ul de coperta; audio-ul ramane 0).
+            cmd = cmd[:-1] + ["-vn", "-i", cale]
             idx = n + (1 if logo else 0) + (1 if confeti else 0) + (1 if muzica else 0) + k
             ms = int(timpi[slot] * 1000)
             filtre.append(f"[{idx}:a]adelay={ms}:all=1,volume=0.9[s{idx}]")
@@ -690,7 +700,7 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     if sfx_rand:
         baza_idx = n + (1 if logo else 0) + (1 if confeti else 0) + (1 if muzica else 0) + (len(efecte) if efecte else 0)
         for j, (t, cale, vol) in enumerate(sfx_rand):
-            cmd += ["-i", cale]
+            cmd += ["-vn", "-i", cale]   # -vn: sare coperta mp3 (attached pic bug #34)
             idx = baza_idx + j
             if poveste.get("ai_verified"):
                 filtre.append(sound_filter(idx, t, f"x{idx}"))
