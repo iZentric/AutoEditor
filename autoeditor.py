@@ -450,16 +450,41 @@ def gaseste_meme(assets_dir):
             if os.path.splitext(f)[1].lower() in ext and not f.startswith(".")]
 
 
+def _extrage_json_stderr(stderr):
+    """Cel ULTIM bloc {...} din stderr (json-ul loudnorm; brace-uri anterioare de
+    metadata/banner nu conteaza). Fix #37: pe runner, cautarea primului '{' prindea
+    alte constructii si parse-ul pica -> 'master audio neverificat'."""
+    sfarsit = stderr.rfind("}")
+    if sfarsit == -1:
+        return None
+    inceput = stderr.rfind("{", 0, sfarsit)
+    if inceput == -1:
+        return None
+    try:
+        return json.loads(stderr[inceput:sfarsit + 1])
+    except Exception:
+        return None
+
+
 def masoara_lufs(ff, cale):
     """Masura loudness-ul real (LUFS integrat) + true peak dintr-un fisier."""
-    r = subprocess.run([ff, "-i", cale, "-af",
+    r = subprocess.run([ff, "-nostats", "-i", cale, "-af",
                         "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
                         "-f", "null", "-"], capture_output=True, text=True, timeout=600)
-    j = r.stderr[r.stderr.find("{"):r.stderr.rfind("}") + 1]
+    d = _extrage_json_stderr(r.stderr)
+    if not d or "input_i" not in d:
+        # a 2-a incercare, fara banner/progress care pot polua stderr pe ffmpeg vechi
+        r = subprocess.run([ff, "-hide_banner", "-nostats", "-i", cale, "-af",
+                            "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
+                            "-f", "null", "-"], capture_output=True, text=True, timeout=600)
+        d = _extrage_json_stderr(r.stderr)
+        if not d or "input_i" not in d:
+            print(f"   ! LUFS: masuratoare ilizibila (rc={r.returncode}, coada stderr: {(r.stderr or '')[-160:].strip()!r})")
+            return None, None
     try:
-        d = json.loads(j)
         return float(d.get("input_i", -70)), float(d.get("input_tp", 0))
     except Exception:
+        print(f"   ! LUFS: valori non-numerice in json: {d}")
         return None, None
 
 
@@ -490,6 +515,7 @@ def calibreaza_lufs(ff, cale):
                             "-movflags", "+faststart", tmp],
                            capture_output=True, text=True, timeout=900)
         if r.returncode != 0 or not os.path.exists(tmp):
+            print(f"   ! LUFS: codificarea liniara a esuat (rc={r.returncode}): {(r.stderr or '')[-160:].strip()!r}")
             return None
         os.replace(tmp, cale)
         i_out, peak = masoara_lufs(ff, cale)
@@ -516,14 +542,16 @@ def calibreaza_lufs(ff, cale):
 
 def masoara_lufs_json(ff, cale):
     """Toate campurile de masurare loudnorm (pt trecerea liniara)."""
-    r = subprocess.run([ff, "-i", cale, "-af",
+    r = subprocess.run([ff, "-nostats", "-i", cale, "-af",
                         "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
                         "-f", "null", "-"], capture_output=True, text=True, timeout=600)
-    j = r.stderr[r.stderr.find("{"):r.stderr.rfind("}") + 1]
-    try:
-        return json.loads(j)
-    except Exception:
-        return None
+    d = _extrage_json_stderr(r.stderr)
+    if not d or "input_i" not in d:
+        r = subprocess.run([ff, "-hide_banner", "-nostats", "-i", cale, "-af",
+                            "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json",
+                            "-f", "null", "-"], capture_output=True, text=True, timeout=600)
+        d = _extrage_json_stderr(r.stderr)
+    return d
 
 
 def expr_zoom(poz, sfarsit, varf, crestere, fps, urcare, coborare):
@@ -1701,7 +1729,12 @@ def main():
         if out:
             lu = calibreaza_lufs(ff, os.path.join(folder, out))
             if opt.ai and not lu:
-                sys.exit(f"EP{k:02d}: master audio neverificat; livrarea este oprita.")
+                # FIX #37: o masuratoare LUFS esuata NU mai omoara livrarea
+                # (retry o data; apoi episodul pleaca asa — YouTube re-normalizeaza oricum)
+                print(f"   EP{k:02d}: retry calibrare LUFS...")
+                lu = calibreaza_lufs(ff, os.path.join(folder, out))
+            if opt.ai and not lu:
+                print(f"   EP{k:02d}: ATENTIE: NU am putut verifica LUFS — episodul PLEACA ASA (non-fatal).")
             if lu:
                 e["_lufs"] = lu
             facute.append((k, e, out))
