@@ -1958,7 +1958,13 @@ def main():
             if os.path.exists(cadru):
                 dst_clasic = os.path.join(folder, f"EP{k:02d}_miniatura_fallback.jpg") if mini_ai \
                     else os.path.join(folder, f"EP{k:02d}_miniatura.jpg")
-                _tl = (titlu_full + " " + str(e.get("ai_in_joc", "")) + " " + str(e.get("ai_de_ce", ""))).lower()
+                _ctx = ""
+                try:
+                    if os.path.exists("context_sursa.txt"):
+                        _ctx = open("context_sursa.txt", encoding="utf-8").read()
+                except Exception:
+                    _ctx = ""
+                _tl = (str(titlu_full) + " " + str(e.get("ai_in_joc", "")) + " " + str(e.get("ai_de_ce", "")) + " " + _ctx + " " + os.environ.get("AE_SERIE", "")).lower()
                 badge_serie = os.path.join(baza, "assets", "logo_pokecity.png") if any(
                     k in _tl for k in ("pokecity", "pokemon", "pixelmon")) else None
                 p = fa_miniatura(cadru, dst_clasic, titlu_full, logo, sageata=(820, 240), avatar=AVATAR, badge=badge_serie)
