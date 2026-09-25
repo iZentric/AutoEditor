@@ -281,6 +281,18 @@ def gaseste_efecte(folder_assets):
     gasite = {}
     for nume in EFECTE_SLOTS:
         candidati = []
+        if nume == "intrare":
+            # INTRO stil youtuber (cerinta creatorului 25.09): sting-ul de deschidere
+            # = "Awkward Moment" din sunete_mele/ (brand constant la 0:00, nu random)
+            intro_gasite = []
+            for f in (sorted(os.listdir(baza_mele)) if os.path.isdir(baza_mele) else []):
+                nf = os.path.splitext(f)[0].lower()
+                if ("awkward" in nf or "intro" in nf) and os.path.splitext(f)[1].lower() in EXT_AUDIO                         and not f.startswith("."):
+                    intro_gasite.append(os.path.join(baza_mele, f))
+            if intro_gasite:
+                intro_gasite.sort(key=lambda cale: (0 if "moment" in os.path.basename(cale).lower() else 1, cale))
+                gasite["intrare"] = intro_gasite[0]
+                continue
         sub = os.path.join(baza_mele, nume.upper())
         if os.path.isdir(sub):
             candidati += [os.path.join(sub, f) for f in os.listdir(sub)

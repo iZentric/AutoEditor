@@ -143,7 +143,7 @@ def verifica_idee_cu_video(ff, cheie, model, video, ide, tmp=None, catalogue=Non
         f"IDEE PROPUSA (nu este dovada): {ide.get('titlu', '')}. "
         f"Durata exacta: {sf-inc}s. Secunda 0 este inceputul ACESTUI clip. "
         "Titlu romanesc concret, fara Ep. N, fara promisiuni de rar/legendar daca nu ai dovezi. "
-        "Alege optional 0-4 efecte din catalogul real, DOAR la evenimente vazute/auzite. "
+        "Alege optional 0-6 efecte din catalogul real, DOAR la evenimente vazute/auzite. Sunetul de INTRO se pune automat de sistem — nu cheltui o propunere pe secunda 0. "
         "Numele si categoria sunt indicii, nu ai ascultat fisierele din catalog. "
         "Daca sensul unui sunet nu este clar, NU il folosi. Niciun efect de umplutura. "
         "Nu acoperi replicile importante; prefera pauza imediat dupa reactie. "

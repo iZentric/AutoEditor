@@ -4,7 +4,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from autoeditor import gaseste_ffmpeg, citeste_cheie_gemini, clasifica_sunet, FOLDERE_MELE, calibreaza_lufs
+from autoeditor import gaseste_ffmpeg, citeste_cheie_gemini, clasifica_sunet, FOLDERE_MELE, calibreaza_lufs, EXT_AUDIO
 from editorial import sound_catalogue, validate_review, validate_sounds, sound_filter
 from idei_ai import verifica_idee_cu_video
 from performance import file_digest
@@ -29,16 +29,39 @@ def candidates(plan, maximum):
     return chosen
 
 
-def render_command(ff, source, start, out, sounds):
+def gaseste_intro_sting():
+    """INTRO stil youtuber pe shorturi (cerinta creatorului): fisierul
+    'Awkward Moment/Pause' din sunete_mele/ = sunetul de aparitie la inceput."""
+    d = Path(__file__).resolve().parent / 'sunete_mele'
+    if not d.is_dir():
+        return None
+    for f in sorted(d.iterdir()):
+        nf = f.stem.lower()
+        if ('awkward' in nf or 'intro' in nf) and f.suffix.lower() in EXT_AUDIO:
+            return str(f)
+    return None
+
+
+def render_command(ff, source, start, out, sounds, intro=None):
     cmd = [ff, '-y', '-ss', str(start), '-t', '16', '-i', source]
     for sound in sounds:
         cmd += ['-i', sound['path']]
+    if intro:
+        cmd += ['-i', intro]
     filters = ['[0:v]crop=ih*9/16:ih,scale=1080:1920:flags=lanczos[v]',
                '[0:a]atrim=duration=16,asetpts=PTS-STARTPTS,loudnorm=I=-16:TP=-1.5:LRA=11[a]']
     for n, sound in enumerate(sounds, 1):
         filters.append(sound_filter(n, sound['sec'], f's{n}'))
+    # sting-ul de intro la 0.3s, usor dat in spate sub voice, cu fade scurt
+    if intro:
+        k = len(sounds) + 1
+        filters.append(f'[{k}:a]atrim=duration=2.2,asetpts=PTS-STARTPTS,volume=0.55,'
+                       f'afade=t=out:st=1.6:d=0.6,adelay=300:all=1[i{k}]')
     inputs = '[a]' + ''.join(f'[s{n}]' for n in range(1, len(sounds) + 1))
-    filters.append(f'{inputs}amix=inputs={len(sounds)+1}:duration=first:normalize=0,'
+    if intro:
+        inputs += f'[i{len(sounds) + 1}]'
+    total = len(sounds) + (1 if intro else 0) + 1
+    filters.append(f'{inputs}amix=inputs={total}:duration=first:normalize=0,'
                    'loudnorm=I=-14:TP=-1.5:LRA=11[aout]')
     return cmd + ['-filter_complex', ';'.join(filters), '-map', '[v]', '-map', '[aout]',
                   '-t', '16', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
@@ -80,7 +103,8 @@ def main():
             continue
         number = completed + 1
         out = folder / f'SHORT{number:02d}.mp4'
-        subprocess.run(render_command(ff, source, idea['inceput'], out, sounds), check=True)
+        subprocess.run(render_command(ff, source, idea['inceput'], out, sounds,
+                          intro=gaseste_intro_sting()), check=True)
         if not calibreaza_lufs(ff, str(out)):
             raise SystemExit('Short respins: master audio neverificat.')
         (folder / f'SHORT{number:02d}_upload.txt').write_text(
