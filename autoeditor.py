@@ -135,7 +135,7 @@ def _top_scor(scor, a, b, folosite, tol):
     return best
 
 
-def alege_povesti(varfuri, scor, live_len, durata, max_ep):
+def alege_povesti(varfuri, scor, live_len, durata, max_ep, transcript=None):
     """Construieste episoade-POVESTEA: 3 scene cronologice (inceput/mijloc/sfarsit) + intro-reactie.
     Fixeaza: C = momentul maxim; A = setup din prima treime; B = desfasurare dintre A si C."""
     global VARFURI_GLOBALE
@@ -150,6 +150,9 @@ def alege_povesti(varfuri, scor, live_len, durata, max_ep):
         if not (15 <= C <= live_len - 40):
             continue
         if any(abs(C - u) < durata + 60 for u in folosite):
+            continue
+        bun, motiv = moment_bun_transcript(transcript, C)
+        if not bun:
             continue
         # UN-SINGUR-JOC (creatorul 25.09: „a combinat roblox cu minecraft — nu e bine deloc"):
         # actele A si B se cauta DOAR in fereastra contigua ~7 min inainte de C,
@@ -319,6 +322,28 @@ def gaseste_efecte(folder_assets):
     return gasite
 
 
+LEGI_ABSOLITE = re.compile(
+    r"\b(salut|salutare|bine ai venit|buna seara|buna ziua|multumesc|mul[țt]umesc|mersi|abonat|aboneaz[ăa]|follow|donat|donat[íi]e|superchat)\b", re.I)
+
+
+def moment_bun_transcript(transcript, C, fereastra=45):
+    """LEGI ABSOLITE (creator 25.09): episodul nu incepe cu saluturi de abonati si
+    nu se construieste pe goluri in care nu se intampla nimic."""
+    if not transcript:
+        return True, "fara transcript (pastrez momentul)"
+    linii = [(a, str(t).strip()) for a, b, t in transcript
+             if C - fereastra <= a <= C + fereastra and str(t).strip()]
+    if not linii:
+        return False, "niciun dialog in jurul momentului (nimic-nimic)"
+    saluturi = sum(1 for _, t in linii if LEGI_ABSOLITE.search(t))
+    if saluturi >= max(2, len(linii) // 3):
+        return False, f"salutari/citit nume de abonati ({saluturi}/{len(linii)} replici)"
+    cuvinte = sum(len(t.split()) for _, t in linii)
+    if cuvinte < 15:   # vanarea linistita e OK; golul total NU
+        return False, f"prea putina actiune/vorbit in jur ({cuvinte} cuvinte in +/-{fereastra}s)"
+    return True, f"OK ({cuvinte} cuvinte in +/-{fereastra}s)"
+
+
 def citeste_momente(path):
     """Citeste fisierul tau de momente: 'm:ss' sau 'h:mm:ss', unul pe linie, # = comentariu."""
     momente = []
@@ -337,7 +362,7 @@ def citeste_momente(path):
     return sorted(set(momente))
 
 
-def alege_din_momente(momente, varfuri, scor, live_len, durata, max_ep):
+def alege_din_momente(momente, varfuri, scor, live_len, durata, max_ep, transcript=None):
     """MODUL MANUAL: momentele tale devin MOMENTUL MAXIM al fiecarui episod.
     In jurul fiecaruia construiesc cea mai buna forma: poveste (setup+desfasurare
     gasite automat in restul live-ului) sau, daca nu exista material inainte, scena completa."""
@@ -354,8 +379,14 @@ def alege_din_momente(momente, varfuri, scor, live_len, durata, max_ep):
         if any(abs(C - u) < durata for u in folosite):
             print(f"   ! momentul {_ts(C)} se suprapune cu altul — sarit")
             continue
-        A = _top_scor(scor, 15, min(int(live_len * 0.35), C - 160), folosite, 100)
-        B = _top_scor(scor, A[0] + 80, C - 90, folosite, 100) if A else None
+        bun, motiv = moment_bun_transcript(transcript, C)
+        if not bun:
+            print(f"   ! momentul {_ts(C)} RESPINS de LEGILE ABSOLITE: {motiv}")
+            continue
+        # UN-SINGUR-JOC si in modul manual: setup/desfasurare doar in fereastra
+        # contigua (~7 min) dinaintea momentului ales, nu prin tot live-ul
+        A = _top_scor(scor, max(15, C - 420), C - 160, folosite, 100)
+        B = _top_scor(scor, A[0] + 80, C - 60, folosite, 100) if A else None
         s_C = round(scor[C], 1) if C < len(scor) else 0.0
         if A and B:
             povesti.append({"tip": "poveste", "scor": s_C, "manual": True, "varf": C,
@@ -1547,7 +1578,7 @@ def main():
         if not momente:
             sys.exit(f"Nu am putut citi momente din {opt.momente} (format: m:ss sau h:mm:ss, unul pe linie)")
         print(f"   MOD MANUAL: {len(momente)} momente date de tine -> construiesc episoadele pe ele")
-        episoade, p3 = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max)
+        episoade, p3 = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max, transcript=transcript)
     else:
         if varfuri:
             # POARTA DE ELITA: intra doar momentele din clasa de varf a live-ului.
@@ -1634,7 +1665,7 @@ def main():
                 # un AI cazut): construim episodul pe momentul lui, fara Gemini.
                 if opt.momente:
                     print(f"   ! verificarea AI a picat ({type(ex2).__name__}) -> MOD MANUAL: episod pe momentul TAU (fara Gemini)")
-                    episoade, p3n = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max)
+                    episoade, p3n = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max, transcript=transcript)
                     for i2, pp in enumerate(episoade, 1):
                         pp.setdefault("tip", "poveste")
                         # REGULA DE AUR: titlul = ce se spune/vede EXACT acolo —
@@ -1661,7 +1692,7 @@ def main():
                     varfuri = [(t, s2) for t, s2 in (analiza or [])]
                     if varfuri:
                         scor_min = {t: s2 for t, s2 in varfuri}   # _top_scor cere dict
-                        povesti, _ = alege_povesti(varfuri, scor_min, live_len, opt.durata, opt.max)
+                        povesti, _ = alege_povesti(varfuri, scor_min, live_len, opt.durata, opt.max, transcript=transcript)
                         # fallback-clasic = titluri de rezerva pana le reface AI-ul maine
                         for i2, pp in enumerate(povesti, 1):
                             pp.setdefault("ai_titlu", f"MOMENTUL CEL MAI TARE {i2} DIN LIVE")
@@ -1678,7 +1709,7 @@ def main():
             # manual = sacru: AI le-a respins pe toate (sau nu a putut) -> episodul
             # pe momentul ales de creator se construieste local, fara Gemini
             print("   ! AI nu a aprobat nimic -> MOD MANUAL: episod pe momentul TAU")
-            episoade, _ = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max)
+            episoade, _ = alege_din_momente(momente, varfuri, scor, live_len, opt.durata, opt.max, transcript=transcript)
             for pp in episoade:
                 pp.setdefault("tip", "poveste")
                 pp.setdefault("ai_titlu", "MOMENTUL ALES DE TINE")
