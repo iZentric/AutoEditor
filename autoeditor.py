@@ -324,7 +324,7 @@ def gaseste_efecte(folder_assets):
 
 # NUME DE PERSOANE DIN CHAT (creator 25.09: "zic Maria de pe chatul live — sa nu apara"):
 # se pot adauga usor nume noi despartite de |
-_NUME_CHAT = r"(?i)\b(maria|antonia|edward|ioana|andrei|alexandru|mihai|mihaela|stefan|diana|elena|andreea|george|matei|david|rares|daniel|vlad|cristi|cristina|gabriel|gabriela|nicolas|nicu|denis|denisa)\b"
+_NUME_CHAT = r"\b(maria|antonia|edward|ioana|andrei|alexandru|mihai|mihaela|stefan|diana|elena|andreea|george|matei|david|rares|daniel|vlad|cristi|cristina|gabriel|gabriela|nicolas|nicu|denis|denisa)\b"
 LEGI_ABSOLITE = re.compile(
     r"\b(salut|salutare|bine ai venit|buna seara|buna ziua|multumesc|mul[țt]umesc|mersi|abonat|aboneaz[ăa]|follow|donat|donat[íi]e|superchat|scuze|pa pa|pa [\-—])\b"
     r"|\b(salut|buna|pa|multumesc|mersi)\s+[A-ZĂÂÎȘȚ][a-zăâîșț]+\b"
