@@ -1481,6 +1481,10 @@ def main():
     logo = os.path.join(assets_dir, "logo.png")
     logo = logo if (os.path.exists(logo) and os.environ.get("AE_LOGO", "0") == "1") else None   # watermark pe video OFF (user: "ai scris pe ecran iZentric"); miniaturile il pastreaza
     efecte = gaseste_efecte(assets_dir)
+    print(f"EFECTE-SLOTURI gasite: {[f'{k}={os.path.basename(v)}' for k, v in efecte.items()] or 'NICIUNUL'}")
+    if os.environ.get("AE_INTRO_OBLIGATORIU", "1") != "0" and "intrare" not in efecte:
+        sys.exit("INTRO lipsa: sting-ul de 0:00 ('Awkward Moment') nu a fost gasit in sunete_mele — "
+                 "livrare oprita (regula creatorului: sunetul de inceput e OBLIGATORIU)")
     AVATAR = gaseste_avatar(assets_dir)   # fata ta din joc pt miniaturi (assets/avatar.png)
     confeti_p = os.path.join(assets_dir, "efecte", "confeti.webm")
     confeti_p = confeti_p if (os.path.exists(confeti_p) and os.environ.get("AE_CONFETI", "0") == "1") else None   # confetti OFF (user: "partile colorate pe ecran")
