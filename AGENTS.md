@@ -108,3 +108,13 @@ links to the user in Romanian, short, with tables.
 5. in cod (autoeditor.py): cauta "MrBeast", "PROTECTIA RETENTIEI", "FINAL ELASTIC",
    "COMPRIMARE stil-JOH", "PRIMELE 3 CUVINTE" — aceleasi legi, aplicate in cod
 >>>>>>> 01b1a86 (learning pack: MrBeast laws + onboarding checklist)
+
+## LEGI VIDEO V3 (t119, 25.09) #SUBTITRARI-DOAR-POPS #ANTI-MARIA #NUME-UNIC-UPLOAD
+1. pe VIDEO: subtitrari DOAR la POP-uri (momente tari, max 10, min 10s intre ele) — FARA dialog continuu.
+2. subtitrari OBLIGATORIU sincronizate: montaj multi-scena → harta scena→live ÎNAINTE de ASS (live_to_ep(t) = off + (t - start)).
+3. EPISOD/SHORT: FARA replici catre o persoana din chat care NU apare in joc (ex "Maria") — _NUME_CHAT in autoeditor.py (lista extensibila) respinge la selectie SI la pops.
+4. curatenie periodica: Release (fisier vechi/prost sters pe ID explicit) + /tmp golit la final.
+5. RE-UPLOAD mereu cu nume NOU unic — același nume = CDN cache servește fișierul vechi.
+6. upload asset >8MB: http.client stream (body=open(f,'rb')) — POST cu Content-Range trunchiază la primul chunk!
+7. randare 2K in sandbox: pre-taie scenele separat (RAM!) sau randeaza 1080p — sursa live e 720p, calitate identica.
+8. logo PNG in ffmpeg: OBLIGATORIU -loop 1 -t DUR — altfel dispare dupa primul frame!

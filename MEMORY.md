@@ -1078,3 +1078,10 @@
 - MAI MULTE POVESTI: AE_POARTA 0.45 (was 0.6); prompt AI = AMUZAMENT prioritatea #1 pt copii mari.
 - Run #28 episod.yml = completed/success (aflata 25.09); #29 dispatch 01:17 pe e1c9ea5 (fara miniaturi v2 — codul vechi).
 - Data.json (100 video canal user): <1min avg 4728 views (max 20K), 1-3min avg 1246, >8min avg 430 -> shorts sub 20s + episoade sub 3min = castigatoare pe canalul lui.
+
+## t119 (25.09) VIDEO NETHER V3 LIVRAT
+- Problema: subtitrari vechi pe fereastra gresita (4135-4305) + 'Nu ierta, Maria'.
+- Fix: harta scena->live [(8095,8,0),(7777,55,8),(7952,55,63),(8082,52,118)], 8 POP-uri sincronizate, logo intro (-loop 1!), fara dialog continuu.
+- Motor: _NUME_CHAT in LEGI_ABSOLITE (autoeditor.py) — Maria & co respinsi; main=e11ee27->6e8fe62.
+- Livrat: FINAL_NETHER_VIDEO_V3_SYNC.mp4 (245.8MB, 1080p) + FINAL_NETHER_POPS_V3.srt + 4 miniaturi re-urcate pe Release 395754968; vechi (153MB desincronizat + srt + 4 JSON/RAPORT) STERSE.
+- Upload mare: http.client stream; POST cu Content-Range = trunchiere la 8MB (capcana gasita).
