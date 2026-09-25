@@ -599,7 +599,7 @@ def expr_zoom(poz, sfarsit, varf, crestere, fps, urcare, coborare):
 
 
 @measured("render-episode")
-def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None, seria=None, meme=None):
+def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte=None, tinta_h=0, sfx_rand=None, confeti=None, h_out=1080, dim=None, seria=None, meme=None, badge=None):
     """O comanda ffmpeg: concateneaza scenele (+intro-reactia), pune logo, textele, muzica."""
     # cuvant-impact pe fiecare sunet al lui (ca „ZIAR"-ul de la JocuriHorror)
     cuvant_pt = {"hit": "PUM!", "cadere": "PAH!", "fericit": "WOW!", "speriat": "HOP!", "generic": "BAM!"}
@@ -793,6 +793,17 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
         if prev != vmap:
             vmap = prev
             poveste["_meme_n"] = len(momente_meme)
+    # LOGO-ul SERIEI pe INTRO (creator 25.09: "foloseste-l si in video la intro"):
+    # apare doar 0.4-8s (pe cold-open), apoi dispare — nu e watermark permanent.
+    if badge and os.path.exists(badge) and efecte and "intrare" in efecte:
+        n_meme = 0
+        bidx = (n + (1 if logo else 0) + (1 if confeti else 0) + (1 if muzica else 0)
+                + (len(efecte) if efecte else 0) + (len(sfx_rand) if sfx_rand else 0) + n_meme)
+        cmd += ["-i", badge]
+        filtre.append(f"[{bidx}:v]scale=-2:230,format=rgba,"
+                      "fade=t=in:st=0.4:d=0.4:alpha=1,fade=t=out:st=7.3:d=0.6:alpha=1[bda]")
+        filtre.append(f"{vmap}[bda]overlay=W-w-34:26:enable='between(t,0.4,8)'[vbd]")
+        vmap = "[vbd]"
     amix_in = "[acn]" + ("[bg]" if muzica else "") + "".join(intrari_sfx) + "".join(intrari_rand)
     filtre.append(f"{amix_in}amix=inputs={amix_in.count('[')}:duration=first:normalize=0[a0]")
     filtre.append(f"[a0]afade=t=out:st={max(0, durata-2)}:d=2[aout]")
@@ -881,7 +892,7 @@ def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None, avatar=No
         # dispare prin FLOOD-FILL de la margini (contururile negre din litere raman),
         # + umbră soft sub logo ca sa se citeasca pe orice fundag aglomerat.
         bd = Image.open(badge).convert("RGBA")
-        bd.thumbnail((320, 320))
+        bd.thumbnail((430, 430))
         px = bd.load()
         w2, h2 = bd.size
         from collections import deque
@@ -1083,10 +1094,10 @@ def pops_subtitrari(transcript, scene, durata):
     candit.sort(key=lambda x: (-x[0], x[1]))
     alese = []
     for _scor, poz, tt in candit:
-        if any(abs(poz - p) < 18 for p, _t in alese):
+        if any(abs(poz - p) < 10 for p, _t in alese):
             continue
         alese.append((poz, tt.upper()))
-        if len(alese) >= 6:
+        if len(alese) >= 10:
             break
     return sorted(alese)
 
@@ -1564,6 +1575,19 @@ def main():
     logo = logo if (os.path.exists(logo) and os.environ.get("AE_LOGO", "0") == "1") else None   # watermark pe video OFF (user: "ai scris pe ecran iZentric"); miniaturile il pastreaza
     efecte = gaseste_efecte(assets_dir)
     print(f"EFECTE-SLOTURI gasite: {[f'{k}={os.path.basename(v)}' for k, v in efecte.items()] or 'NICIUNUL'}")
+    # LOGO-ul SERIEI pt INTRO-ul video-ului (doar 0-8s; nu watermark permanent).
+    # Detectie: titlul live-ului (context_sursa.txt) + titluri episodu + AE_SERIE.
+    _ctx_txt = ""
+    try:
+        if os.path.exists("context_sursa.txt"):
+            _ctx_txt = open("context_sursa.txt", encoding="utf-8").read()
+    except Exception:
+        pass
+    _semnatura = (_ctx_txt + " " + os.environ.get("AE_SERIE", "")).lower()
+    BADGE_VIDEO = os.path.join(assets_dir, "logo_pokecity_clear.png") if any(
+        k in _semnatura for k in ("pokecity", "pokemon", "pixelmon")) else None
+    if BADGE_VIDEO and efecte and "intrare" in efecte:
+        print(f"LOGO-SERIE INTRO: {os.path.basename(BADGE_VIDEO)} (0-8s, sus-dreapta)")
     if os.environ.get("AE_INTRO_OBLIGATORIU", "1") != "0" and "intrare" not in efecte:
         sys.exit("INTRO lipsa: sting-ul de 0:00 ('Awkward Moment') nu a fost gasit in sunete_mele — "
                  "livrare oprita (regula creatorului: sunetul de inceput e OBLIGATORIU)")
@@ -1862,7 +1886,7 @@ def main():
         e["_pops"] = asigura_pop_inceput(e.get("_pops"), transcript, e.get("scene"), durata_ep)
         out = comanda_randare(ff, os.path.abspath(opt.video), e, durata_ep, folder, muzica, logo, k,
                               efecte, tinta_h, sfx_rand, confeti_p, h_out,
-                              dim=(w_src, h_src, fps_live), seria=seria, meme=meme)
+                              dim=(w_src, h_src, fps_live), seria=seria, meme=meme, badge=BADGE_VIDEO)
         if opt.ai and not out:
             sys.exit(f"EP{k:02d}: randare esuata; livrarea este oprita.")
         if out:
@@ -1921,6 +1945,12 @@ def main():
             chk.append(f"- {out}: GRADE culoare (saturatie 1.18, contrast 1.06 — pica in feed)")
         open(os.path.join(folder, "RAPORT.md"), "a", encoding="utf-8").write("\n".join(chk) + "\n")
 
+    if transcript:
+        try:
+            with open(os.path.join(folder, "transcript.json"), "w", encoding="utf-8") as f:
+                json.dump(transcript, f, ensure_ascii=False)
+        except Exception:
+            pass
     if opt.subtitrari and transcript:
         print("Scriu subtitrarile .srt (remapate pe scenele fiecarui episod)...")
         for k, e, out in facute:
