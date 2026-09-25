@@ -151,10 +151,17 @@ def alege_povesti(varfuri, scor, live_len, durata, max_ep):
             continue
         if any(abs(C - u) < durata + 60 for u in folosite):
             continue
-        A = _top_scor(scor, 15, min(int(live_len * 0.35), C - 160), folosite, 100)
+        # UN-SINGUR-JOC (creatorul 25.09: „a combinat roblox cu minecraft — nu e bine deloc"):
+        # actele A si B se cauta DOAR in fereastra contigua ~7 min inainte de C,
+        # nu prin tot live-ul (live-ul are jocuri diferite pe ore intregi).
+        A = _top_scor(scor, max(15, C - 420), C - 160, folosite, 100)
         if not A:
             continue
-        B = _top_scor(scor, A[0] + 80, C - 90, folosite, 100)
+        B = _top_scor(scor, A[0] + 80, C - 60, folosite, 100)
+        if not B:
+            # niciun varf intre A si C (sau fereastra prea stransa) -> desfasurare
+            # sintetica la mijloc, ORI in fereastra un-joc; episodul se termina mereu la C
+            B = ((A[0] + C) // 2, 0.0)
         if not B:
             continue
         povesti.append({
@@ -1588,7 +1595,7 @@ def main():
         except Exception as ex:
             # Run #29 lecția: un TimeoutError după 52 min de transcript a aruncat TOT.
             # Gemini are crize tranzitorii (503/timeout) -> o singura reincercare completa.
-            print(f"   ! selectia a picat ({type(ex).__name__}) -> reincerc dupa 60s")
+            print(f"   ! selectia a picat: {type(ex).__name__}: {str(ex)[:300]} -> reincerc dupa 60s")
             time.sleep(60)
             try:
                 if opt.momente:
@@ -1606,7 +1613,7 @@ def main():
             except Exception as ex2:
                 # A 3-a incercare: clasicul pe varfuri audio (fara AI) — episodul IASA oricum.
                 # Gemini are zile proaste; creatorul are nevoie de livrare, nu de scuze.
-                print("   ! si a 2-a incercare a picat -> PLAN C: momente clasice pe varfuri audio")
+                print(f"   ! si a 2-a incercare a picat: {type(ex2).__name__}: {str(ex2)[:300]} -> PLAN C: momente clasice pe varfuri audio")
                 try:
                     analiza = analiza_audio(ff, opt.video)
                     varfuri = [(t, s2) for t, s2 in (analiza or [])]
