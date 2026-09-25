@@ -28,7 +28,9 @@ on:
     types: [published]
 
 concurrency:
-  group: episod
+  # TURBO: rularile dedic (doar_ep=N) ruleaza PARALEL; cele complete (fara doar_ep)
+  # se serialzeaza intre ele, ca sa nu se calce pe release.
+  group: episod-${{ inputs.doar_ep || 'full' }}
   cancel-in-progress: false
 jobs:
   episod:
