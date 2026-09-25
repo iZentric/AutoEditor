@@ -376,6 +376,33 @@ def _ts(sec):
     return f"{h}:{m:02d}:{s:02d}.{cc:02d}"
 
 
+def asigura_pop_inceput(pops, transcript, scene, durata=170):
+    """Regula creatorului (25.09): POP-urile DOAR in momente faine, SI mereu unul
+    la inceput (primele 8s) — salutul/shocul de deschidere, ca la JocuriHorror."""
+    pops = sorted([(float(t), str(x)) for t, x in (pops or [])])
+    if transcript and scene:
+        start = scene[0][0]
+        if not any(t <= 8.5 for t, _ in pops):
+            for a_t, b_t, txt in transcript:
+                t_ep = float(a_t) - start
+                if 0.4 <= t_ep <= 8.5 and txt.strip():
+                    txt = txt.strip()
+                    if len(txt) > 46:
+                        taiat = txt[:46].rsplit(" ", 1)[0]
+                        txt = taiat + "…"
+                    pops = [(round(max(0.2, t_ep), 2), txt)] + pops
+                    break
+    # max 6 pe episod, minimum 18s intre ele (prioritate: cel din fata sta)
+    rezultat = []
+    for t, x in sorted(pops):
+        if len(rezultat) >= 6:
+            break
+        if rezultat and t - rezultat[-1][0] < 18:
+            continue
+        rezultat.append((t, x))
+    return rezultat
+
+
 def scrie_ass(nume, durata, poveste, impact_words=None):
     """Textele pe ecran: semnatura colt + intrebare (0:12) + hype (inainte de maxim) + CTA final."""
     linii = ["[Script Info]", "ScriptType: v4.00+", "PlayResX: 1920", "PlayResY: 1080", "",
@@ -385,7 +412,7 @@ def scrie_ass(nume, durata, poveste, impact_words=None):
              "Style: WM,Arial,44,&H00FFFFFF,&H00000000,&H80000000,1,3,0,7,40,40,30,1",
              "Style: HYPE,Arial,96,&H0000E5FF,&H00000000,&H80000000,1,5,0,2,60,60,90,1",
              "Style: IMPACT,Arial,96,&H00FFFFFF,&H00000000,&H70000000,1,4,0,5,40,40,40,3",
-             "Style: POP,Arial,88,&H0000FFFF,&H00000000,&H80000000,1,6,0,2,60,60,150,1",
+             "Style: POP,Arial,92,&H0000FFFF,&H00000000,&H80000000,1,9,0,2,60,60,90,1",   # galben + contur gros (model: screenshot creator 25.09)
              "", "[Events]",
              "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
     if NUME_CANAL:
@@ -1626,6 +1653,7 @@ def main():
             print(f"   EP{k:02d} ({eticheta}) · sunete: {detalii}{' + confeti' if confeti_p else ''}")
         else:
             print(f"   EP{k:02d} ({eticheta})...")
+        e["_pops"] = asigura_pop_inceput(e.get("_pops"), transcript, e.get("scene"), durata_ep)
         out = comanda_randare(ff, os.path.abspath(opt.video), e, durata_ep, folder, muzica, logo, k,
                               efecte, tinta_h, sfx_rand, confeti_p, h_out,
                               dim=(w_src, h_src, fps_live), seria=seria, meme=meme)
