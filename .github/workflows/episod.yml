@@ -157,7 +157,7 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           YT_PRIVACY: private
-      env:
+        env:
           AE_DOAR_EP: ${{ inputs.doar_ep }}
         run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 'auto' }}"
       - name: Publica in Releases (gata de download)
