@@ -524,7 +524,9 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     filtre.append(f"{concat_in}concat=n={n}:v=1:a=1[vc][ac]")
     # NORMALIZARE VOCE (standard streaming): -16 LUFS constant, indiferent cat de departe
     # era microfonul — copiii nu trebuie sa joace cu volumul
-    filtre.append("[ac]loudnorm=I=-16:TP=-1.5:LRA=11[acn]")
+    filtre.append("[ac]asplit=2[acn][duckkey]")   # duckkey = cheia de ducking pt muzica
+    # DUCKING PRO: muzica de fundal coboara automat cand creatorul vorbeste (sidechain)
+    # + SILENTIU strategic (documentul MrBeast): 0.75s liniste de tot inainte de EXPLOZIE -> momentul loveste de 2x mai tare
     # calitate: daca cerem 2K si sursa e mai mica -> scalare LANCZOS + usor sharpen
     # (YouTube da bitrate mai mare la 1440p => imaginea supravietuieste mai bine re-encodarii lor)
     # GRADE stil MrBeast: saturatie+contrast usor ridicate — cadrul "pica" si la
@@ -599,11 +601,17 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
         filtre.append(f"[{ci}:v]scale=-2:{h_out},chromakey=0x000000:0.15:0.02,tpad=start_duration={intarziere}:start_mode=clone[cf]")
         filtre.append(f"{vmap}[cf]overlay=0:0:eof_action=pass[vfin]")
         vmap = "[vfin]"
+    # FINAL PRO: fade-in scurt la start + fade-out la final (standard editorial)
+    filtre.append(f"{vmap}fade=t=in:st=0:d=0.25,fade=t=out:st={max(0, durata - 0.6)}:d=0.6[vfo]")
+    vmap = "[vfo]"
     harta_a = "[ac]"
     if muzica:
         cmd += ["-stream_loop", "-1", "-i", muzica]
         mi = n + (1 if logo else 0) + (1 if confeti else 0)
-        filtre.append(f"[{mi}:a]volume={MUZICA_VOLUME}[bg]")
+        # silentiu-de-payoff: muzica dispare 0.75s inainte de momentul maxim
+        filtre.append(f"[{mi}:a]volume={MUZICA_VOLUME},"
+                      f"volume='if(between(t,{START_P3 - 0.9},{START_P3 - 0.15}),0.001,1)':eval=frame[bg0]")
+        filtre.append("[bg0][duckkey]sidechaincompress=threshold=0.02:ratio=6:attack=25:release=350[bg]")
     # efectele pe sloturi (zero-config): adelay la timpul lor, apoi amix cu tot restul
     intrari_sfx = []
     if efecte:
@@ -615,6 +623,29 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
             ms = int(timpi[slot] * 1000)
             filtre.append(f"[{idx}:a]adelay={ms}:all=1,volume=0.9[s{idx}]")
             intrari_sfx.append(f"[s{idx}]")
+    # ACCENTE PLANIFICATE (retentie-inginerie): sunetele LUI la punctele strategice,
+    # nu doar random — whoosh la trecerea dintre acte, riser care construieste spre explozie
+    if sfx_rand is None:
+        sfx_rand = []      # accentele planificate functioneaza oricum (biblioteca e mereu acolo)
+    if sfx_rand is not None:
+        def accent(nume):
+            d2 = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sunete_mele")
+            if os.path.isdir(d2):
+                for f2 in sorted(os.listdir(d2)):
+                    if nume in os.path.splitext(f2)[0].lower() and os.path.splitext(f2)[1].lower() in EXT_AUDIO:
+                        return os.path.join(d2, f2)
+            return None
+        planificate = []
+        w = accent("whoosh")
+        if w and START_P2 > 14:
+            planificate.append((START_P2 - 1.2, w, 0.5))
+        if "hype" not in (efecte or {}):
+            r = accent("riser")
+            if r:
+                planificate.append((START_P3 - 10, r, 0.45))
+        for t_p, c_p, v_p in planificate:
+            if not any(abs(t_p - x) < 6 for x, _, _ in sfx_rand):
+                sfx_rand.append((t_p, c_p, v_p))
     intrari_rand = []
     if sfx_rand:
         baza_idx = n + (1 if logo else 0) + (1 if confeti else 0) + (1 if muzica else 0) + (len(efecte) if efecte else 0)
