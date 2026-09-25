@@ -12,6 +12,11 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install pillow
+      - name: Listeaza modelele Gemini disponibile
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          curl -s "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY&pageSize=1000"             | grep -oE '"name": ?"models/[^"]*"' | grep -iE "image|banana" || echo "NICIUN MODEL IMAGE"
       - name: Genereaza miniatura AI din test_frame.jpg
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

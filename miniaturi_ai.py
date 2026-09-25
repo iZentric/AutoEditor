@@ -18,12 +18,13 @@ import json
 import os
 import subprocess
 import sys
+import urllib.error
 import urllib.request
 
 # Modele imagine Gemini, in ordinea incercarii (env AE_MINIATURI_MODELE le poti schimba)
 MODELE = os.environ.get(
     "AE_MINIATURI_MODELE",
-    "gemini-2.5-flash-image,gemini-2.5-flash-image-preview",
+    "gemini-2.5-flash-image,gemini-3.6-flash-image,gemini-2.0-flash-preview-image-generation",
 )
 
 PROMPT = """You are the thumbnail artist for a top Minecraft YouTube channel for kids (style reference: Gannicus96, JocuriHorror — Romanian top creators).
@@ -66,17 +67,32 @@ def _apeleaza(cheie, model, prompt, cadre_b64):
     Returneaza bytes PNG sau None (motivul la stdout)."""
     parts = [{"inline_data": {"mime_type": "image/jpeg", "data": d}} for d in cadre_b64]
     parts.append({"text": prompt})
+    gen_cfg = {"temperature": 0.4}
+    if "2.0-flash-preview-image-generation" in model:
+        gen_cfg["responseModalities"] = ["TEXT", "IMAGE"]
     body = json.dumps({"contents": [{"parts": parts}],
-                       "generationConfig": {"temperature": 0.4}}).encode()
-    req = urllib.request.Request(
-        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
-        data=body,
-        headers={"Content-Type": "application/json", "x-goog-api-key": cheie})
-    try:
-        with urllib.request.urlopen(req, timeout=180) as r:
-            resp = json.loads(r.read().decode())
-    except Exception as ex:
-        print(f"   ! miniatura AI {model}: {ex}")
+                       "generationConfig": gen_cfg}).encode()
+    resp = None
+    for incerc in range(4):
+        req = urllib.request.Request(
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+            data=body,
+            headers={"Content-Type": "application/json", "x-goog-api-key": cheie})
+        try:
+            with urllib.request.urlopen(req, timeout=180) as r:
+                resp = json.loads(r.read().decode())
+            break
+        except urllib.error.HTTPError as ex:
+            print(f"   ! miniatura AI {model} (incercarea {incerc + 1}): {ex}")
+            if ex.code in (429, 500, 503) and incerc < 3:
+                import time as _t
+                _t.sleep(25 * (incerc + 1))   # 429 = limita de ritm: asteptam si reincercam
+                continue
+            return None
+        except Exception as ex:
+            print(f"   ! miniatura AI {model}: {ex}")
+            return None
+    if resp is None:
         return None
     for p in (resp.get("candidates") or [{}])[0].get("content", {}).get("parts", []):
         if "inlineData" in p and p["inlineData"].get("data"):
