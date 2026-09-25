@@ -16,6 +16,10 @@ on:
         description: '(OPTIONAL) gol = AI-ul decide cate shorturi'
         default: ''
         type: string
+      doar_ep:
+        description: '(TURBO) ruleaza DOAR episodul N (N rulari simultane = N episoade in timpul unuia)'
+        default: ''
+        type: string
       release_tag:
         description: '(OPTIONAL) reproceseaza un release existent (ex: vod-1) — fara re-upload'
         default: ''
@@ -153,6 +157,8 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           YT_PRIVACY: private
+      env:
+          AE_DOAR_EP: ${{ inputs.doar_ep }}
         run: python3 pipeline_github.py "$URL" "${{ env.MAX_EP || inputs.max_episoade || 'auto' }}"
       - name: Publica in Releases (gata de download)
         env:

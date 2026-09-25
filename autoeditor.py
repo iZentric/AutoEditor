@@ -1635,6 +1635,15 @@ def main():
         print(f"   AI: {len(episoade)} povesti verificate; fara efecte aleatorii")
     print(f"   plan: {len(episoade)} episoade ({sum(1 for e in episoade if e['tip']=='poveste')} in modul poveste)")
 
+    # TURBO PARALEL (creatorul: „mai rapid decat un om"): AE_DOAR_EP=N ->
+    # acest run randeaza DOAR episodul N; N rulari simultane = N episoade in
+    # timpul UNUI singur episod (in loc de N x randare secventiala).
+    doar = os.environ.get("AE_DOAR_EP", "").strip()
+    if doar.isdigit() and 1 <= int(doar) <= len(episoade):
+        n_doar = int(doar)
+        episoade = [e for i, e in enumerate(episoade, 1) if i == n_doar]
+        print(f"   TURBO: run dedicat DOAR pentru EP{n_doar:02d} — restul ruleaza in paralel pe alte masini")
+
     rap = ["# RAPORT AUTOEDITOR (POVESTEA) — " + datetime.now().strftime("%d.%m.%Y %H:%M"),
            f"Sursa: {opt.video} ({live_len//60} min) · episod: {opt.durata}s",
            f"**DECIZIE AI: {len(episoade)} episoade** — doar momentele care au trecut poarta de calitate; restul ar fi umplutura.", ""]
