@@ -24,7 +24,7 @@ import urllib.request
 # Modele imagine Gemini, in ordinea incercarii (env AE_MINIATURI_MODELE le poti schimba)
 MODELE = os.environ.get(
     "AE_MINIATURI_MODELE",
-    "gemini-2.5-flash-image,gemini-3.6-flash-image,gemini-2.0-flash-preview-image-generation",
+    "gemini-3.1-flash-image,gemini-3.1-flash-lite-image,gemini-2.5-flash-image",  # confirmate pe cheie 25.09.2026
 )
 
 PROMPT = """You are the thumbnail artist for a top Minecraft YouTube channel for kids (style reference: Gannicus96, JocuriHorror — Romanian top creators).
