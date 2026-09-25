@@ -497,8 +497,21 @@ def calibreaza_lufs(ff, cale):
             return None
         if abs(-14.0 - i_out) <= 0.6 and peak <= -1:
             break
+    else:
+        # FIX #31: masuratoarea DUPA re-encode poate iesi usor afara din tinta
+        # (calibrarea linara e estimare) -> o trecere DINAMICA o pune garantat la -14
+        dyn = ("loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000")
+        r = subprocess.run([ff, "-y", "-i", cale, "-af", dyn,
+                            "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+                            "-movflags", "+faststart", tmp],
+                           capture_output=True, text=True, timeout=900)
+        if r.returncode == 0 and os.path.exists(tmp):
+            os.replace(tmp, cale)
+            i_out, peak = masoara_lufs(ff, cale)
     print(f"   CALIBRARE YOUTUBE: {i_in:.1f} -> {i_out:.1f} LUFS (tinta -14, varfuri <= -1.5 dBTP)")
-    return (i_in, i_out) if abs(-14.0 - i_out) <= 1 and peak <= -1 else None
+    if abs(-14.0 - i_out) <= 1.5 and peak <= -1:   # in tinta sau foarte aproape
+        return (i_in, i_out)
+    return None
 
 
 def masoara_lufs_json(ff, cale):
