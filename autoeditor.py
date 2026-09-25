@@ -1637,13 +1637,25 @@ def main():
               "pokecity seria, minecraft cu pokemoni, pixelmon, minecraft pokemon mod, nocivanu extra, "
               "pixelmon server, nocivanu horror, pixelmon romania, isentric, izentric, minecraft romania, "
               "gaming romania, supercity, nocivanu supercity, minecarft")
+    cheie_mini = os.environ.get("GEMINI_API_KEY") or citeste_cheie_gemini(baza)
     for k, e, out in facute:
         titlu_full = e.get("ai_titlu") or "Moment din live — de verificat"
         cadru = os.path.join(folder, f"EP{k:02d}_cadru2.jpg")
+        # MINIATURA v2 (stil canale-top): AI recreeaza scena din clip -> fallback: cadrul real editat
+        mini_ai = None
+        try:
+            import miniaturi_ai
+            centre_mini = [max(0, e["varf"] - 8), e["varf"], e["varf"] + 8]
+            mini_ai = miniaturi_ai.genereaza_din_video(ff, os.path.abspath(opt.video), centre_mini, cheie_mini,
+                                                       os.path.join(folder, f"EP{k:02d}_miniatura.jpg"))
+        except Exception as ex:
+            print(f"   ! miniatura AI a picat ({ex}) -> fallback cadrul real")
         try:
             if os.path.exists(cadru):
-                p = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura.jpg"), titlu_full, logo, sageata=(820, 240), avatar=AVATAR)
-                print(f"   miniatura A: {os.path.basename(p)}")
+                dst_clasic = os.path.join(folder, f"EP{k:02d}_miniatura_fallback.jpg") if mini_ai \
+                    else os.path.join(folder, f"EP{k:02d}_miniatura.jpg")
+                p = fa_miniatura(cadru, dst_clasic, titlu_full, logo, sageata=(820, 240), avatar=AVATAR)
+                print(f"   miniatura {'fallback' if mini_ai else 'A'}: {os.path.basename(p)}")
                 for suf, sageata2 in (("B", (400, 600)), ("C", (640, 140))):
                     try:
                         p2 = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura_{suf}.jpg"),
