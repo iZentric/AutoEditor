@@ -1074,3 +1074,7 @@
   pentru a nu sari peste credential guard la commituri fara Python; dispatch permis.
 - Se finalizeaza PR#3 dupa reverificarea CI. Nicio randare noua sau incarcare YouTube
   in acest pas; calitatea pe VOD real ramane de validat printr-un episod-pilot.
+- MINIATURI v2 (25.09.2026): stil Gannicus96 deconstruct (ilustratie 3D cartoon, skinuri+obiecte DIN clip, emotie extrema, contur alb sticker, sageata rosie, bright, FARA text) — miniaturi_ai.py integrat in autoeditor (AI prima alegere, clasica=fallback); REGULI_MINIATURI.md; userul TREBUIE sa urce assets/avatar.png (fata lui din joc).
+- MAI MULTE POVESTI: AE_POARTA 0.45 (was 0.6); prompt AI = AMUZAMENT prioritatea #1 pt copii mari.
+- Run #28 episod.yml = completed/success (aflata 25.09); #29 dispatch 01:17 pe e1c9ea5 (fara miniaturi v2 — codul vechi).
+- Data.json (100 video canal user): <1min avg 4728 views (max 20K), 1-3min avg 1246, >8min avg 430 -> shorts sub 20s + episoade sub 3min = castigatoare pe canalul lui.

@@ -39,3 +39,11 @@ obiecte, evenimentul). Nimic inventat care nu exista in clip.
 
 ## CE MA TREBUIE DE LA CREATOR
 - assets/avatar.png = PNG cu fata/skinul din joc (fundal transparent ideal).
+
+## REALITATE QUOTA (25.09.2026, dovedit in Actions)
+- Modele image pe cheie (ListModels): gemini-3.1-flash-image, 3.1-flash-lite-image, 3-pro-image, 2.5-flash-image.
+- Quota IMAGE = SEPARATA de text si s-a epuizat azi -> 429 pe toate; reset gratuit ~10:00 RO (miezul noptii Pacific).
+- gemini-3.6-flash (TEXT) = 503 ocazional -> descrie_scena are retry x3.
+- Pollinations.ai (plan B keyless) = cazut 500 la 02:20; ramane in cod, nu e critic.
+- LANT FINAL: Gemini image -> descriere+Pollinations -> miniatura clasica (mereu functioneaza).
+- Test rapid oricand: Actions -> "Test miniatura AI" -> Run workflow.
