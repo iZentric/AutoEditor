@@ -119,8 +119,8 @@ def validate_sounds(proposals, catalogue, duration):
                 raise ValueError('Eveniment insuficient confirmat')
             if not 1 <= t <= duration - 3:
                 raise ValueError('Sunet in afara intervalului sigur')
-            if len(accepted) >= 4 or any(abs(t - s['sec']) < 12 for s in accepted):
-                raise ValueError('Prea multe efecte sau prea apropiate')
+            if len(accepted) >= 6 or any(abs(t - s['sec']) < 9 for s in accepted):
+                raise ValueError('Prea multe efecte sau prea apropiate')   # creatorul vrea sunetele lui CAT MAI DES (25.09)
             if any(s['id'] == sid for s in accepted):
                 raise ValueError('Acelasi efect repetat')
             if catalogue[sid]['category'] == 'hit' and any(

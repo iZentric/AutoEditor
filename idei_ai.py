@@ -158,7 +158,8 @@ def verifica_idee_cu_video(ff, cheie, model, video, ide, tmp=None, catalogue=Non
         '"poveste":{"inceput":"context + secunda", "desfasurare":"actiune + secunda", '
         '"final":"rezultat + secunda"}, "titlu_corectat":"max 55 caractere", '
         '"hook_sec":0, "scor":0, "replici_pop":["R001"], '
-        '"sunete":[{"id":"S001", "sec":12.5, "eveniment":"cadere", "motiv":"eveniment precis", "incredere":0.95}]} '
+        '"sunete":[{"id":"S001", "sec":12.5, "eveniment":"cadere", "motiv":"eveniment precis", "incredere":0.95}, {"id":"S002", "sec":40, ...}] '
+        'REGULA SUNETE (creatorul vrea CAT MAI MULTE din biblioteca lui): propune pana la 8 accente sonore per episod — cate unul la FIECARE moment care se potriveste (caderi, prinderi, rash, victorii, blow-uri, comici). Doar evenimente sigur vazute pe video (incredere min 0.9). ' 
         "Scor de la 0 la 10; aproba doar >=7. Boolean false cand nu esti sigur. "
         "Listele pot fi goale. CATALOG:\n" + json.dumps(public_catalogue(catalogue), ensure_ascii=False) +
         "\nREPLICI:\n" + json.dumps(quote_catalogue(transcript, inc, sf), ensure_ascii=False))
