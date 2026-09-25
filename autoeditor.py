@@ -686,7 +686,16 @@ def font_gros(size):
     return ImageFont.load_default()
 
 
-def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None):
+def gaseste_avatar(assets_dir):
+    """Avatarul creatorului (fata din joc): assets/avatar.png (il pui tu, fundal transparent)"""
+    for nume in ("avatar.png", "avatar.webp", "avatar.jpg", "fata.png"):
+        p = os.path.join(assets_dir, nume)
+        if os.path.exists(p):
+            return p
+    return None
+
+
+def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None, avatar=None):
     """MINIATURA in stil Minecraft, EDITATA din cadru REAL al live-ului
     (niciodata generata cu AI — regula canalului):
     crop 16:9 -> saturatie/contrast/sharpness boost -> logo -> text mare cu contur."""
@@ -707,11 +716,29 @@ def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None):
         lg = Image.open(logo).convert("RGBA")
         lg.thumbnail((170, 170))
         img.paste(lg, (24, 24), lg)
+    # AVATARUL (fata ta din joc) in coltul stanga-jos, cerc decupat + contur ALB gros — stil creator-top
+    if avatar and os.path.exists(avatar):
+        try:
+            av = Image.open(avatar).convert("RGBA")
+            marime = 300
+            av.thumbnail((marime, marime), Image.LANCZOS)
+            masca = Image.new("L", av.size, 0)
+            dd = ImageDraw.Draw(masca)
+            dd.ellipse([0, 0, av.size[0], av.size[1]], fill=255)
+            poz = (26, 720 - av.size[1] - 26)
+            cerc = Image.new("RGBA", (av.size[0] + 28, av.size[1] + 28), (0, 0, 0, 0))
+            dc = ImageDraw.Draw(cerc)
+            dc.ellipse([0, 0, cerc.size[0], cerc.size[1]], fill=(255, 255, 255, 255))
+            cerc.paste(av, (14, 14), masca)
+            img.paste(cerc, poz, cerc)
+        except Exception:
+            pass
     # SAGETA ROSIE stil Minecraft-kids: arata cat punctul de interes + cerc de accent
     if sageata:
         try:
             ax, ay = sageata[0], sageata[1]
-            d.ellipse([ax - 95, ay - 95, ax + 95, ay + 95], outline=(255, 40, 40), width=14)
+            d.ellipse([ax - 108, ay - 108, ax + 108, ay + 108], outline=(255, 255, 255), width=8)
+            d.ellipse([ax - 98, ay - 98, ax + 98, ay + 98], outline=(255, 30, 30), width=16)
             cx = 1120
             cy = 140
             ang = math.atan2(ay - cy, ax - cx)
@@ -1323,6 +1350,7 @@ def main():
     logo = os.path.join(assets_dir, "logo.png")
     logo = logo if (os.path.exists(logo) and os.environ.get("AE_LOGO", "0") == "1") else None   # watermark pe video OFF (user: "ai scris pe ecran iZentric"); miniaturile il pastreaza
     efecte = gaseste_efecte(assets_dir)
+    AVATAR = gaseste_avatar(assets_dir)   # fata ta din joc pt miniaturi (assets/avatar.png)
     confeti_p = os.path.join(assets_dir, "efecte", "confeti.webm")
     confeti_p = confeti_p if (os.path.exists(confeti_p) and os.environ.get("AE_CONFETI", "0") == "1") else None   # confetti OFF (user: "partile colorate pe ecran")
     pool_rand = gaseste_sfx_random(assets_dir)
@@ -1614,12 +1642,12 @@ def main():
         cadru = os.path.join(folder, f"EP{k:02d}_cadru2.jpg")
         try:
             if os.path.exists(cadru):
-                p = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura.jpg"), titlu_full, logo, sageata=(820, 240))
+                p = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura.jpg"), titlu_full, logo, sageata=(820, 240), avatar=AVATAR)
                 print(f"   miniatura A: {os.path.basename(p)}")
                 for suf, sageata2 in (("B", (400, 600)), ("C", (640, 140))):
                     try:
                         p2 = fa_miniatura(cadru, os.path.join(folder, f"EP{k:02d}_miniatura_{suf}.jpg"),
-                                          titlu_full, logo, sageata=sageata2)
+                                          titlu_full, logo, sageata=sageata2, avatar=AVATAR)
                         print(f"   miniatura {suf}: {os.path.basename(p2)}")
                     except Exception:
                         pass
