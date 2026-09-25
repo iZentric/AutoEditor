@@ -564,7 +564,13 @@ def comanda_randare(ff, video, poveste, durata, folder, muzica, logo, nr, efecte
     filtre.append(f"{concat_in}concat=n={n}:v=1:a=1[vc][ac]")
     # NORMALIZARE VOCE (standard streaming): -16 LUFS constant, indiferent cat de departe
     # era microfonul — copiii nu trebuie sa joace cu volumul
-    filtre.append("[ac]asplit=2[acn][duckkey]")   # duckkey = cheia de ducking pt muzica
+    # FIX #36: duckkey e consumat DOAR de sidechaincompress (muzica de fundal).
+    # Fara muzica, asplit lasa un output neconsumat -> "Filter asplit has an
+    # unconnected output" -> "Error binding filtergraph" (EPurile picau).
+    if muzica:
+        filtre.append("[ac]asplit=2[acn][duckkey]")   # duckkey = cheia de ducking pt muzica
+    else:
+        filtre.append("[ac]anull[acn]")   # lant simplu, zero capete libere
     # DUCKING PRO: muzica de fundal coboara automat cand creatorul vorbeste (sidechain)
     # + SILENTIU strategic (documentul MrBeast): 0.75s liniste de tot inainte de EXPLOZIE -> momentul loveste de 2x mai tare
     # calitate: daca cerem 2K si sursa e mai mica -> scalare LANCZOS + usor sharpen
