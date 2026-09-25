@@ -161,7 +161,7 @@ if not sursa_gata():
     sys.exit("!! nicio sursa disponibila")
 
 # ── 2) RANDARE (runner 7GB) + poarta STRICTA: doar ce chiar merita ──
-env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.6"),
+env = dict(os.environ, PYTHONUNBUFFERED="1", AE_POARTA=os.environ.get("AE_POARTA", "0.45"),
            AE_PERFORMANCE_REPORT="episodes/PERFORMANTA_editor.json")
 cmd = [sys.executable, "autoeditor.py", "live_curent.mp4", "--calitate", "2k", "--max", MAXN]
 cmd += ["--ai"]   # CREIERUL MEREU PORNIT: fara el momentele se aleg doar dupa zgomot (greseala r17/r18)
