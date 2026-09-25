@@ -141,7 +141,7 @@ jobs:
       - name: Randare episoade (descarcare -> analiza -> episoade -> 2K)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          AE_POARTA: '0.6'
+          AE_POARTA: '0.45'   # MAI MULTE POVESTI (was 0.6 — yml suprascria pipeline-ul)
           ASSET_TOKEN: ${{ env.ASSET_TOKEN }}
           RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ env.RELEASE_TAG }}
