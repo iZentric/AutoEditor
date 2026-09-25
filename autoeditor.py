@@ -835,6 +835,7 @@ def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None, avatar=No
     else:
         nh = int(w / tinta); y0 = (h - nh) // 2; img = img.crop((0, y0, w, y0 + nh))
     img = img.resize((1280, 720), Image.LANCZOS)
+    img = ImageEnhance.Brightness(img).enhance(1.22) # cadrele de noapte ies negre in feed
     img = ImageEnhance.Color(img).enhance(1.28)      # culori tari = stilul Minecraft
     img = ImageEnhance.Contrast(img).enhance(1.10)
     img = ImageEnhance.Sharpness(img).enhance(1.15)
@@ -885,11 +886,25 @@ def fa_miniatura(cale_cadru, cale_out, titlu, logo=None, sageata=None, avatar=No
         mici = {c for c in toate if len(c) <= 2}
         cuvinte = [c for c in toate if c not in mici][:5]
     linie = " ".join(cuvinte) if cuvinte else "CE S-A INTAMPLAT!"
-    size = 96
+
+    def _latime(text, f):
+        bb = d.textbbox((0, 0), text, font=f, stroke_width=10)
+        return bb[2] - bb[0]
+
+    size = 88
     fnt = font_gros(size)
-    while d.textlength(linie, font=fnt) > 1200 and size > 44:
+    # FIX: masuram CU contur (textlength il taia pe runner -> textul iese din cadru)
+    while _latime(linie, fnt) > 1210 and size > 40:
         size -= 4
         fnt = font_gros(size)
+    if _latime(linie, fnt) > 1210:      # tot prea lat -> mai putine cuvinte
+        cuvinte = cuvinte[:3]
+        linie = " ".join(cuvinte)
+        size = 84
+        fnt = font_gros(size)
+        while _latime(linie, fnt) > 1210 and size > 40:
+            size -= 4
+            fnt = font_gros(size)
     bb = d.textbbox((0, 0), linie, font=fnt, stroke_width=10)
     x = (1280 - (bb[2] - bb[0])) // 2
     y = 720 - (bb[3] - bb[1]) - 46
