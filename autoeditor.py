@@ -468,7 +468,12 @@ def scrie_ass(nume, durata, poveste, impact_words=None):
         linii.append(f"Dialogue: 0,{_ts(START_P3 - 10)},{_ts(START_P3 - 2)},HYPE,,0,0,0,,{HYPE_TEXT}")
     linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{CTA_TEXT}")
     linii.append(f"Dialogue: 0,{_ts(max(0, durata-5))},{_ts(durata)},CTA,,0,0,0,,{{\\fs56\\c&H0000E5FF&\\pos(960,700)}}ABONEAZĂ-TE ca să nu pierzi seria!")
-    # SUBTITRARI-POP: replici-cheie, MARI si GALBENE, doar la momentele alese de AI
+    # SUBTITRARI-POP: replici-cheie, MARI si GALBENE, doar la momentele alese de AI.
+    # REGULA CREATOR (25.09): DOAR pops — FARA dialog subtitrat continuu ("nu vreau
+    # subtitrari mereu, doar in anumite momente"). Subtitrarile NU contin nume de
+    # persoane din chat/live (fara "Maria de pe chat") si nu apar deloc la
+    # sectiunile in care vorbeste cu o persoana care nu apare in joc.
+
     if os.environ.get("AE_POPS", "1") != "0":
         for t_pop, text_pop in (poveste.get("_pops") or []):
             linii.append(f"Dialogue: 0,{_ts(t_pop)},{_ts(t_pop + 2.6)},POP,,0,0,0,,{text_pop}")
@@ -1077,7 +1082,8 @@ def live_to_episod(t_live, scene):
 
 CUV_POP = ("ha", "haha", "hahaha", "lol", "uau", "wow", "boom", "nu se poate", "prins",
            "prindem", "rar", "legendar", "incredibil", "atentie", "look", "frate", "boa",
-           "s-a dus", "a cazut", "epic", "serios")
+           "s-a dus", "a cazut", "epic", "serios", "diamante", "nether", "portal", "moart",
+           "am gasit", "ce e asta", "fugi", "pericol", "am murit", "am invins", "boss")
 
 
 def pops_subtitrari(transcript, scene, durata):
@@ -1086,10 +1092,17 @@ def pops_subtitrari(transcript, scene, durata):
     -> [(t_in_episod, text)]; max 6 pe episod, minim 18s intre ele."""
     if not transcript:
         return []
+    # REGULA CREATOR (25.09): in subtitrari NU apar conversatii cu persoane din
+    # chat/live (ex: "Maria de pe chatul live") — doar ce se intampla IN JOC.
+    FARA_CHAT = re.compile(
+        r"\b(maria|marius|andrei|alex|stefan|ionut|cristi|diana|ioana|abonat|chatul|"
+        r"de pe chat|pe chat|who|sub\b|donatie|superchat|multumesc|mersi frumos)\b", re.I)
     candit = []
     for a0, _b, t in transcript:
         tt = t.strip()
         if not (8 <= len(tt) <= 48) or len(tt.split()) < 2:
+            continue
+        if FARA_CHAT.search(tt):
             continue
         tl = tt.lower()
         if LEGI_ABSOLITE.search(tt):
