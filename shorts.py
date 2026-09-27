@@ -99,7 +99,7 @@ def _scrie_ass(cale, linii, offset):
     out = ["[Script Info]", "ScriptType: v4.00+", "PlayResX: 1080", "PlayResY: 1920", "",
            "[V4+ Styles]",
            "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-           "Style: POP,DejaVu Sans,88,&H0000FFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,10,3,2,60,60,180,1",
+           "Style: POP,DejaVu Sans,88,&H0000FFFF,&H00000000,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,10,3,2,60,60,180,1",
            "", "[Events]", "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
     for a2, b2, t2 in linii:
         r1 = max(0.0, a2 - offset)
