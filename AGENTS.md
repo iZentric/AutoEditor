@@ -118,3 +118,9 @@ links to the user in Romanian, short, with tables.
 6. upload asset >8MB: http.client stream (body=open(f,'rb')) — POST cu Content-Range trunchiază la primul chunk!
 7. randare 2K in sandbox: pre-taie scenele separat (RAM!) sau randeaza 1080p — sursa live e 720p, calitate identica.
 8. logo PNG in ffmpeg: OBLIGATORIU -loop 1 -t DUR — altfel dispare dupa primul frame!
+
+## LEGI POSTĂRI/TITLURI (creator, 25.09) #JH-ISILENT-MEREU
+- TOATE titlurile + postările de comunitate + descrieri = stil JH/iSilent, ÎNTOTDEAUNA (creator: "mereu vreau JH/iSilent").
+- Rețeta: începe cu literă mică sau verb la pers. I; „.." (două puncte) la mijloc; CAPS pe cuvântul de șoc; cuvinte-bombă: „a înnebunit", „NEBUNIE", „fata nebună", „am supraviețuit", „de 100 de ori"; emoji max 2 (😱🔥😂).
+- FĂRĂ ton formal, FĂRă formulări de scamător, FĂRĂ „EP".
+- Post comunitate abonat: video-ul LUI pe primul loc + LIKE pentru el + sondaj scurt.
