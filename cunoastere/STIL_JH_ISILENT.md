@@ -35,3 +35,8 @@ SHORT: „MI-A MURIT PICHU ?" / „O INIMA in NETHER.."
 ## POST comunitate (lei-ul de la „DOORS cu iZentric !")
 - literă mică la început, „.." la mijloc, CAPS pe bombă, max 2 emoji (😱🔥😂);
 - video-ul abonatului pe primul loc + LIKE pentru el + sondaj 2 opțiuni.
+
+## LEGE CLICKBAIT (creator 28.09: "cu clickbait vreau, dar sa dau ce zice")
+- Titlul ARE VOIE sa amplifice: superlative, drama, «NEBUNIE», «ERA SA MOR», «de 100 de ori».
+- De FIER: miezul promis (evenimentul/obiectul) sa existe REAL in video. Amplifici ce exista, nu inventezi.
+- AI-ul verifica automat ("livrat") si rescrie cu acelasi hype daca promitea ceva inexistent.

@@ -1417,20 +1417,20 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             "«Am gasit CAT in the HAT in Lumea MEA..» (RECURENT: acelasi personaj/joc in serii — pt noi: POKECITY in fiecare titlu de epilog) · «CE am gasit in Casa VECINULUI..» (270K) / «FUGI de Cat in the Hat cu VITEZA INFINITA !» (176K, modele scrape 28.09) · STILUL COMPLET (cu modele de top scrise azi) e in cunoastere/STIL_JH_ISILENT.md — RESPECTA-L LITERA CU LITERA · "
             "«Am SCHIMBAT Nota La TEST din 3 in 10..» (transformare CU NUMERE). "
             "REGLE DE FORMAT obligatorii: max ~55 caractere · 0-1 emoji (😂/😭/💀/😱 doar daca se potriveste) · «..» la final = mister "
-            "· substantivele-cheie in MAJUSCULE (POKECITY, LEGENDAR, RAR) · NICIODATA clickbait minciunos — titlul promite EXACT ce e in video · "
+            "· substantivele-cheie in MAJUSCULE (POKECITY, LEGENDAR, RAR) · CLICKBAIT-UL E BINEVENIT si RECOMANDAT (exact ca la ei: amplificare emotionala, superlative, drama, «NEBUNIE», «ERA SA MOR», «de 100 de ori») — DAR legea de fier: MIEZUL promis (evenimentul/obiectul principal) TREBUIE sa existe REAL in video; amplifici ce exista, nu inventezi nimic · "
             "FARA «Ep. N»/«EP» in titlu — seria se leaga prin playlist in descriere, nu prin numar · "
             "varianta poate fi si intrebare. Scrie 3 variante: una CE am gasit, una intrebare scurta, una cu consecinta emotionala. "
             '"promite": ["ce promite titlul, max 3 lucruri"], '
-            '"livrat": true/false — TRUE doar daca TOT ce promite titlul chiar se vede/se aude in moment}. '
-            'Daca in moment se SCHIMBA jocul (Minecraft->Roblox sau invers), e faza regresie: ia DOAR segmentul intr-un singur joc. ''REGULA DE AUR: titlul descrie DOAR ce chiar se intampla in moment (vezi cadrele + ce s-a vorbit). '
-            'Daca in moment nu se prinde niciun Pokemon, titlul nu are voie sa promita asta. Fara clickbait fals. '
+            '"livrat": true/false — TRUE daca MIEZUL promis (evenimentul/obiectul principal) chiar se vede/se aude in video, CHIAR daca titlul il amplifica emotional; FALSE doar daca titlul promite ceva ce NU exista deloc in moment}. '
+            'Daca in moment se SCHIMBA jocul (Minecraft->Roblox sau invers), e faza regresie: ia DOAR segmentul intr-un singur joc. ''REGULA DE AUR (update 28.09): titlul poate AMPLIFICA (hype JH/iSilent) dar MIEZUL = ce chiar se intampla in moment (vezi cadrele + ce s-a vorbit). '
+            'Daca in moment nu se prinde niciun Pokemon, titlul nu are voie sa promita asta. Amplifici ce EXISTA, nu inventezi. '
             'Scor mic daca: plictisitor, doar zgomot fara eveniment, sau nu se intelege ce se intampla.')
         try:
             r = ia_gemini(cheie, model, prompt, ia_frames_ai(ff, video, varf - 10))
             if r.get("livrat") is False:      # titlul promitea ceva ce NU e in moment -> rescriere stricta
                 r2 = ia_gemini(cheie, model,
                                prompt + ' TITLUL ANTERIOR ("' + str(r.get("titlu", "")) +
-                               '") a promis lucruri care nu apar. Rescrie-l STRICT dupa ce se vede/auze.',
+                               '") a promis lucruri care nu apar deloc. Rescrie-l cu ACELASI hype JH/iSilent dar ancorat in evenimentul care chiar exista in cadre.',
                                ia_frames_ai(ff, video, varf - 10))
                 if r2.get("livrat", True):
                     r = r2
