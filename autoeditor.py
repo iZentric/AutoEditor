@@ -1414,7 +1414,7 @@ def evalueaza_cu_ai(ff, cheie, model, episoade, video, transcript, baza):
             "(CUM + verb perfect + substantiv SUPERLATIV) · «L-am TROLLAT si a PLANS 😂» (actiune + CONSECINTA emotionala) · "
             "«ERA SA MOR...» / «NU m-am ENERVAT..» (reactie stoica, final misterios) · «CINE-I CRIMINALUL ?» / «CINE se ASCUNDE mai BINE pe X ?» "
             "(intrebare CINE) · «Sunt SKINWALKER ?» / «Te Ascunzi ?» (intrebare scurta 2-3 cuvinte) · «Te rog NU BEA asta.. 💀» · "
-            "«Am gasit CAT in the HAT in Lumea MEA..» (RECURENT: acelasi personaj/joc in serii — pt noi: POKECITY in fiecare titlu de epilog) · "
+            "«Am gasit CAT in the HAT in Lumea MEA..» (RECURENT: acelasi personaj/joc in serii — pt noi: POKECITY in fiecare titlu de epilog) · «CE am gasit in Casa VECINULUI..» (270K) / «FUGI de Cat in the Hat cu VITEZA INFINITA !» (176K, modele scrape 28.09) · STILUL COMPLET (cu modele de top scrise azi) e in cunoastere/STIL_JH_ISILENT.md — RESPECTA-L LITERA CU LITERA · "
             "«Am SCHIMBAT Nota La TEST din 3 in 10..» (transformare CU NUMERE). "
             "REGLE DE FORMAT obligatorii: max ~55 caractere · 0-1 emoji (😂/😭/💀/😱 doar daca se potriveste) · «..» la final = mister "
             "· substantivele-cheie in MAJUSCULE (POKECITY, LEGENDAR, RAR) · NICIODATA clickbait minciunos — titlul promite EXACT ce e in video · "
