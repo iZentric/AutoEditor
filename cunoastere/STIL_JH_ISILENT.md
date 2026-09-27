@@ -40,3 +40,12 @@ SHORT: „MI-A MURIT PICHU ?" / „O INIMA in NETHER.."
 - Titlul ARE VOIE sa amplifice: superlative, drama, «NEBUNIE», «ERA SA MOR», «de 100 de ori».
 - De FIER: miezul promis (evenimentul/obiectul) sa existe REAL in video. Amplifici ce exista, nu inventezi.
 - AI-ul verifica automat ("livrat") si rescrie cu acelasi hype daca promitea ceva inexistent.
+
+## MINIATURI — ADN REAL (văzute pe 4 miniature mari ale lor, 28.09)
+Compoziția lor EXACTĂ (100%):
+1. FATA/AVATARUL creatorului în STÂNGA (~40%) — șoc: gura deschisă, ochii mari; DEGET arătând spre acțiune.
+2. OBIECTUL/PERSONAJUL în DREAPTA, MARE — încercuit cu CERC VERDE gros sau evidențiat.
+3. SĂGEATĂ ROȘIE GRASĂ (contur alb) care arată obiectul — mereu.
+4. BULĂ de dialog cu 1-2 cuvinte ROȘII CAPS: «AICI», «CE?» SAU cifre mari «10 SEC | 1 ORA».
+5. Fundal joc saturat. Text pe miniatură = 2-4 cuvinte, ACELAȘI cuvânt-cheie ca în titlu.
+Pentru noi: avatarul cu coarne (doilea „față") din cadru = elementul de stânga; cerc verde + săgeata pe pokemonul/evenimentul-cheie.
