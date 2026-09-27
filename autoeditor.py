@@ -2079,3 +2079,27 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def verifica_subs_vizibile(cale_video, momente, prag=3000, ff="ffmpeg"):
+    """LEGE t120 (25.09): NICIO livrare cu subtitrari fara DOVADA pe pixeli.
+    Extrage cadre la momentele cu POP si numara pixelii galbeni. Sub prag = ESUARE
+    (bug-urile libass erau invizibile in loguri — se vedeau doar pe cadre)."""
+    import subprocess, tempfile, os
+    rezultate = []
+    with tempfile.TemporaryDirectory() as td:
+        for i, t in enumerate(momente):
+            fot = os.path.join(td, f"v{i}.jpg")
+            subprocess.run([ff, "-y", "-v", "error", "-ss", str(t + 0.5), "-i", str(cale_video),
+                            "-frames:v", "1", "-update", "1", fot], check=True)
+            from PIL import Image
+            im = Image.open(fot).convert("RGB")
+            w, h = im.size
+            zona = im.crop((0, int(h * 0.55), w, h))   # subtitrarile stau jos
+            n = sum(cnt for cnt, (r, g, b) in zona.getcolors(999999)
+                    if r > 200 and g > 200 and b < 120)
+            rezultate.append((t, n))
+    stricate = [(t, n) for t, n in rezultate if n < prag]
+    if stricate:
+        raise SystemExit(f"ESUARE: subtitrari INVIZIBILE la {stricate} (prag {prag} px). NU se livreaza!")
+    return rezultate
