@@ -1125,6 +1125,31 @@ def pops_subtitrari(transcript, scene, durata):
     return sorted(alese)
 
 
+def scrie_ass_pops(nume, pops, lat=2560, inal=1440, durata=None):
+    """Scrie fisier .ass cu DOAR pops-urile (REGULA CREATOR 25.09: fara dialog continuu).
+    LEGI RANDARE ASS (dovedit pe sandbox 25.09):
+      1) Bold = -1 — la &H80000000 libass arunca TACIT tot textul (subtitrari invizibile!);
+      2) timp format ASS H:MM:SS.cc — formatul SRT (00:04,700) da 'Bad timestamp' si arunca tot;
+      3) font 'DejaVu Sans' — exista in sandbox/CI; 'Arial' nu e instalat niciodata acolo."""
+    def ts(t):
+        cs = int(round((t - int(t)) * 100))
+        if cs >= 100:
+            cs = 99
+        return f"{int(t)//3600}:{int(t)//60 % 60:02d}:{int(t) % 60:02d}.{cs:02d}"
+    linii = ["[Script Info]", "ScriptType: v4.00+", f"PlayResX: {lat}", f"PlayResY: {inal}", "WrapStyle: 0", "",
+             "[V4+ Styles]",
+             "Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
+             f"Style: POP,DejaVu Sans,128,&H0000FFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,12,0,2,160,160,300,1",
+             "", "[Events]",
+             "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
+    for t, txt in pops:
+        sfarsit = t + 2.2 if not durata else min(t + 2.2, durata)
+        linii.append(f"Dialogue: 1,{ts(t)},{ts(sfarsit)},POP,,0,0,0,,{{\\fad(150,180)}}{txt}")
+    with open(nume, "w", encoding="utf-8") as f:
+        f.write("\n".join(linii) + "\n")
+    return nume
+
+
 def alege_sfx_inteligent(pool, durata, transcript, scene):
     """PRECIS, nu doar random: evenimentele REALE din vorbire primeste sunetul POTRIVIT
     (fericit_* la 'am prins!', cadere_* la 'a cazut!'). Daca evenimentele sunt rare,
