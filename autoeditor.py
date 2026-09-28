@@ -1125,22 +1125,33 @@ def pops_subtitrari(transcript, scene, durata):
     return sorted(alese)
 
 
-def scrie_ass_pops(nume, pops, lat=2560, inal=1440, durata=None):
+def scrie_ass_pops(nume, pops, lat=2560, inal=1440, durata=None, stil="video"):
     """Scrie fisier .ass cu DOAR pops-urile (REGULA CREATOR 25.09: fara dialog continuu).
     LEGI RANDARE ASS (dovedit pe sandbox 25.09):
       1) Bold = -1 — la &H80000000 libass arunca TACIT tot textul (subtitrari invizibile!);
       2) timp format ASS H:MM:SS.cc — formatul SRT (00:04,700) da 'Bad timestamp' si arunca tot;
-      3) font 'DejaVu Sans' — exista in sandbox/CI; 'Arial' nu e instalat niciodata acolo."""
+      3) font 'DejaVu Sans' — exista in sandbox/CI; 'Arial' nu e instalat niciodata acolo;
+      4) nr. campuri Format == nr. valori Style (orice dezechilibru = libass arunca TACIT tot);
+      5) NUMAI ACEASTA functie scrie ASS in tot proiectul — nu mai scrieti capete de ASS de mana!
+    stil="video" -> 2560x1440, 128px, jos (MarginV 300) | stil="short" -> 1080x1920, 88px (MarginV 180)."""
+    if stil == "short":
+        lat, inal = 1080, 1920
+        marime, margine_jos, contur = 88, 180, 10
+    else:
+        marime, margine_jos, contur = 128, 300, 12
+
     def ts(t):
         cs = int(round((t - int(t)) * 100))
         if cs >= 100:
             cs = 99
         return f"{int(t)//3600}:{int(t)//60 % 60:02d}:{int(t) % 60:02d}.{cs:02d}"
+    antet_format = ("Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, "
+                    "Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, "
+                    "Alignment, MarginL, MarginR, MarginV, Encoding")   # 22 campuri
+    stil_pop = (f"Style: POP,DejaVu Sans,{marime},&H0000FFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,"
+                f"1,{contur},0,2,120,120,{margine_jos},1")              # 22 valori — EGALE cu antetul
     linii = ["[Script Info]", "ScriptType: v4.00+", f"PlayResX: {lat}", f"PlayResY: {inal}", "WrapStyle: 0", "",
-             "[V4+ Styles]",
-             "Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-             f"Style: POP,DejaVu Sans,128,&H0000FFFF,&H00000000,&H00000000,-1,0,0,0,100,100,0,0,1,12,0,2,160,160,300,1",
-             "", "[Events]",
+             "[V4+ Styles]", f"Format: {antet_format}", stil_pop, "", "[Events]",
              "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
     for t, txt in pops:
         sfarsit = t + 2.2 if not durata else min(t + 2.2, durata)
