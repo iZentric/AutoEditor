@@ -270,6 +270,39 @@ def livreaza(path, nume):
 
 
 # ------------------------------------------------------------------ MAIN
+def whisper_transcript(cale):
+    """faster-whisper local (gratis, timestamp-uri pe CUVINTE). Fallback final cand
+    YT nu are subtitrari. PyAV e incompatibil pe sandbox -> decodez cu ffmpeg in array numpy."""
+    try:
+        import numpy as np
+        from faster_whisper import WhisperModel
+    except ImportError:
+        return []
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(cale), "-f", "f32le",
+                          "-ac", "1", "-ar", "16000", "-"], capture_output=True).stdout
+    if not raw:
+        return []
+    audio = np.frombuffer(raw, dtype=np.float32)
+    try:
+        m = WhisperModel("tiny", device="cpu", compute_type="int8")
+        segs, _ = m.transcribe(audio, language="ro", word_timestamps=True, vad_filter=True)
+    except Exception:
+        return []
+    ies, cur, t0 = [], [], None
+    for s in segs:
+        for w in s.words:
+            if t0 is None:
+                t0 = w.start
+            cur.append(w.word.strip())
+            if len(cur) >= 8:
+                ies.append([round(float(t0), 2), round(float(w.end), 2), " ".join(cur)])
+                cur, t0 = [], None
+        if cur and w is s.words[-1]:
+            ies.append([round(float(t0), 2), round(float(w.end), 2), " ".join(cur)])
+            cur, t0 = [], None
+    return ies
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("sursa")
@@ -299,6 +332,11 @@ def main():
     # 2. transcript
     print("2. Transcript...")
     tr = transcript_din_url(a.sursa) if a.sursa.startswith("http") else []
+    if not tr:
+        print("   transcript YT lipsa -> WHISPER local (sync pe cuvinte)...")
+        tr = whisper_transcript(seg)
+        if tr:
+            print(f"   {len(tr)} replici (whisper)")
     print(f"   {len(tr)} replici" if tr else "   (fara transcript -> decat pe evenimente)")
 
     # 3. evenimente + 4. poveste
