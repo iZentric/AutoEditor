@@ -269,6 +269,19 @@ def livreaza(path, nume):
     return d["browser_download_url"]
 
 
+def titluri_jh(pops):
+    """3 propuneri de titlu stil JocuriHorrorSky (DNA_JH_2026.md), din pops reale.
+    Doar PROPOZITII — titlul final il da userul explicit (t125)."""
+    cuv = [p[1].strip("?!. ").upper() for p in pops if p[1].strip()]
+    h = cuv[0] if cuv else "CE E ASTA"
+    sub = cuv[-1] if len(cuv) > 1 else "A FUGIT"
+    return [
+        f"L-am GASIT si dupa {h}..",
+        f"{h} sau MORI !",
+        f"AM ZIS {h}.. si A FOST {sub} !",
+    ]
+
+
 # ------------------------------------------------------------------ MAIN
 def whisper_transcript(cale):
     """faster-whisper local (gratis, timestamp-uri pe CUVINTE). Fallback final cand
@@ -406,6 +419,8 @@ def main():
         livreaza(srt, f"FINAL_{a.nume}_SHORT_POPS.srt")
         os.remove(out)                       # legea: nimic greu ramas local
         print("   GATA. Descarci de pe Releases.")
+    for i, t in enumerate(titluri_jh(pops), 1):
+        print(f"   titlu propus {i} (stil JH, tu decizi): {t}")
     print("== CREIER: DONE ==")
 
 
