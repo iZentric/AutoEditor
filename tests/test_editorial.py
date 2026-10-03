@@ -237,6 +237,9 @@ class MainIntegrationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             (root / 'cunoastere').mkdir()
+            # Garda INTRO (t119) cere sting-ul de deschidere in sunete_mele/
+            sm = root / 'sunete_mele'; sm.mkdir()
+            (sm / 'Awkward Moment 2.mp3').write_bytes(b'fixture')
             with patch.object(ae, '__file__', str(root / 'autoeditor.py')), \
                  patch('sys.argv', ['autoeditor.py', 'fake.mp4', '--ai'] +
                        ([] if render_mode else ['--doar-analiza'])), \

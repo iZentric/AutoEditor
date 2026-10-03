@@ -73,8 +73,10 @@ def render_command(ff, source, start, out, sounds, intro=None, badge=None, ass_f
     if badge:
         k = n_extra + 1                      # badge e ULTIMUL input
         cmd += ['-i', badge]
+        # badge in SAFE-ZONE (cercetare 30.09): top UI ~160px acopera iconitele
+        # din colt => logo la y=170, margine dreapta 40 (rail-ul e la mijloc, nu sus)
         filters.append(f'[{k}:v]scale=-2:300,format=rgba[bdg]')
-        filters.append('[v][bdg]overlay=W-w-28:30:alpha=0.94[vf]')
+        filters.append('[v][bdg]overlay=W-w-40:170:alpha=0.94[vf]')
         v_label = '[vf]'
     inputs = '[a]' + ''.join(f'[s{n}]' for n in range(1, len(sounds) + 1))
     if intro:

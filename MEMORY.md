@@ -1085,3 +1085,9 @@
 - Motor: _NUME_CHAT in LEGI_ABSOLITE (autoeditor.py) — Maria & co respinsi; main=e11ee27->6e8fe62.
 - Livrat: FINAL_NETHER_VIDEO_V3_SYNC.mp4 (245.8MB, 1080p) + FINAL_NETHER_POPS_V3.srt + 4 miniaturi re-urcate pe Release 395754968; vechi (153MB desincronizat + srt + 4 JSON/RAPORT) STERSE.
 - Upload mare: http.client stream; POST cu Content-Range = trunchiere la 8MB (capcana gasita).
+
+## 30.09 — UPGRADE EDITOR SHORTS (cercetare algoritm 2026 -> cod)
+- Cercetat 9 surse (nexora/vexub/clipiq/shortimize/vidiq/capcut/automateed/shortzly/quso + safe-zones + frecventa) -> cunoastere/REGULI_ALGORITM_SHORTS.md.
+- Semnal #1 Shorts: SWIPE-RATE in 1-3s (>=75% viewed); avg viewed >60% distribuție, >80% shelf; REWATCH=loop cel mai tare; Shorts intrate in SEARCH (ian 2026).
+- Cod (main): scrie_ass_pops short MarginV 180->340 (safe-zone jos 320px); shorts.py badge y30->170/margin40 (safe-zone sus 160px); NOU autoeditor.filmstrip() (plansa cadre - te uiti la material inainte sa tai) + NOU autoeditor.verifica_hook() (prima secunda statica = refuz livrare).
+- Testate pe LEU V2: filmstrip OK, hook dif=26.49 (actiune), MarginV 340 confirmat.

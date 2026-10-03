@@ -1133,10 +1133,13 @@ def scrie_ass_pops(nume, pops, lat=2560, inal=1440, durata=None, stil="video"):
       3) font 'DejaVu Sans' — exista in sandbox/CI; 'Arial' nu e instalat niciodata acolo;
       4) nr. campuri Format == nr. valori Style (orice dezechilibru = libass arunca TACIT tot);
       5) NUMAI ACEASTA functie scrie ASS in tot proiectul — nu mai scrieti capete de ASS de mana!
-    stil="video" -> 2560x1440, 128px, jos (MarginV 300) | stil="short" -> 1080x1920, 88px (MarginV 180)."""
+    stil="video" -> 2560x1440, 128px, jos (MarginV 300) | stil="short" -> 1080x1920, 88px (MarginV 340).
+    SAFE-ZONE Shorts 2026 (cercetare 30.09): UI-ul acopera bottom ~320px (titlu+canal),
+    right ~150px (rail like/comment), top ~160px (iconite). Pops pe MarginV 340 ies
+    COMPLET deasupra benzii de titlu -> nu mai sunt acoperite in feed."""
     if stil == "short":
         lat, inal = 1080, 1920
-        marime, margine_jos, contur = 88, 180, 10
+        marime, margine_jos, contur = 88, 340, 10
     else:
         marime, margine_jos, contur = 128, 300, 12
 
@@ -1155,7 +1158,13 @@ def scrie_ass_pops(nume, pops, lat=2560, inal=1440, durata=None, stil="video"):
              "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text"]
     for t, txt in pops:
         sfarsit = t + 2.2 if not durata else min(t + 2.2, durata)
-        linii.append(f"Dialogue: 1,{ts(t)},{ts(sfarsit)},POP,,0,0,0,,{{\\fad(150,180)}}{txt}")
+        if stil == "short":
+            # UPGRADE EDITOR 03.10 (kinetic captions, research: 78.6% din top clips folosesc
+            # capte animate, +40-80% AVD): pop-in = fade rapid + scale bounce 115%->100%.
+            anim = "{\\fad(120,160)\\t(0,90,\\fscx115\\fscy115)\\t(90,190,\\fscx100\\fscy100)}"
+        else:
+            anim = "{\\fad(150,180)}"
+        linii.append(f"Dialogue: 1,{ts(t)},{ts(sfarsit)},POP,,0,0,0,,{anim}{txt}")
     with open(nume, "w", encoding="utf-8") as f:
         f.write("\n".join(linii) + "\n")
     return nume
@@ -2114,3 +2123,41 @@ def verifica_subs_vizibile(cale_video, momente, prag=3000, ff="ffmpeg"):
     if stricate:
         raise SystemExit(f"ESUARE: subtitrari INVIZIBILE la {stricate} (prag {prag} px). NU se livreaza!")
     return rezultate
+
+
+def filmstrip(cale_video, iesire, start=0.0, durata=None, pas=1.0, coloane=7, linii=5, ff="ffmpeg"):
+    """LEGE t126 (30.09): inainte de ORICE short, editorul SE UITA la tot materialul.
+    Genereaza o plansa de cadre (1/pas sec) — daca intr-un interval nu se INTAMPLA
+    nimic vizibil, intervalul NU intra in short. intoarce calea plansii."""
+    import subprocess
+    vf = f"fps=1/{pas},scale=216:384,tile={coloane}x{linii}"
+    cmd = [ff, "-y", "-v", "error"]
+    if start:
+        cmd += ["-ss", str(start)]
+    if durata:
+        cmd += ["-t", str(durata)]
+    cmd += ["-i", str(cale_video), "-vf", vf, "-frames:v", "1", str(iesire)]
+    subprocess.run(cmd, check=True)
+    return iesire
+
+
+def verifica_hook(cale_video, ff="ffmpeg", prag_miscare=2.5):
+    """LEGE ALGORITM 2026 (30.09): swipe-rate-ul se decide in primele 1-3s —
+    primul cadru trebuie sa aiba SUBIECT IN MISCARE (nu peisaj static).
+    Compara cadru 0.1s vs 0.9s; diferenta medie de pixeli sub prag = ESUARE."""
+    import subprocess, tempfile, os
+    with tempfile.TemporaryDirectory() as td:
+        f1, f2 = os.path.join(td, "a.png"), os.path.join(td, "b.png")
+        subprocess.run([ff, "-y", "-v", "error", "-ss", "0.1", "-i", str(cale_video),
+                        "-frames:v", "1", "-update", "1", f1], check=True)
+        subprocess.run([ff, "-y", "-v", "error", "-ss", "0.9", "-i", str(cale_video),
+                        "-frames:v", "1", "-update", "1", f2], check=True)
+        from PIL import Image
+        a = Image.open(f1).convert("L").resize((216, 384))
+        b = Image.open(f2).convert("L").resize((216, 384))
+        pa, pb = a.load(), b.load()
+        dif = sum(abs(pa[x, y] - pb[x, y]) for x in range(216) for y in range(384)) / (216 * 384)
+    if dif < prag_miscare:
+        raise SystemExit(f"ESUARE HOOK: prima secunda e statica (dif {dif:.2f} < {prag_miscare}). "
+                         "Algoritmul masoara swipe-rate in 1-3s — incepe cu ACTIUNE!")
+    return round(dif, 2)
