@@ -138,7 +138,7 @@ def ruleaza(path, momente_pops):
     hard_fail |= not static
 
     s = bucla(path)
-    raport.append(("loop potential (info)", f"ssim primul/ultim={s:.3f}", True))
+    raport.append(("loop potential (info)", f"ssim primul/ultim={s if s is not None else 'n/a'}", True))
 
     aer = goluri_silenzioase(path)
     raport.append(("fara aer mort >2s", "OK" if aer else "GOLURI", aer))
