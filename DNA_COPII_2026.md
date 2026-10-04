@@ -71,3 +71,14 @@ Dagar postează master în ES→EN→toate; Jakey RO local. NOI (RO-first): titl
 - [ ] Fără bagăance/jargon adult (public 6–12 ani + părinți)?
 - [ ] Disclaimer „divertisment, sunt personaj" în descriere (deja în template) ✓
 - [ ] Short-ul e înțeles FĂRĂ sunet (L21 + legea noastră t131)?
+
+## L23. SPEC MINIATURĂ (OBLIGATORIU, verificat automat)
+- **1280x720 (16:9), JPG, sub 2MB** — cerința YouTube (înainte greșeam 1024x1024!).
+- Unealta: `finalizare_miniatura.py intrare.png iesire.jpg offset_y` (crop+scale+verificare).
+- offset_y controlează CE porțiune rămâne în cadru — personajele trebuie COMPLETE (verific VIZUAL, t117).
+
+## L24. FIECARE MINIATURĂ = SCENA DIN EPISODUL ACELUIA (nu imagine generică)
+- Miniatura se generează din MOMENTUL-CHEIE al episoadei date (drama principală, personajele ei, locul ei).
+- Ex: EP1 „Nocivanu vrea să furе Bebe Pikachu" → villain + bebe + portal (gata); EP2 polițista → scena cu polițista.
+- Workflow per episod: (1) aleg momentul-cheie din poveste, (2) generez cu avatar_referinta.jpg,
+  (3) finalizez la 1280x720, (4) verific vizual că fața e completă + se potrivește cu episodul.
