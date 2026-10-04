@@ -269,6 +269,74 @@ def livreaza(path, nume):
     return d["browser_download_url"]
 
 
+# -------------------------------------------------- 0. AUTO: aleg singur live + moment
+CANAL_STREAMS = "https://www.youtube.com/@isentric1/streams"
+MANIFEST_F = os.path.join(os.path.dirname(os.path.abspath(__file__)), "momente_folosite.json")
+
+
+def listeaza_live():
+    """Live-urile canalului (yt-dlp flat). [{id, titlu, durata, views}] — cele mai noi primele."""
+    r = subprocess.run(["yt-dlp", "--flat-playlist", "-J", CANAL_STREAMS],
+                       capture_output=True, text=True)
+    try:
+        d = json.loads(r.stdout or "{}")
+    except Exception:
+        return []
+    return [{"id": e.get("id"), "titlu": e.get("title") or "",
+             "durata": e.get("duration") or 0, "views": e.get("view_count") or 0}
+            for e in (d.get("entries") or []) if e]
+
+
+def citeste_folosite():
+    """momente_folosite.json: {live_id: [[s,e],...]} — ce s-a postat deja, ca sa nu repetam (t129)."""
+    if os.path.exists(MANIFEST_F):
+        try:
+            return json.load(open(MANIFEST_F, encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def marcheaza_folosit(vid, s, e):
+    f = citeste_folosite()
+    f.setdefault(vid, []).append([round(s, 1), round(e, 1)])
+    json.dump(f, open(MANIFEST_F, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def este_folosit(folosite, vid, mijloc, margine=90):
+    return any(s - margine <= mijloc <= e + margine for s, e in folosite.get(vid, []))
+
+
+def candidati_auto(harta, dur, folosite, vid, top=5, lungime=16.0):
+    """Maxim-locale greedy pe TOTA harta: cel mai bun secund nefolosit, apoi urmatorul
+    la >=16s distanta etc. Exclud intervalele din manifest (±90s). Prefix-sum pt zona."""
+    w = int(lungime / 3)
+    pref = [0.0]
+    for x in harta:
+        pref.append(pref[-1] + x["energie"] + x["scena"])
+
+    def scor_total(t):
+        i = min(int(t), len(harta) - 1)
+        lo, hi = max(0, i - w), min(len(harta), i + w + 1)
+        return (harta[i]["energie"] + harta[i]["scena"] * 0.8
+                + (pref[hi] - pref[lo]) * 0.15)
+
+    ok = [x for x in harta if 3 < x["t"] < dur - 3]
+    ok.sort(key=lambda x: -scor_total(x["t"]))
+    cand, luate = [], []
+    for x in ok:
+        t = x["t"]
+        if any(abs(t - u) < lungime for u in luate):
+            continue
+        if este_folosit(folosite, vid, t):
+            continue
+        cand.append((round(scor_total(t), 3), t))
+        luate.append(t)
+        if len(cand) >= top:
+            break
+    return cand
+
+
 def titluri_jh(pops):
     """3 propuneri de titlu stil JocuriHorrorSky (DNA_JH_2026.md), din pops reale.
     Doar PROPOZITII — titlul final il da userul explicit (t125)."""
@@ -349,44 +417,100 @@ def main():
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--pops-manual", default=None, help='ex: "0.3=CUM ADICA?,5=CE?!"; gol=auto')
     ap.add_argument("--pers", default=None, help="personaje/prieteni pt titluri MC: 'BROSCUTUL,SKY'")
+    ap.add_argument("--auto", action="store_true",
+                    help="aleg SINGUR: listeaza live-urile canalului, scaneaza tot, ia cel mai bun moment nefolosit")
+    ap.add_argument("--live", default=None, help="cu --auto: id/URL-ul unui live anume (default: cel mai nou)")
+    ap.add_argument("--top", type=int, default=3, help="cati candidati afisez (randez doar #1)")
     a = ap.parse_args()
 
     Path(TMP).mkdir(exist_ok=True)
     print("== CREIER SHORTURI ==")
-    # 1. sursa
-    if a.sursa.startswith("http"):
-        seg = f"{TMP}/seg.mp4"
-        print("1. Descarc segmentul...")
-        seg = descarca_segment(a.sursa, a.fenestru, seg)
+    vid = None
+    if a.auto:
+        # ---- AUTO: aleg live-ul, descarc, scanez TOT, exclud folositele ----
+        if a.sursa.startswith("http"):
+            mvid = re.search(r"(?:v=|live/|be/)([\w-]{11})", a.sursa)
+            url, vid = a.sursa, (mvid.group(1) if mvid else "manual")
+            seg = descarca_segment(url, None, f"{TMP}/live_{vid}.mp4")
+        elif os.path.exists(a.sursa):
+            url, seg, vid = None, a.sursa, os.path.basename(a.sursa)
+        else:
+            lives = listeaza_live()
+            print(f"0. Live-uri gasite pe canal: {len(lives)}")
+            if not lives:
+                sys.exit("   Nu am putut lista live-urile.")
+            live = lives[0]
+            if a.live:
+                pot = [l for l in lives if a.live in (l["id"], l["titlu"])]
+                if pot:
+                    live = pot[0]
+            print(f"   ALES: {live['titlu'][:65]} ({live['durata']//60} min, {live['views']:,} views)")
+            vid = live["id"]
+            url = f"https://www.youtube.com/watch?v={vid}"
+            print("1. Descarc live-ul COMPLET (poate fi greu pe cloud IP)...")
+            seg = descarca_segment(url, None, f"{TMP}/live_{vid}.mp4")
         if not seg:
-            print("   DESCARCARE ESUATA (403/limita IP). Incearca mai tarziu sau fisier local.")
+            print("   DESCARCARE ESUATA (403 cloud). Ruleaza de pe VPS/PC-ul tau sau da fisier local.")
             sys.exit(2)
-    else:
-        seg = a.sursa
-    dur_tot = float(subprocess.run([FP, "-v", "error", "-show_entries", "format=duration",
+        dur = float(subprocess.run([FP, "-v", "error", "-show_entries", "format=duration",
                                     "-of", "csv=p=0", seg], capture_output=True,
                                    text=True).stdout)
-    print(f"   segment {dur_tot:.1f}s")
-
-    # 2. transcript
-    print("2. Transcript...")
-    tr = transcript_din_url(a.sursa) if a.sursa.startswith("http") else []
-    if not tr:
-        print("   transcript YT lipsa -> WHISPER local (sync pe cuvinte)...")
-        tr = whisper_transcript(seg)
+        print(f"   sursa {dur/60:.1f} min")
+        tr = transcript_din_url(url) if url else []
+        if not tr:
+            tr = whisper_transcript(seg)
+        print(f"   {len(tr)} replici" if tr else "   (fara transcript -> doar evenimente)")
+        print("3. Harta evenimente pe TOT materialul...")
+        harta, dur = harta_evenimente(seg)
+        folosite = citeste_folosite()
+        if folosite.get(vid):
+            print(f"   deja folosite: {len(folosite[vid])} momente (le exclud)")
+        cand = candidati_auto(harta, dur, folosite, vid, top=a.top)
+        if not cand:
+            sys.exit("   Niciun moment nefolosit de calitate. Alt live sau alt canal.")
+        for i, (sc, t) in enumerate(cand, 1):
+            print(f"   candidat #{i}: la {int(t//60)}:{int(t%60):02d} (scor {sc})")
+        sc, tbest = cand[0]
+        s = max(0.0, tbest - 16.0 * 0.45)
+        e = s + 16.0
         if tr:
-            print(f"   {len(tr)} replici (whisper)")
-    print(f"   {len(tr)} replici" if tr else "   (fara transcript -> decat pe evenimente)")
-
-    # 3. evenimente + 4. poveste
-    print("3. Harta de evenimente (scena+energie)...")
-    harta, dur = harta_evenimente(seg)
-    s, e, varf_t = varf_poveste(harta, dur)
-    if tr:
-        s, e = taie_pe_fraze(tr, s, e)
-    e = min(e, dur)
-    varf_rel = round(varf_t - s, 2)
-    print(f"   fereastra: {s:.1f}s -> {e:.1f}s | varful la +{varf_rel:.1f}s")
+            s, e = taie_pe_fraze(tr, s, e)
+        e = min(e, dur)
+        varf_rel = round(tbest - s, 2)
+        print(f"   ALES momentul: {int(s//60)}:{int(s%60):02d} -> {int(e//60)}:{int(e%60):02d} | varf +{varf_rel:.1f}s")
+        pops = pops_din_eveniment(tr, s, e, varf_rel)
+    else:
+        # ---- fluxul manual (cum era) ----
+        if a.sursa.startswith("http"):
+            seg = f"{TMP}/seg.mp4"
+            print("1. Descarc segmentul...")
+            seg = descarca_segment(a.sursa, a.fenestru, seg)
+            if not seg:
+                print("   DESCARCARE ESUATA (403/limita IP). Incearca mai tarziu sau fisier local.")
+                sys.exit(2)
+        else:
+            seg = a.sursa
+        dur_tot = float(subprocess.run([FP, "-v", "error", "-show_entries", "format=duration",
+                                        "-of", "csv=p=0", seg], capture_output=True,
+                                       text=True).stdout)
+        print(f"   segment {dur_tot:.1f}s")
+        print("2. Transcript...")
+        tr = transcript_din_url(a.sursa) if a.sursa.startswith("http") else []
+        if not tr:
+            print("   transcript YT lipsa -> WHISPER local (sync pe cuvinte)...")
+            tr = whisper_transcript(seg)
+            if tr:
+                print(f"   {len(tr)} replici (whisper)")
+        print(f"   {len(tr)} replici" if tr else "   (fara transcript -> decat pe evenimente)")
+        print("3. Harta de evenimente (scena+energie)...")
+        harta, dur = harta_evenimente(seg)
+        s, e, varf_t = varf_poveste(harta, dur)
+        if tr:
+            s, e = taie_pe_fraze(tr, s, e)
+        e = min(e, dur)
+        varf_rel = round(varf_t - s, 2)
+        print(f"   fereastra: {s:.1f}s -> {e:.1f}s | varful la +{varf_rel:.1f}s")
+        pops = None
 
     # 5. pops
     if a.pops_manual:
@@ -395,7 +519,7 @@ def main():
             t, txt = p.split("=", 1)
             pops.append((float(t), txt.strip()))
 
-    else:
+    elif pops is None:
         pops = pops_din_eveniment(tr, s, e, varf_rel)
     print("4. Pops:", pops)
 
@@ -429,6 +553,10 @@ def main():
                         f"{TMP}/fix.mp4"], check=True)
         out = f"{TMP}/fix.mp4"
         qc.ruleaza(out, mom)
+
+    if a.auto and vid:
+        marcheaza_folosit(vid, s, e)
+        print("   moment marcat ca FOLOSIT in manifest (t129)")
 
     # 9. livrare
     print("7. Livrez pe Release...")
