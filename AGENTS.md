@@ -124,3 +124,9 @@ links to the user in Romanian, short, with tables.
 - Rețeta: începe cu literă mică sau verb la pers. I; „.." (două puncte) la mijloc; CAPS pe cuvântul de șoc; cuvinte-bombă: „a înnebunit", „NEBUNIE", „fata nebună", „am supraviețuit", „de 100 de ori"; emoji max 2 (😱🔥😂).
 - FĂRĂ ton formal, FĂRă formulări de scamător, FĂRĂ „EP".
 - Post comunitate abonat: video-ul LUI pe primul loc + LIKE pentru el + sondaj scurt.
+
+## REGULA PROZENT (ordin user 2026-10-04, PERMANENT)
+La FIECARE discuție strategică: pârghiile se exprimă ÎN % impact pe canal, ordonate MAXIM-FIRST.
+Categorii obligatorii: DOVEDIT pe datele canalului / PROBABIL (estimat cu sursă) / NEGARANTABIL.
+Obiectiv declarat user: maxima audiență de copii RO + Moldova + diaspora (limba română le acoperă pe toate).
+Egoist = agentul dă singur comenzile pregătitoare; public = doar cu DA explicit.
