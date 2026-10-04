@@ -71,3 +71,40 @@ Fiecare: short 16s ÎNTÂI (L8), apoi episod ~170s, miniatură școala EMOȚIE (
 - [ ] Nametag vizibil pe personajul principal?
 - [ ] Săgeată roșie DOAR dacă e element ascuns (nu la emoție pură)?
 - [ ] Test 120px: emoția se vede?
+
+---
+# UPDATE 2026-10-04 (trending gaming RO disecat LIVE: 50 clipuri + 6 mega-hituri cu comentarii)
+
+## L10. MINIATURILE MEGA-HIT (2M+) SUNT DESENE CARTOON, NU GAMEPLAY (VERIFICAT VIZUAL 2/2)
+- Zoomy „ADOPTED By GORILLA KING" (2,09M): cadru DESENAT — bebeluș-rege plângând + gorilă cu banane.
+- Dagar „VAMPIR în închisoarea fetelor" (2,1M): DESEN — vampirul în brațe cu polițista, INIMIOARE roșii.
+- REGULA: desenez SCENA DRAMei (personaje cartoon, emoție, obiect-simbol: coroană/banane/inimioare), ZERO text, ZERO gameplay-screenshot.
+- NOI: avem generatorul de imagini → miniatura = scenă cartoon cu avatarul nostru + Pikachu + antagonist.
+
+## L11. TITLURILE-MEGA = TRANSFORMARE + CONTEXT INTERZIS
+| Titlu real | Views |
+|---|---|
+| M-am transformat în VAMPIR ca să EVADEZ din ÎNCHISOAREA FETELOR | 2,1M |
+| ADOPTAT de REGELE GORILĂ în Steal an Egg! | 2,09M |
+| TOATE FETELE ADMIN sunt ÎNSĂRCINATE în Roblox! | 1,16M |
+| Dragoste Interzisă: BACON SĂRAC și FIICA ADMINULUI! | 443K |
+| AM JUCAT TOATE JOCURILE SONIC LA 3 DIMINEAȚA! | 2,06M |
+Șabloane noi pt titluri_mc: „M-am transformat în {X} ca să {scap/evadez}!", „ADOPTAT de {X}!",
+„Dragoste interzisă: {sărac} și {fiica adminului}!"
+
+## L12. AUTO-DUBBING 2026 ( Comentarii în ES/PT/RO pe ACELAȘI video = hituri multi-țară)
+Titlurile se traduc automat pe YouTube → scriem titluri care au sens în RO, fără argou care se strică la traducere.
+
+## L13. STEAL AN EGG = JOCUL LIVE ACUM (3 clipuri în trending RO simultan)
+Universul Steal a Brainrot: ADOPTAT de GORILĂ (2M), AM PRIMIT ADMIN (84K), INDEX toate ouăle (4,6M).
+→ conținut PokeCity poate face „OUĂ DE POKÉMON în Minecraft" pe val.
+
+## L14. COMENTARII = MOTORUL (văzut la JH + Zoomy)
+- JH-Sky își fixează comentariu cu ANUNȚUL EPISODULUI URMĂTOR (58♥ cel mai likuit!) → NOI: după fiecare upload, comentariu fixat cu „mâine facem X".
+- Comunitatea CERE „play with me? username..." → draftul #5 „Tur de case al abonaților" e EXACT cererea pieții. PRIORITATE.
+
+## PLAN ACTUALIZAT VIDEO+SHORTS (1+1/zi)
+1. SHORT (creierul): moment nefolosit din live, pops VTT, QC 8 legi, logo — legea veche rămâne.
+2. EPISOD: formula L11 (transformare/adoptie/drama) — NOCIVANU VREA SĂ-MI FURE BEBE PIKACHU e pe șablon câștigător.
+3. MINIATURĂ EPISOD: L10 — scenă cartoon generată, zero text (demo: demo_miniatura_cartoon.png).
+4. COMENTARIU FIXAT după upload: anunțul episodului următor (L14).
