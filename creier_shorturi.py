@@ -291,6 +291,9 @@ def titluri_mc(pops, pers=None):
             "SUNT BEBE PIKACHU in Minecraft!",
             "AM UN CRUSH SECRET LA SCARA ?!",
             "100 PIKACHU in ACELASI TIMP !!",
+            "M-am transformat in PIKACHU ca sa EVADEZ !",
+            "ADOPTAT de REGELE GORILA in Minecraft!",
+            "Dragoste interzisa: SARAMan si FIICA ADMINULUI !",
         ]
     a, b = (p + ["EL", "EA"])[:2]
     return [
@@ -299,6 +302,8 @@ def titluri_mc(pops, pers=None):
         f"I-AM FURAT TOT lui {b} in Minecraft!",
         f"{b} m-a RAPIT! in Minecraft",
         f"100 {a} in ACELASI TIMP !!",
+        f"M-am transformat in {a} ca sa EVADEZ !",
+        f"ADOPTAT de REGELE {a} in Minecraft!",
     ]
 
 
