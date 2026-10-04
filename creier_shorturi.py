@@ -270,7 +270,7 @@ def livreaza(path, nume):
 
 
 # -------------------------------------------------- 0. AUTO: aleg singur live + moment
-CANAL_STREAMS = "https://www.youtube.com/@isentric1/streams"
+CANAL_STREAMS = "https://www.youtube.com/channel/UCBoZcTLayAUgYTPsyrStiLg/streams"  # ID stabil, nu handle (rebranding-proof)
 MANIFEST_F = os.path.join(os.path.dirname(os.path.abspath(__file__)), "momente_folosite.json")
 
 
