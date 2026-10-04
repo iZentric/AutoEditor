@@ -356,22 +356,25 @@ def titluri_mc(pops, pers=None):
     p = [x.strip().upper() for x in (pers or "").split(",") if x.strip()]
     if not p:
         return [
-            "SUNT BEBE PIKACHU in Minecraft!",
-            "AM UN CRUSH SECRET LA SCARA ?!",
-            "100 PIKACHU in ACELASI TIMP !!",
+            "SUNT BEBE PIKACHU GUGUGAGA in Minecraft!",
+            "POLITISTA s-a INDRAGOSTIT de MINE ?!",
+            "AM FOST RAPIT de NINJA GIRL in Minecraft!",
             "M-am transformat in PIKACHU ca sa EVADEZ !",
             "ADOPTAT de REGELE GORILA in Minecraft!",
+            "de la CASA DE CARTON la CASTEL in 24 ORE !",
+            "TOTI VOR SA SE CASATOREASCA CU MINE ?!",
             "Dragoste interzisa: SARAMan si FIICA ADMINULUI !",
         ]
     a, b = (p + ["EL", "EA"])[:2]
     return [
         f"{a} are UN CRUSH PE MINE in Minecraft!",
-        f"SUNT BEBE {a} in Minecraft!",
+        f"SUNT BEBE {a} GUGUGAGA in Minecraft!",
         f"I-AM FURAT TOT lui {b} in Minecraft!",
         f"{b} m-a RAPIT! in Minecraft",
-        f"100 {a} in ACELASI TIMP !!",
-        f"M-am transformat in {a} ca sa EVADEZ !",
+        f"{b} s-a INDRAGOSTIT de MINE ?!",
         f"ADOPTAT de REGELE {a} in Minecraft!",
+        f"M-am transformat in {a} ca sa EVADEZ !",
+        f"BEBE vs PRO vs HACKER in Minecraft!",
     ]
 
 
