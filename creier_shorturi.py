@@ -282,6 +282,26 @@ def titluri_jh(pops):
     ]
 
 
+def titluri_mc(pops, pers=None):
+    """Propuneri titlu Minecraft roleplay (DNA_MC_ROLEPLAY_2026.md L1/L2/L4).
+    pers: nume personaje/prieteni CAPS (separati prin virgula). Fara pers -> sabloane generice."""
+    p = [x.strip().upper() for x in (pers or "").split(",") if x.strip()]
+    if not p:
+        return [
+            "SUNT BEBE PIKACHU in Minecraft!",
+            "AM UN CRUSH SECRET LA SCARA ?!",
+            "100 PIKACHU in ACELASI TIMP !!",
+        ]
+    a, b = (p + ["EL", "EA"])[:2]
+    return [
+        f"{a} are UN CRUSH PE MINE in Minecraft!",
+        f"SUNT BEBE {a} in Minecraft!",
+        f"I-AM FURAT TOT lui {b} in Minecraft!",
+        f"{b} m-a RAPIT! in Minecraft",
+        f"100 {a} in ACELASI TIMP !!",
+    ]
+
+
 # ------------------------------------------------------------------ MAIN
 def whisper_transcript(cale):
     """faster-whisper local (gratis, timestamp-uri pe CUVINTE). Fallback final cand
@@ -323,6 +343,7 @@ def main():
     ap.add_argument("--nume", default="SHORT")
     ap.add_argument("--dry", action="store_true")
     ap.add_argument("--pops-manual", default=None, help='ex: "0.3=CUM ADICA?,5=CE?!"; gol=auto')
+    ap.add_argument("--pers", default=None, help="personaje/prieteni pt titluri MC: 'BROSCUTUL,SKY'")
     a = ap.parse_args()
 
     Path(TMP).mkdir(exist_ok=True)
@@ -421,6 +442,8 @@ def main():
         print("   GATA. Descarci de pe Releases.")
     for i, t in enumerate(titluri_jh(pops), 1):
         print(f"   titlu propus {i} (stil JH, tu decizi): {t}")
+    for i, t in enumerate(titluri_mc(pops, a.pers), 1):
+        print(f"   titlu MC propus {i} (roleplay, tu decizi): {t}")
     print("== CREIER: DONE ==")
 
 
