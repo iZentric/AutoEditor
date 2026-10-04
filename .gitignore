@@ -38,3 +38,4 @@ cookies*.b64
 
 # Local browser authorization environment.
 .venv-oauth/
+.secrets/
