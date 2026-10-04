@@ -82,3 +82,42 @@ Dagar postează master în ES→EN→toate; Jakey RO local. NOI (RO-first): titl
 - Ex: EP1 „Nocivanu vrea să furе Bebe Pikachu" → villain + bebe + portal (gata); EP2 polițista → scena cu polițista.
 - Workflow per episod: (1) aleg momentul-cheie din poveste, (2) generez cu avatar_referinta.jpg,
   (3) finalizez la 1280x720, (4) verific vizual că fața e completă + se potrivește cu episodul.
+
+---
+# CEMAIBUNI — TURNÉUL COMPLET 2026-10-04 (17 canale; doar ce-i mai bun de la fiecare)
+
+| Canal | Ab | Doar CE-I MAI BUN de la el (dovada) |
+|---|---|---|
+| iSilent 1,68M | **MUZICA-MEME** (top5 toate MV: 2,5–3,6M; „GOO GOO", „TOPICRAFT") |
+| Cadres 23,3M | transformări+body-drama (31M „I LOST PARTS OF MY BODY") |
+| Nacho 8,51M | BEBE-ANIMAL GUGUGAGA (10M) + shorts mecanice (84M) |
+| Dagar 6,72M | răpiri/adoptions + NOOB vs PRO vs HACKER (mediana 4M!) |
+| Knoxy 4,65M | nuntă/măritiș + real-face mystery (5,2M) |
+| Cristineel 105K | bebe roleplay + miniaturi zero-text (×3,5 shorts) |
+| Jakey 174K | RO love-drama (polițista 473K) |
+| Nocivanu 1,12M | SMP prieteni + MUZICA (5,5M NOCIV SONG) + în viața reală (4,4M) |
+| Klorna 660K | TRY NOT TO LAUGH cu APA + colaburi (1,2M cu JH) + „Ajutor" 1 cuvânt (591K) |
+| INSANITY 465K | SERII-formulă „99 NOPTI bază sigură" (632–795K constant) + Steal a Brainrot (893K) |
+| Silentiosu 455K | colaburi-muzică + SEZONUL COMPLET compilat (1,2M Skincraft) |
+| M.I. 372K | VIAȚA LA ȘCOALĂ serie + compilări FILM (1,2M) |
+| OanaVT 145K | KISS MARRY KILL + gelozie-drama între personaje (173–218K) |
+| Bonus SKY 96K | COMPILĂRI 1H fail-uri (854K „O ORĂ cum SKY pică de pe scaun") |
+| Adizece 74K | trend-mashup 48h (LABUBU/Ben10) |
+| Broscutul 9,5K | music-video > roleplay (156K) |
+| Minecraft oficial | — (brand, nu tactică) |
+
+## L25. MUZICA-MEME = CEI MAI MARI HITURI ALE SCENEI RO (NOU, cel mai tare descoperit)
+iSilent 3,6M ×2, Nocivanu 5,5M, Silentiosu colab 2,7M, OanaVT 831K — TOATE melodii de 2-3 min.
+→ dupa ~5-10 episoade: „Zentric - BEBE PIKACHU (Official Music Video)" 2-3 min, refren hackuit, colab dacă se poate.
+
+## L26. COMPILĂRI-LUNGI = bani pe fond (Bonus SKY 854K la 1H)
+după 20+ episoade: „1 ORĂ de PokeCity" + „SEZONUL 1 COMPLET" (Silentiosu 1,2M).
+
+## L27. SERIA CU FORMULĂ FIXĂ bate randomul (INSANITY: aceeași cutie „Fac cea mai sigură X în 99 de NOPTI")
+titlul se repetă, doar variabila se schimbă → abonatul știe ce cumpără. POKECITY: „Am supraviețuit 100 de ZILE cu BEBE PIKACHU".
+
+# REBRANDING (întrebarea userului)
+- ALGORITMUL NU SE PĂCĂLEȘTE cu nume-duble: el citește CTR+AVD+constanță, nu asemănarea numelui.
+- DOUĂ canale la 1,3K abonați = audiență tăiată în două + dublu lucru. NU.
+- RENUMIRE același canal = gratuit, abonații rămân. Tag-urile lui deja acoperă izentric/isentric/zentric.
+- Handle-uri verificate 2026-10-04: @ZentricMinecraft ✅LIBER, @ZentricJoaca ✅LIBER, @Zentric_MC ✅, @iZentricMinecraft ✅, @ZentricPlayz ✅ (@Zentric ocupat).
