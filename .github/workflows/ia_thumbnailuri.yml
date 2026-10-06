@@ -1,0 +1,64 @@
+name: Ia thumbnailuri referinta
+# Sandboxul NU are acces la i.ytimg.com (SSL blocat). Runnerul de Actions ARE internet,
+# deci descărcarea se face aici și se comite în repo — exact cum zice AGENTS.md
+# (munca grea / rețeaua = GitHub Actions, nu sandboxul).
+on:
+  workflow_dispatch:
+    inputs:
+      iduri:
+        description: 'ID-uri video YouTube, separate prin virgulă'
+        required: true
+      dosar:
+        description: 'Folder destinație în repo'
+        required: false
+        default: 'refs/thumbnailuri_noi'
+      canal:
+        description: 'Etichetă canal (prefix nume fișier)'
+        required: false
+        default: 'JocuriHorrorSky'
+
+permissions:
+  contents: write
+
+jobs:
+  descarca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Descarcă thumbnailurile
+        run: |
+          set -e
+          mkdir -p "${{ inputs.dosar }}"
+          for id in $(echo "${{ inputs.iduri }}" | tr ',' ' ' | tr -d ' '); do
+            ok=0
+            for cal in maxresdefault hq720 sddefault hqdefault; do
+              url="https://i.ytimg.com/vi/${id}/${cal}.jpg"
+              if curl -fsSL --max-time 30 -o "/tmp/${id}.jpg" "$url"; then
+                if [ -s "/tmp/${id}.jpg" ]; then
+                  cp "/tmp/${id}.jpg" "${{ inputs.dosar }}/${{ inputs.canal }}_${id}.jpg"
+                  echo "OK ${id} (${cal}) $(stat -c%s /tmp/${id}.jpg) bytes"
+                  ok=1
+                  break
+                fi
+              fi
+            done
+            [ "$ok" = "1" ] || echo "ESEC ${id}"
+          done
+          ls -la "${{ inputs.dosar }}"
+
+      - name: Comite în branch
+        run: |
+          git config user.name "demiurg-bot"
+          git config user.email "demiurg@izentric.local"
+          git add "${{ inputs.dosar }}"
+          if git diff --cached --quiet; then
+            echo "Nimic nou de comis."
+          else
+            git commit -m "thumbnailuri referinta: ${{ inputs.iduri }}"
+            git push origin "HEAD:${{ github.ref_name }}"
+            echo "COMIS iesit cu $?"
+          fi
