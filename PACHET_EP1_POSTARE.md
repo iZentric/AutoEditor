@@ -19,6 +19,9 @@ Regulă: copiezi blocurile exact cum sunt. Nimic de ghicit.
 **B:** `FINAL_THUMB_EP1_V2.jpg` · **C:** `FINAL_THUMB_DEMO_EP1.jpg`
 (toate 3 sunt 1280×720, sub 2 MB — YouTube le acceptă direct)
 
+Unde sunt (pe GitHub, în repo): A și B în `workspace_migrat/`, C în rădăcină.
+Deschizi fișierul pe GitHub → butonul **Download raw file** (săgeata ↓ din dreapta).
+
 **Dacă vezi butonul „Test & Compare" în Studio** → încarci toate 3 (maxim 3 variante,
 YouTube alege singur câștigătorul după watch-time, în ~2 săptămâni).
 **Dacă NU vezi butonul** → o pui pe A și gata. Nu aștepți după el.
