@@ -15,3 +15,8 @@ PNG cu FUNDAL TRANSPARENT — se lipesc peste ORICE scenă (în Pillow, Photosho
 REGULI (PROTOCOL_MINIATURI_BRAND.md): bulă = UN cuvânt scurt · nametag NU pe fețe ·
 logo de serie DOAR la serie (assets/logo_pokecity_clear.png) · textul NICIODATĂ generat de AI.
 Pentru aplicare automată: python tools/thumb_brand.py (le desenează procedural, la fel).
+
+## ⭐ ORIGINALE/ — ELEMENTELE REALE (bătute în cuie de boss, 06-10-2026)
+Tăiate pixel-cu-pixel DIN `refs/BRAND_THUMB_MASTER.png` (thumbnail-ul aprobat de boss).
+Agentul folosește ÎNTÂI acestea (ORIGINALE/); variantele redesenate (părintele) sunt doar
+rezervă dacă vreuna are fundal prins în transparentă. Regula rămâne: identic cu masterul.
