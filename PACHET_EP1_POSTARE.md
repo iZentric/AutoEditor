@@ -135,10 +135,14 @@ Am căutat peste tot în repo + pe GitHub Releases + în toate transcriptele (63
 ## 10) DUPĂ POSTARE — măsurăm, nu sperăm
 | Când | Prag de trecut | Ce fac dacă nu trece |
 |---|---|---|
-| +24h | >600 views | schimb ordinii hashtagurilor, nimic altceva |
+| **+2h** | CTR ≥ 6% | pregătesc deja varianta B de thumbnail |
+| **+6h** | CTR ≥ 8% | schimb miniatura pe B + titlul [B] |
+| +24h | >600 views | schimb ordinea hashtagurilor, nimic altceva |
 | +48h | CTR >4% | schimb miniatura pe varianta B |
 | +7 zile | >1.500 views + trafic „Browse" | trecem EP.2 pe formula câștigătoare |
 
+⚠️ **Nu atingi un clip care urcă.** Dacă la 2h și 6h curba e sus, NU schimbi nimic —
+orice modificare resetează testul algoritmic. Intervii doar când curba e moartă.
 Cifre de referință: cel mai bun POKECITY de pe canal = **871**, media ultimelor = ~450.
 
 **Pârghii (% impact, ordin maxim-first)** — ca să știi de ce facem fiecare pas:
