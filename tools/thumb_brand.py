@@ -19,6 +19,12 @@ def main():
     ap.add_argument('--cerc', default=None, help='x:y:r')
     ap.add_argument('--sageata', default=None, help='x0:y0:x1:y1')
     ap.add_argument('--inimi', default=None, help='x:y')
+    ap.add_argument('--cerc-pe', default=None,
+                    help='x0,y0,x1,y1[:CALE] — cercul lui se AUTO-CENTREAZA pe ce e de '
+                         'aratat (fata/obiect). Nu-l mai pui la ochi, iese perfect.')
+    ap.add_argument('--sageata-spre', default=None,
+                    help='CALE:tx,ty:latime:colt(:stanga) — sageata LUI, din colt '
+                         '(sj/dj/ss/ds) spre tinta; se roteste singura.')
     ap.add_argument('--pune', action='append', default=[],
                     help='CALE:x:y:latime — lipeste ORICE element 1:1 extras '
                          '(săgeată/cerc/semn din elemente_brand/JH/). Se poate repeta.')
@@ -65,6 +71,37 @@ def main():
         hq = Image.open(os.path.join(ELEM, 'inimi_rosii.png'))
         hq = hq.resize((int(hq.width*0.85), int(hq.height*0.85)), Image.LANCZOS)
         im.paste(hq, (ix - hq.width//2, iy - hq.height//2), hq)
+    if a.cerc_pe:
+        # Cercul lui, fix pe obiect: se calculeaza centrul si diametrul din caseta tintei.
+        b = a.cerc_pe.split(':')
+        x0, y0, x1, y1 = [int(v) for v in b[0].split(',')]
+        cale = b[1] if len(b) > 1 else os.path.join(BASE, 'elemente_brand', 'JH',
+                                                    'CANONIC', 'CERC_2.png')
+        cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+        diam = int(max(x1 - x0, y1 - y0) * 1.3)
+        cp = Image.open(cale).convert('RGBA')
+        cp = cp.resize((diam, int(cp.height * diam / cp.width)), Image.LANCZOS)
+        im.paste(cp, (cx - cp.width // 2, cy - cp.height // 2), cp)
+        d = ImageDraw.Draw(im)
+
+    if a.sageata_spre:
+        # Sageata lui, orientata din coltul ales spre tinta (rotita, nu desenata).
+        b = a.sageata_spre.split(':')
+        cale, tx, ty, latime, colt = b[0], int(b[1]), int(b[2]), int(b[3]), b[4]
+        colturi = {'sj': (0.12 * 1280, 0.88 * 720), 'dj': (0.88 * 1280, 0.88 * 720),
+                   'ss': (0.12 * 1280, 0.12 * 720), 'ds': (0.88 * 1280, 0.12 * 720)}
+        sx, sy = colturi.get(colt, colturi['sj'])
+        sa = Image.open(cale).convert('RGBA')
+        sa = sa.resize((latime, int(sa.height * latime / sa.width)), Image.LANCZOS)
+        if len(b) > 5 and b[5] == 'stanga':
+            sa = sa.transpose(Image.FLIP_LEFT_RIGHT)
+        unghi = math.degrees(math.atan2(ty - sy, tx - sx))
+        rot = sa.rotate(-unghi, expand=True, resample=Image.BICUBIC)
+        px = int(sx + (tx - sx) * 0.42 - rot.width / 2)
+        py = int(sy + (ty - sy) * 0.42 - rot.height / 2)
+        im.paste(rot, (px, py), rot)
+        d = ImageDraw.Draw(im)
+
     for element in a.pune or []:
         # Element 1:1 din biblioteca (săgeata/cercul/semnul LUAT din original, nu desenat).
         cale, ex, ey, elat = element.rsplit(':', 3)
