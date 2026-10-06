@@ -42,3 +42,28 @@
    bulei → spre amenințare/cerc; corpul săgeții rămâne ÎN SPATE relativ la text (text 100% lizibil).
 4. Centru CURAT între personaje — acțiunea (cuțitul) se vede instant.
    → Validat pe thumbnaili/THUMB_YTARI_FINAL_v6 (0 pixeli original modificați).
+
+## 💎 PIXEL-PERFECT & ZERO-ARTIFACT PROTOCOL (LEGE, 06-10, directivă boss)
+### 1. EXTRACȚIE CURATĂ (fără artefacte de crop)
+- INTERZIS: margini zimțați, tăieturi pătrate cu fundal vizibil, colțuri de crop pe overlay-uri.
+- TOATE elementele (bulă/săgeată/cerc) = PNG cu alpha CURAT, zero bleeding de fundal.
+- Pipeline obligatoriu: `MinFilter(3)` (erodează 1px zimțat) + `GaussianBlur(1.1)` (feather margine)
+  + crop pe bbox + upscale DOAR LANCZOS + drop shadow moale (blur 5-7, ~65% opacitate).
+  → Asseturi deja procesate: pipeline la încărcare, nu se folosește NICIODATĂ PNG brut cu fundal prins.
+
+### 2. ANCORARE PRECIZIE & GEOMETRIE (aliniere EXACTĂ, vectorială)
+- COADA BULEI: vârful POINTĂ DIRECT la CENTRUL gurii personajului principal
+  (detectare vârf pixel-level + rotire calculată: `atan2` — niciodată spre ochi/frunte/aer).
+- CERCUL: obiectul-țintă (armă/față ascunsă/obiect cheie) în CENTRUL GEOMETRIC EXACT al cercului.
+- SĂGEATA: pornește lângă bulă/personaj → capul ei aterizează DIRECT în centrul cercului
+  (rotație vectorială până la 1px de centru).
+
+### 3. FILTRU INTELIGENT DE SELECTARE (calitate bază)
+- INTERZISE bazele mizerabile/blurate/cu artefacte sau compoziție ciudată.
+- DOAR thumb-uri curate, contrast mare, grad profesionist de la top creators verificați
+  (@dagar-minecraft, @SamiMinecraft/UC8Ekc, JocuriHorror) cu engagement/CTR dovedit
+  → selecție = top VIEWS din `refs/brand_1la1/INDEX.csv`.
+- BALANȚĂ: subiect focal clar în stânga ȘI dreapta; centrul NEAGLOMERAT (acțiunea se vede instant).
+
+### ✅ STATUS: implementat & certificat pe `thumbnaili/THUMB_RECHIN_v2.png`
+(coadă→gură vectorial · cap săgeată→centru cerc · inel centrat pe gură · alpha curățat · 0 pixeli străini)
