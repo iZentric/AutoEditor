@@ -32,3 +32,17 @@
 ## ELEMENTELE OFICIALE (folderul elemente_brand/)
 bula_FUGI.png · bula_GOLA.png (fără text) · nametag_iZentric.png · nametag_Mocivanu.png ·
 cerc_rosu.png · sageata_rosie.png · inimi_rosii.png — extrase din masterul aprobat.
+
+## 👑 REGULA DE AUR (bătută în cuie de boss, 06-10-2026)
+„Ai făcut ASTA — a fost PERFECT. Regulile să rămână exact asta."
+→ Orice thumbnail de acum înainte trebuie să arate EXACT ca `refs/BRAND_THUMB_MASTER.png`.
+**CHECKLIST FINAL înainte de livrare (compari cu masterul, element cu element):**
+- [ ] Bula albă cu contur negru gros + text roșu scurt („FUGI!"/„CE?" — UN cuvânt)?
+- [ ] Nametag-urile Minecraft (Monocraft, box gri) deasupra FIECĂRUI personaj, pe nume?
+- [ ] Cercul roșu gros pe elementul-mister (bebelul/obiectul), centrat?
+- [ ] Săgeata roșie groasă din colțul liber, cu coadă rotundă, spre țintă?
+- [ ] Logo-ul seriei în colț (POKECITY stânga-jos) — DOAR la serie?
+- [ ] Personajele EXACT ale noastre: iZentric (jumătate negru/alb, coarne, yin-yang) + Mocivanu (urs, șapcă roz-albă)?
+- [ ] Stil cartoon-Minecraft cu contur negru gros, culori săturate, fețe exagerate = „editat de om"?
+Dacă un singur punct lipsește → NU se livrează. Refă.
+PNG-urile oficiale sunt în elemente_brand/ — folosești ACELEA, nu improviezi altele.
