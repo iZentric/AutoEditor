@@ -19,6 +19,19 @@
 6. **Logo-ul SERIEI** într-un colț curat — DOAR când e din serie.
 7. **Finisaj uman**: saturație +10%, contrast +5%, claritate +25%, test 120px telefon.
 
+## 📍 REGULI DE PLASARE (lege de la boss, 06-10-2026 — „să pară editat de om")
+1. **BULA stă LÂNGĂ caracter, NICIODATĂ pe fața lui.** Se pune în dreptul capului, pe o parte
+   (stânga sau dreapta, în funcție de spațiul liber), și se ÎNTOARCE cu coada spre caracter —
+   să pară că el zice cuvântul. Dacă e nevoie: `:stanga` la `--balon` o întoarce.
+2. **CERCUL se pune MEREU PE FAȚA / PE OBIECTUL care trebuie arătat** — centrat pe el, nu
+   pe lângă, nu „aproximativ". Comanda `--cerc-pe x0,y0,x1,y1` îl centrează singur pe casetă.
+3. **SĂGEATA vine dintr-un COLȚ și arată spre subiect** (caracter sau obiect), rotită singură
+   cu `--sageata-spre CALE:tx,ty:latime:colt` (colț: sj / dj / ss / ds).
+4. Săgeata, cercul și bula sunt **luate 1:1 de la JocuriHorrorSky** (`elemente_brand/JH/`),
+   niciodată desenate și niciodată regenerate. **Singurul lucru generat = personajele.**
+5. Dacă un element nu e „exact ala de la el", NU-l folosi: se cere altul din hartă
+   (`preview/harta.html` → bossul arată căsuța) și se taie din original.
+
 ## FLUXUL (agentul îl face singur, fără să întrebe)
 1. **Alege referința inteligent** (SMART MATCHING): Minecraft → canalele campionilor
    (dagar/nacho/Cadres/Knoxy, baza în cunostinte/); alt joc → top youtuberul ACELUI joc

@@ -45,9 +45,13 @@ def main():
         im.paste(png, (xc - png.width//2, yt - png.height//2), png)
     if a.balon:
         # Element REAL 1:1 (legea bossului: copiaza, nu redesena) — ex. balonul JH cu „CE?".
-        cale, bx, by, lat = a.balon.rsplit(':', 3)
+        b = a.balon.rsplit(':', 3)
+        cale, bx, by, lat = b[0], int(b[1]), int(b[2]), int(b[3])
         bp = Image.open(cale).convert('RGBA')
-        bp = bp.resize((int(lat), int(bp.height * int(lat) / bp.width)), Image.LANCZOS)
+        # regula bossului: bula stă LÂNGĂ caracter (nu pe față), cu coada întoarsă spre el
+        if len(b) > 4 and b[4] == 'stanga':
+            bp = bp.transpose(Image.FLIP_LEFT_RIGHT)
+        bp = bp.resize((lat, int(bp.height * lat / bp.width)), Image.LANCZOS)
         im.paste(bp, (int(bx) - bp.width // 2, int(by) - bp.height // 2), bp)
         d = ImageDraw.Draw(im)
     if a.bula:
