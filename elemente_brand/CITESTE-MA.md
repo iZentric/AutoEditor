@@ -20,3 +20,8 @@ Pentru aplicare automată: python tools/thumb_brand.py (le desenează procedural
 Tăiate pixel-cu-pixel DIN `refs/BRAND_THUMB_MASTER.png` (thumbnail-ul aprobat de boss).
 Agentul folosește ÎNTÂI acestea (ORIGINALE/); variantele redesenate (părintele) sunt doar
 rezervă dacă vreuna are fundal prins în transparentă. Regula rămâne: identic cu masterul.
+
+## 🔥 REALE DE ASEARĂ (radăcina brandului — Boss confirmat vizual 06-10)
+- `BALON_JH_real_CE.png` = bula REALĂ „CE?" (contur + text autentice JH)
+- `SAGEATA_JH_real.png` = săgeata REALĂ curbată cu margini albe (stil JH)
+Acestea + `ORIGINALE/` (tăiate din master) = cele OFICIALE. Redesenatele = doar rezervă.
