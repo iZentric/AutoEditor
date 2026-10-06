@@ -139,3 +139,10 @@ Bossul a lipit conversația completă cu Gemini (agentul Demiurg). Salvat VERBAT
 DEMIURGE_SYSTEM_PROMPT.md + secțiune obligatorie adăugată în AGENTS.md. Implementarea reală
 din repo: BRAND_THUMB_MASTER.png + thumb_brand.py + miniaturi.py + FORMULE_TOP_DECODATE.md.
 Nume (decizie cu date): canal afișat iZentric, handle @iZentric-Minecraft (SEO 276.8K/lună).
+
+## 06-10-2026 (final final) — MIGRARE COMPLETĂ PE AGENT NOU
+Bossul a cerut mutarea totului pe alt agent. Efectuat: workspace_migrat/ (REGULI_BOSS,
+REGISTRU 24, FORMULA_TOP5, KIT-uri, LECTII_JURNAL, TRACKER, INTEL vidiq, pro/ SFX,
+transcripts, thumbs EP1, Videos.csv) + Monocraft/PressStart2P în assets/ + START_HERE.md
+(protocol de preluare pentru agentul nou). Repo-ul = singura sursă de adevăr; orice agent
+nou: clonează + citește START_HERE.md + cere tokenul de la boss.

@@ -1,0 +1,42 @@
+================================================================
+KIT EP.1 — UPLOAD COMPLET (copiezi exact ce e între liniile ──)
+Gate: DOAR la „DA EPISOD 1" | Publicare: 16:00 RO/MD
+================================================================
+
+── TITLU ──────────────────────────────────────────────
+NOCIVANU are PLANURI cu BEBE PIKACHU... GUGUGAGA! (POKECITY EP.1)
+
+── DESCRIERE ──────────────────────────────────────────
+AM ADOPTAT cel mai RAR bebe PIKACHU din toată POKECITY! 😱 Face GUGUGAGA și NOCIVANU ÎL VREA! 🥚⚡
+Cred că e cel mai rar Pokémon din Minecraft! Tu ce nume îi pui? Scrie în comentarii! 👇
+
+🔴 SERIA POKECITY — Minecraft cu Pokémoni (cu NOCIVANU)!
+▶ Toate episoadele: playlistul „POKECITY — TOATE EPISOADELE"
+
+⚠ Fiecare episod de pe canalul meu este creat în scop de divertisment. Eu sunt un personaj pe videoclipuri, și creez situații amuzante. Lucrurile nu trebuie luate în serios.
+
+#minecraft #pokecity #nocivanu #pokemon #minecraftromania
+
+── TAGURI (copiați blocul) ────────────────────────────
+pokecity, nocivanu, minecraft, minecraft romania, minecraft pokemon, pokemon minecraft, bebe pikachu, pikachu minecraft, adopt pokemon minecraft, nocivanu pokecity, minecraft series, minecraft lets play, jocuri, jocuri horror, roblox, gaming romania, izentric, isentric, zentric, izentric minecraft, zentric minecraft, isentric minecraft, minecarft, cel mai rar pokemon, gugugaga, minecraft baby, inchis 24 ore, minecraft short
+
+── COMENTARIU FIXAT (pui tu imediat după publicare) ───
+ce NUME punem bebelușului? 🥚 cel mai mult ❤ câștigă și intră în EP.2!
+
+── MINIATURA (Test & Compare — urci toate 3, YouTube le testează singur) ──
+THUMB: THUMB_EP1_GATA.jpg (v29, 6f618f9) — FINAL
+THUMB_EP1_GATA.jpg (v28, 94bd6e9) — FINAL
+THUMB_EP1_GATA.jpg (v28, 94bd6e9) — FINAL
+→ Studio → videoclip → Miniatură → Test & Compare → încarci toate 3
+
+── PROGRAM ────────────────────────────────────────────
+16:00  EP.1 publicat (NU „made for kids"!)
+16:05  comentariul fixat
+16:30  postarea comunitate P2 (perete-spoiler, în COMUNITATE_PACHET_EP1.md)
+17:30  shortul 16s (din live, mod AUTO, cu LOOP)
+18:00  răspunsuri la comentarii (prietenie!)
+
+── SHORTUL (generat după live) ────────────────────────
+python3 creier_shorturi.py --auto --nume EP1_BEBE
+titlu short: AM ADOPTAT un BEBE PIKACHU GUGUGAGA! 😱
+================================================================
