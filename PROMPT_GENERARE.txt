@@ -1,0 +1,9 @@
+[SWAP PE REFERINTA VIRALA — metoda validata]
+Image A (referinta): refs/REF_ales_HsMGT0I-ZvM.jpg  (12,000,000 views, @dagar-minecraft)
+Image B (personajele noastre): refs/BRAND_THUMB_MASTER.png
+Prompt: "Edit image 1. Replace the main characters with the two characters from image 2
+(bear-like MC character with pink-white cap + boy with half black/white hair, red horns,
+white yin-yang hoodie), redrawn in image 1's exact art style, same positions/sizes/poses.
+Keep EVERYTHING else EXACTLY identical (background, lighting, composition, effects).
+NO text, NO letters, NO bubbles, NO circles, NO arrows, NO nametags, NO logos."
+TEMA bossului: bebe dragon pet in minecraft (joc: minecraft)
