@@ -1,27 +1,26 @@
-# ELEMENTELE DE BRAND (extrase din masterul aprobat — thumbnail-ul cu bebe Pikachu)
-PNG cu FUNDAL TRANSPARENT — se lipesc peste ORICE scenă (în Pillow, Photoshop, Canva, CapCut).
+# ELEMENTELE DE BRAND — DOAR EXACTE (structura finală curată, 06-10-2026)
+> Bossul a RESPINS elementele redesenate → ȘTERSE. Rămân DOAR cele EXACTE 1:1.
 
-| Fișier | Ce e | Unde se pune (recomandare 1280x720) |
-|---|---|---|
-| bula_FUGI.png | bula albă + „FUGI!" roșu, contur negru gros | sus-centru (530,10), codita spre cine strigă |
-| bula_GOLA.png | bula FĂRĂ text — scrii ce vrei (CE?, NU!, SST!, BĂĂ) | idem |
-| nametag_iZentric.png | nametag Minecraft al canalului | deasupra capului personajului tău |
-| nametag_Mocivanu.png | nametag Minecraft Mocivanu | deasupra capului lui Mocivanu |
-| cerc_rosu.png | inel roșu gros de highlight | pe elementul-mister (rotit/redimensionat liber) |
-| sageata_rosie.png | săgeata groasă cu coadă rotundă | dintr-un colț liber, spre acțiune |
-| inimi_rosii.png | 4 inimioare (formula Cadres 31M) | între personaje la teme de dragoste |
-| PREVIZUALIZARE.jpg | toate pe fond șah | doar ca să le vezi |
+## 🥇 PRIORITATEA 1 — `JH_1LA1/` (elementele REALE ale lui JocuriHorrorSky, tăiate 1:1 din thumbnail-urile lui)
+- `bula_CE_JH.png` · `bula_FUGI_JH.png` · `bula_AICI_JH.png` · `bula_HAIDE_JH.png`
+  → bulele lui cu textele lui EXACTE. Un cuvânt, exact cum le are el.
+- `sageata_curbata_JH.png` (+v2) → săgeata CURBATĂ roșie cu CONTUR ALB (semnătura lui).
+- `cerc_rosu_alb_JH.png` · `cerc_verde_alb_JH.png` → cercurile lui cu contur alb.
+- `PREVIZUALIZARE_JH_1LA1.jpg` → toate pe o foaie.
 
-REGULI (PROTOCOL_MINIATURI_BRAND.md): bulă = UN cuvânt scurt · nametag NU pe fețe ·
-logo de serie DOAR la serie (assets/logo_pokecity_clear.png) · textul NICIODATĂ generat de AI.
-Pentru aplicare automată: python tools/thumb_brand.py (le desenează procedural, la fel).
+## 🥈 PRIORITATEA 2 — `REALE_ASEARA/` + `ORIGINALE/` (elementele noastre reale)
+- REALE_ASEARA: bula CE transparentă, cerc transparent, GEN25, CUȘCA ×2, EP1 aprobat+final,
+  avatar referință, REF stil post JH.
+- ORIGINALE: tăiate pixel-cu-pixel din BRAND_THUMB_MASTER (nametag-uri, logo POKECITY etc.).
 
-## ⭐ ORIGINALE/ — ELEMENTELE REALE (bătute în cuie de boss, 06-10-2026)
-Tăiate pixel-cu-pixel DIN `refs/BRAND_THUMB_MASTER.png` (thumbnail-ul aprobat de boss).
-Agentul folosește ÎNTÂI acestea (ORIGINALE/); variantele redesenate (părintele) sunt doar
-rezervă dacă vreuna are fundal prins în transparentă. Regula rămâne: identic cu masterul.
+## 🥉 PRIORITATEA 3 — `BALON_JH_real_CE.png` + `SAGEATA_JH_real.png` (confirmate de boss)
 
-## 🔥 REALE DE ASEARĂ (radăcina brandului — Boss confirmat vizual 06-10)
-- `BALON_JH_real_CE.png` = bula REALĂ „CE?" (contur + text autentice JH)
-- `SAGEATA_JH_real.png` = săgeata REALĂ curbată cu margini albe (stil JH)
-Acestea + `ORIGINALE/` (tăiate din master) = cele OFICIALE. Redesenatele = doar rezervă.
+## MODELELE (structul complet, copiat 1:1)
+- `refs/JH_MODELE_REALE/` — cele 5 thumbnail-uri JH date EXACT de boss (formula: față mare
+  stânga + bulă sus + săgeată curbată dreapta-sus → cerc pe entitate dreapta).
+- `refs/brand_1la1/` — 76 thumbnail-uri ORIGINALE: dagar 15, nacho 15, Nocivanu 16 (inclusiv
+  clipul exact I0NiXn_YVCQ), JocuriHorrorSky 15, UC8Ekc 15 + INDEX.csv.
+
+## REGULA DE AUR
+Thumbnail nou = un model din cele de mai sus + elementele EXACTE de aici, pozițiile identice
+cu modelul. CEVA REDESENAT/ESTIMAT = INTERZIS. Verifici cu PREVIZUALIZARE_JH_1LA1.jpg.
