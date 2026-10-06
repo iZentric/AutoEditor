@@ -89,7 +89,7 @@ def whisper_words(clip, lang='ro'):
     global _WH
     if _WH is None:
         import os as _os
-                try:
+        try:
             _tot = _os.sysconf('SC_PAGE_SIZE') * _os.sysconf('SC_PHYS_PAGES') / 1e9
             _def = 'small' if _tot > 5 else 'tiny'
         except Exception:

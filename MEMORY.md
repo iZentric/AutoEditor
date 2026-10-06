@@ -1,5 +1,46 @@
 # Memorie sesiune
 
+## Sesiune 2026-10-06 — DEMIURG #2 (Arena): PACHET POSTARE EP.1 + CI VERDE
+### CE AM LIVRAT
+- **`PACHET_EP1_POSTARE.md`** — pachetul complet de postare EP.1: titlu aprobat (65 caract.),
+  descriere (textul aprobat + linkuri REALE adăugate: playlist PLI1rZHL507Wk, abonare pe
+  CHANNEL ID UCBoZcTLayAUgYTPsyrStiLg — stabil la schimbarea handle-ului, Discord), taguri
+  427/500, comentariu fixat CU LINK spre serie (lecția Klorna 382♥), checklist Studio,
+  programul zilei, P2 comunitate, praguri de măsurare (+24h/+48h/+7z).
+- **Miniaturi pentru Test & Compare = 3 fișiere DISTINCTE** (kitul vechi repeta același fișier
+  de 3 ori → test inutil). A=THUMB_EP1_GATA.jpg, B=FINAL_THUMB_EP1_V2.jpg,
+  C=FINAL_THUMB_DEMO_EP1.jpg. Toate 1280x720, <2MB. Corectat și în KIT_EP1_UPLOAD.txt.
+- **BLOCANT EP.1 = VIDEO-UL** (verificat, nu presupus): 0 fișiere video EP.1 în repo/Releases;
+  0 din 63 transcripte conțin „gugugaga"/„bebe pikachu" → materialul EP.1 nu a trecut niciodată
+  pe aici. Calea: bossul urcă release `vod-2` (video + link) sau are deja video-ul randat.
+
+### CI-UL ERA ROȘU PE ORICE PUSH — 3 cauze, toate reparate
+1. `tools/check_secrets.py`: `assets/Monocraft.ttc` (5,9MB binar) era marcat
+   „text-too-large-for-guard" → gardul bloca TOT repo-ul. Fix: BINARY = fonturi/arhive +
+   detectare binar după octeți NUL; test nou `test_guard_skips_binary_assets_but_flags_large_text`.
+2. `tests/test_performance.py`: compara cheile cataloului (`S001`..) cu numele de fișiere.
+   Cheile sunt ID-uri stabile de la refactor → se compară `sound['name']`. Catalogul era bun,
+   testul era greșit.
+3. `editor_pro.py` NU COMPILA — linie 92 (`try:` indentată cu 16 spații în loc de 8), moartă
+   din migrare. Editorul Suprem era nefuncțional. Reparat.
+   ACUM: 63 teste OK · `compileall` OK · guard OK → push-ul merge verde.
+
+### MEDIU (se pierde la reset)
+- `pip install --break-system-packages imageio-ffmpeg auto-editor faster-whisper yt-dlp pillow`
+  (PEP 668: fără `--break-system-packages` pica). apt ffmpeg NU există în surse →
+  `sudo ln -sf $(python -c "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())")
+  /usr/local/bin/ffmpeg` (7.0.2 static).
+- **yt-dlp e BLOCAT pe IP-ul de cloud** (TLS/SSL EOF, și pe metadate, nu doar download).
+  Canalul se verifică din exporturile Studio, nu din sandbox.
+- Nu există YouTube OAuth și nici GEMINI_API_KEY în sandbox; doar GITHUB_TOKEN (gh funcțional).
+
+### LECȚII
+- După orice migrare: rulează `python -m unittest discover -s tests` + `compileall` +
+  `tools/check_secrets.py` LOCAL, nu te uita doar la badge-ul din Actions (logurile expiră
+  și nu se mai pot descărca → am pierdut timp pe `gh run view --log-failed` = EOF).
+- Linkurile de abonare se fac pe **channel ID**, nu pe handle: handle-ul se poate schimba iar
+  vechiul link moare după 14 zile.
+
 ## Sesiune 2026-09-24 — ★ PRIMA LIVRARE COMPLETĂ cap-coadă (vod-1) ★
 
 ### REZULTATUL CEL MARE

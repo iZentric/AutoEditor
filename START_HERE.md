@@ -41,6 +41,23 @@ KIT_EP1_UPLOAD.txt) — DE POSTAT ② reanimare vctn6 (check stats, țintă >871
 ④ PostsYT SECRET nelivrat ⑤ redesign canal (banner+trailer după EP1).
 /minutele/ locale sunt EPUIZATE: short nou DOAR cu materiale noi de la boss.
 
+## [UPDATE 06-10-2026 — DEMIURG #2] STAREA REALĂ, VERIFICATĂ
+- **PACHET EP.1 GATA**: `PACHET_EP1_POSTARE.md` (titlu 65 caract., descriere cu linkuri reale,
+  taguri 427/500, comentariu fixat cu playlist, setări Studio, program, P2 comunitate, măsurare).
+- **BLOCANT (singurul)**: NU EXISTĂ fișierul video EP.1 în repo / Releases / transcripte
+  (0 din 63 transcripte conțin „gugugaga"/„bebe pikachu"). Bossul fie urcă release `vod-2`,
+  fie are deja video-ul randat → kitul se aplică direct (§9 din pachet).
+- **BUG-URI REPARATE (CI-ul era ROȘU pe fiecare push, de la migrare)**:
+  1. `tools/check_secrets.py` bloca repo-ul pe `assets/Monocraft.ttc` (binar >2MB) →
+     gardul sare acum peste binare/fonturi (test nou în tests/test_security.py).
+  2. `tests/test_performance.py` compara ID-urile S001 cu numele de fișiere → testul era greșit,
+     nu catalogul (se compară `sound['name']`).
+  3. `editor_pro.py` NU COMPILA (linie 92 indentată greșit) → Editorul Suprem era mort din
+     migrare. Reparat. Acum: 63 teste OK + compileall OK + guard OK.
+- **Mediu**: ffmpeg 7.0.2 (din imageio-ffmpeg, legat în /usr/local/bin), auto-editor 29.3.1,
+  faster-whisper 1.2.1, yt-dlp, Pillow. yt-dlp e BLOCAT pe IP-ul de cloud (TLS EOF) —
+  metadatele de canal se iau din Studio/upload-uri, nu din sandbox.
+
 ## HARTA RAPIDĂ
 - Motor shorturi: `editor_pro.py` + `suprem.py` | Thumbnail: `tools/demiurg_thumb.py`
   (cauta/finalizeaza) + `tools/thumb_brand.py` + `miniaturi.py`

@@ -13,15 +13,30 @@ PATTERNS = {
 }
 MEDIA = {'.mp3', '.mp4', '.wav', '.ogg', '.m4a', '.flac', '.aac', '.opus',
          '.webm', '.png', '.jpg', '.jpeg', '.gif', '.zip'}
+# Fonturi si alte binare de asset: nu contin text de scanat. Fara lista asta
+# gardul bloca repo-ul la fiecare font adaugat (Monocraft.ttc a rupt CI-ul).
+BINARY = {'.ttc', '.ttf', '.otf', '.woff', '.woff2', '.eot', '.ico', '.pdf',
+          '.pyc', '.so', '.db', '.sqlite'}
+
+
+def _looks_binary(path):
+    """True pentru fisiere care nu sunt text (detectie dupa octeti NUL)."""
+    try:
+        with path.open('rb') as handle:
+            return b'\0' in handle.read(4096)
+    except OSError:
+        return True
 
 
 def scan_paths(paths):
     findings = []
     for path in paths:
         path = Path(path)
-        if not path.is_file() or path.suffix.lower() in MEDIA:
+        if not path.is_file() or path.suffix.lower() in MEDIA or path.suffix.lower() in BINARY:
             continue
         if path.stat().st_size > 2 * 1024 * 1024:
+            if _looks_binary(path):
+                continue
             findings.append((str(path), 'text-too-large-for-guard'))
             continue
         try:

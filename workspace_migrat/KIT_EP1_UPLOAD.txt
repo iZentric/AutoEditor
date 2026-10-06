@@ -24,10 +24,13 @@ pokecity, nocivanu, minecraft, minecraft romania, minecraft pokemon, pokemon min
 ce NUME punem bebelușului? 🥚 cel mai mult ❤ câștigă și intră în EP.2!
 
 ── MINIATURA (Test & Compare — urci toate 3, YouTube le testează singur) ──
-THUMB: THUMB_EP1_GATA.jpg (v29, 6f618f9) — FINAL
-THUMB_EP1_GATA.jpg (v28, 94bd6e9) — FINAL
-THUMB_EP1_GATA.jpg (v28, 94bd6e9) — FINAL
+⚠️ CORECTAT 06-10: înainte apărea ACELAȘI fișier de 3 ori (test inutil).
+Acum = 3 fișiere DISTINCTE, toate 1280x720:
+A: THUMB_EP1_GATA.jpg            (cea aprobată — o pui prima)
+B: FINAL_THUMB_EP1_V2.jpg
+C: FINAL_THUMB_DEMO_EP1.jpg      (în rădăcina repo-ului)
 → Studio → videoclip → Miniatură → Test & Compare → încarci toate 3
+→ Kitul complet de postare (descriere+taguri+comentariu+program): PACHET_EP1_POSTARE.md
 
 ── PROGRAM ────────────────────────────────────────────
 16:00  EP.1 publicat (NU „made for kids"!)
