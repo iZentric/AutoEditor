@@ -130,3 +130,12 @@ La FIECARE discuție strategică: pârghiile se exprimă ÎN % impact pe canal, 
 Categorii obligatorii: DOVEDIT pe datele canalului / PROBABIL (estimat cu sursă) / NEGARANTABIL.
 Obiectiv declarat user: maxima audiență de copii RO + Moldova + diaspora (limba română le acoperă pe toate).
 Egoist = agentul dă singur comenzile pregătitoare; public = doar cu DA explicit.
+
+## [ADĂUGAT 06-10-2026] PROTOCOLUL DEMIURGE — MINIATURI (citește OBLIGATORIU)
+Orice agent care lucrează în acest repo respectă: DEMIURGE_SYSTEM_PROMPT.md (protocolul complet),
+PROTOCOL_MINIATURI_BRAND.md (legile esenței), FORMULE_TOP_DECODATE.md (formulele din 14.824 video),
+tools/thumb_brand.py (stratul uman). Pe scurt: scena generată FĂRĂ text cu personajele fixe
+(iZentric + Mocivanu) în stilul din refs/BRAND_THUMB_MASTER.png → nametag-uri Minecraft (Monocraft)
+→ bulă scurtă + cerc + săgeată roșie (sau contur întrerupt + inimi, formula Cadres 31M) → logo serie
+doar la serie → finisaj uman. Smart Matching: Minecraft → dagar/nacho/Cadres/Knoxy; alt joc →
+top youtuberul acelui joc. Bossul nu explică niciodată workflow-ul: dă tema, primește livrarea.

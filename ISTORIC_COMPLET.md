@@ -125,3 +125,17 @@
 5. **SECURITATE**: PAT-ul a fost lipit în chat de boss → la final de sesiune bossul ÎL ROTEȘTE
    (GitHub → Settings → Developer settings → Fine-grained tokens → Regenerate).
 6. Whispers pe sandbox 2GB: model `tiny` automat (pe mașina/Actions: `WHISPER_MODEL=small`).
+
+## 06-10-2026 (cont.) — PROTOCOLUL DE BRAND MINIATURI (fixarea finală)
+- Bossul a validat esența: refs/BRAND_THUMB_MASTER.png (nametag-uri Minecraft Monocraft,
+  bula FUGI!, cercul roșu, săgeata, logo serie, stil cartoon-Minecraft contur gros).
+- Regula de ALEGERE INTELIGENTĂ: la Minecraft → referințe @dagar-minecraft (top 6.3M) și
+  UC8EkcHOycB94lHDkbAPSnQA (top 3.2M); la ALT joc → cel mai viral youtuber al acelui joc.
+- Textul/bula/cercul/săgeata NICIODATĂ în generarea AI — se lipesc pe strat (claritate 100%).
+- Unealtă: tools/thumb_brand.py. Primul thumbnail pe noul protocol: refs/THUMB_FINAL.jpg.
+
+## 06-10-2026 (final) — DEMIURGE_FIXAT
+Bossul a lipit conversația completă cu Gemini (agentul Demiurg). Salvat VERBATIM în
+DEMIURGE_SYSTEM_PROMPT.md + secțiune obligatorie adăugată în AGENTS.md. Implementarea reală
+din repo: BRAND_THUMB_MASTER.png + thumb_brand.py + miniaturi.py + FORMULE_TOP_DECODATE.md.
+Nume (decizie cu date): canal afișat iZentric, handle @iZentric-Minecraft (SEO 276.8K/lună).
