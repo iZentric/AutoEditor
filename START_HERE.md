@@ -13,7 +13,8 @@
    (ține clonele în /tmp — .git/config cu token nu trebuie să intre în snapshot-uri!)
 3. Instalează unelte: `pip install imageio-ffmpeg auto-editor faster-whisper yt-dlp pillow &&
    sudo apt-get install -y ffmpeg` (sandboxul le pierde la fiecare reset)
-4. Citește ÎN ACEASTĂ ORDINE: `AGENTS.md` → `DEMIURGE_SYSTEM_PROMPT.md` →
+4. Citește ÎN ACEASTĂ ORDINE: `CONVERSATIE_COMPLETA_06-10.md` (tot ce s-a vorbit
+   cu bossul, verbatim) → `AGENTS.md` → `DEMIURGE_SYSTEM_PROMPT.md` →
    `PROTOCOL_MINIATURI_BRAND.md` → `PROTOCOL_THUMB_SWAP.md` (⚠️ inclusiv BIBLIOTECA 1:1) →
    `FORMULE_TOP_DECODATE.md` → `REGULI_BOSS.md` (în workspace_migrat/) → `MEMORY.md`
 
