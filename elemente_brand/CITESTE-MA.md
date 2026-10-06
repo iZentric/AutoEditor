@@ -24,3 +24,16 @@
 ## REGULA DE AUR
 Thumbnail nou = un model din cele de mai sus + elementele EXACTE de aici, pozițiile identice
 cu modelul. CEVA REDESENAT/ESTIMAT = INTERZIS. Verifici cu PREVIZUALIZARE_JH_1LA1.jpg.
+
+## 📚 BIBLIOTECA COMPLETĂ — `JH_1LA1/TOATE/` (LEGE NOUĂ, 06-10, boss: „ia-le pe TOATE")
+Bossul a văzut TOATE elementele și a decis: agentul folosește TOATE ca modele, nu doar pe cele 8.
+- `TOATE/` = 88 elemente bruse extrase automat din toate cele 20 thumbnail-uri JH
+  (5 modele exacte + 15 JocuriHorrorSky din bibliotecă) + 4 foi de verificare vizuală.
+- `TOATE/ALESE/` = 25 curate alese (SETUL OFICIAL): 10 bule cu cuvintele lui
+  (AICI, FUGI!, AJUTOR, CE?, FUGI, TATA?, COPIIL PROST, HAIDE, MORI, FINAL),
+  13 săgeți curbate exacte, cercul verde real + semnele OHIO / WELCOME TO OHIO.
+- Foile de control: TOT_PACHETUL_JH.jpg (totul pe o foaie) · SELECTIA_FINALA.jpg ·
+  FOAIE_BULE / FOAIE_SAGETI / FOAIE_CERCURI.jpg.
+- REGULĂ: alege modelul din refs/ → ia elementele POTRIVITE modelului din ALESE/
+  (bula = cuvântul din model, săgeata = forma din model, cerc = culoarea din model).
+  Dacă modelul are un element care nu e în ALESE, caută varianta lui în TOATE/ (bruse).
