@@ -13,7 +13,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('scena'); ap.add_argument('--out', required=True)
     ap.add_argument('--ntag', action='append', default=[], help='Nume:x:y (PNG oficial)')
-    ap.add_argument('--bula', default=None, help='TEXT:x:y')
+    ap.add_argument('--bula', default=None, help='TEXT:x:y (bula desenata cu fontul Anton)')
+    ap.add_argument('--balon', default=None,
+                    help='CALE:x:y:latime (PNG REAL 1:1 din biblioteca, ex. elemente_brand/BALON_JH_real_CE.png)')
     ap.add_argument('--cerc', default=None, help='x:y:r')
     ap.add_argument('--sageata', default=None, help='x0:y0:x1:y1')
     ap.add_argument('--inimi', default=None, help='x:y')
@@ -32,6 +34,13 @@ def main():
         png = Image.open(os.path.join(ELEM, f'nametag_{nume}.png'))
         png = png.resize((int(png.width*0.55), int(png.height*0.55)), Image.LANCZOS)
         im.paste(png, (xc - png.width//2, yt - png.height//2), png)
+    if a.balon:
+        # Element REAL 1:1 (legea bossului: copiaza, nu redesena) — ex. balonul JH cu „CE?".
+        cale, bx, by, lat = a.balon.rsplit(':', 3)
+        bp = Image.open(cale).convert('RGBA')
+        bp = bp.resize((int(lat), int(bp.height * int(lat) / bp.width)), Image.LANCZOS)
+        im.paste(bp, (int(bx) - bp.width // 2, int(by) - bp.height // 2), bp)
+        d = ImageDraw.Draw(im)
     if a.bula:
         parts = a.bula.rsplit(':', 2); txt = parts[0]; bx, by = int(parts[1]), int(parts[2])
         bp = Image.open(os.path.join(ELEM, 'bula_GOLA.png')).resize((430, 239), Image.LANCZOS)
