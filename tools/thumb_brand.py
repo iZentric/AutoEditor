@@ -19,6 +19,9 @@ def main():
     ap.add_argument('--cerc', default=None, help='x:y:r')
     ap.add_argument('--sageata', default=None, help='x0:y0:x1:y1')
     ap.add_argument('--inimi', default=None, help='x:y')
+    ap.add_argument('--pune', action='append', default=[],
+                    help='CALE:x:y:latime — lipeste ORICE element 1:1 extras '
+                         '(săgeată/cerc/semn din elemente_brand/JH/). Se poate repeta.')
     ap.add_argument('--logo', default=None, help='pokecity sau cale')
     ap.add_argument('--test120', action='store_true')
     a = ap.parse_args()
@@ -62,6 +65,13 @@ def main():
         hq = Image.open(os.path.join(ELEM, 'inimi_rosii.png'))
         hq = hq.resize((int(hq.width*0.85), int(hq.height*0.85)), Image.LANCZOS)
         im.paste(hq, (ix - hq.width//2, iy - hq.height//2), hq)
+    for element in a.pune or []:
+        # Element 1:1 din biblioteca (săgeata/cercul/semnul LUAT din original, nu desenat).
+        cale, ex, ey, elat = element.rsplit(':', 3)
+        ep = Image.open(cale).convert('RGBA')
+        ep = ep.resize((int(elat), int(ep.height * int(elat) / ep.width)), Image.LANCZOS)
+        im.paste(ep, (int(ex) - ep.width // 2, int(ey) - ep.height // 2), ep)
+        d = ImageDraw.Draw(im)
     if a.logo:
         cale = os.path.join(BASE, 'assets', 'logo_pokecity_clear.png') if a.logo == 'pokecity' else a.logo
         if os.path.exists(cale):

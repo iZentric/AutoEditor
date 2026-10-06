@@ -1,68 +1,58 @@
-# ELEMENTELE LUATE 1:1 DE LA JOCURI HORROR SKY (iei, nu refaci)
+# ELEMENTELE LUI JOCURI HORROR SKY — TĂIATE 1:1 (iei, nu refaci)
 
-Toate sunt **decupaje din thumbnail-urile lui REALE** (originalele byte-cu-byte sunt in
-`refs/brand_1la1/JocuriHorrorSky_*.jpg`). NU sunt regenerate, NU sunt redesenate, NU sunt AI.
-Fundal transparent (PNG RGBA), gata de lipit peste orice scena.
+**Nimic aici nu e generat, redesenat sau „inspirat".** Sunt decupaje pixel-cu-pixel din
+thumbnail-urile lui ORIGINALE (`refs/brand_1la1/JocuriHorrorSky_*.jpg`, salvate byte-cu-byte
+de pe i.ytimg). Fiecare dosar = UN thumbnail de-al lui, cu elementele lui:
 
-Continut: **12 bule cu cuvinte** · **13 sageti/„linii"** · **4 cercuri rosii** · 30 semne/logouri
-(OHIO, WELCOME TO, STRICT, TikTok = semnatura lui repetata).
+```
+elemente_brand/JH/<thumbnail>/
+  _SURSA.jpg      <- thumbnailul lui, intreg (sa compari: elementul e IDENTIC cu ce e acolo)
+  BULA_CUVANT.png <- balonul/bula cu cuvantul EXACT folosit de el
+  CERC_x_y.png    <- cercul rosu de highlight, exact ala
+  SAGEATA_x_y.png <- sageata/„linia" care arata, exact aia
+  SEMN_*.png      <- semnatura lui repetata (OHIO, WELCOME TO, STRICT, TikTok)
+```
 
-## CE CUVINTE FOLOSESTE EL (bulele lui, verificate cu OCR)
-| Cuvant | Din thumbnail-ul | Fisier |
+78 de elemente din 15 thumbnail-uri. `OCR ✔` = cuvantul a fost recitit cu OCR DIN PNG-ul
+decupat (deci decupajul e bun). `de verificat` = OCR n-a putut confirma (text stilizat) —
+uite-te la el in galerie.
+
+## CE CUVINTE ARE FIECARE THUMBNAIL (lista lui de cuvinte)
+| Thumbnail-ul lui | Cuvinte (bulele lui) | Ce are in dosar |
 |---|---|---|
-| **AJUTOR** | JocuriHorrorSky_F2S4d-wedWM.jpg | `BULA_AJUTOR_-wedWM.png` |
-| **CE?** | JocuriHorrorSky_MerQRetwZKM.jpg | `BULA_CE?_etwZKM.png` |
-| **COPIL** | JocuriHorrorSky_cP2H14-G_Wk.jpg | `BULA_COPIL_4-G_Wk.png` |
-| **FILM** | JocuriHorrorSky_jWsJyQ9yKHQ.jpg | `BULA_FILM_Q9yKHQ.png` |
-| **FINAL** | JocuriHorrorSky_hSfHO5r7lZk.jpg | `BULA_FINAL_5r7lZk.png` |
-| **FINAL** | JocuriHorrorSky_t2L6AnKJDjE.jpg | `BULA_FINAL_nKJDjE.png` |
-| **FUGI!** | JocuriHorrorSky_8BxmOBKt84I.jpg | `BULA_FUGI!_BKt84I.png` |
-| **MORI** | JocuriHorrorSky_jWsJyQ9yKHQ.jpg | `BULA_MORI_Q9yKHQ.png` |
-| **PROST** | JocuriHorrorSky_cP2H14-G_Wk.jpg | `BULA_PROST_4-G_Wk.png` |
-| **SCOALA DIN** | JocuriHorrorSky_2CSW8Yx7Peo.jpg | `BULA_SCOALADIN_Yx7Peo.png` |
-| **SI** | JocuriHorrorSky_tvANsruR1MU.jpg | `BULA_SI_ruR1MU.png` |
-| **TATA?** | JocuriHorrorSky_auNYTQ4k-hI.jpg | `BULA_TATA?_Q4k-hI.png` |
+| `JocuriHorrorSky_2CSW8Yx7Peo` | **24, OHIO, ORE, SCOALA DIN, WELCOME TO** | 3 bula, 3 semn/logo_jh, 1 cerc |
+| `JocuriHorrorSky_74YDp-LVi6Q` | **240RE, OHIO, WELCOME TO** | 1 bula, 2 semn/logo_jh, 1 sageata |
+| `JocuriHorrorSky_8BxmOBKt84I` | **FUGI!, OHIO** | 1 bula, 1 semn/logo_jh, 1 sageata, 2 cerc |
+| `JocuriHorrorSky_F2S4d-wedWM` | **AJUTOR, OHIO, WELCOME TO** | 1 bula, 2 semn/logo_jh, 1 sageata |
+| `JocuriHorrorSky_MerQRetwZKM` | **CE?** | 1 bula, 2 sageata |
+| `JocuriHorrorSky_TX1MAv0zXrI` | **10RA, CE?, OHIO, WELCOME TO** | 2 bula, 4 semn/logo_jh |
+| `JocuriHorrorSky_auNYTQ4k-hI` | **OHIO, STRICT, TATA?, WELCOME TO** | 1 bula, 4 semn/logo_jh, 1 sageata |
+| `JocuriHorrorSky_cP2H14-G_Wk` | **COPIL, OHIO, PROST, WELCOME TO** | 2 bula, 2 semn/logo_jh, 1 sageata |
+| `JocuriHorrorSky_hSfHO5r7lZk` | **FINAL, OHIO, STRICT, WELCOME TO** | 1 bula, 4 semn/logo_jh |
+| `JocuriHorrorSky_jWsJyQ9yKHQ` | **FILM, MORI, STRICT** | 2 bula, 2 semn/logo_jh, 1 sageata, 1 cerc |
+| `JocuriHorrorSky_rV5R3qiMc0Q` | **CE FACI ?, Q0, STRICT** | 2 bula, 1 semn/logo_jh, 2 sageata |
+| `JocuriHorrorSky_t2L6AnKJDjE` | **FINAL, OHIO, STRICT, WELCOME TO** | 1 bula, 4 semn/logo_jh |
+| `JocuriHorrorSky_tvANsruR1MU` | **DRACULASS, LUMEA LUI, OHIO, SI, SKY, WELCOME TO** | 4 bula, 2 semn/logo_jh, 1 sageata |
+| `JocuriHorrorSky_uDh7jW4UtCE` | **CU CAPRA, OHIO, ORA, WELCOME TO** | 2 bula, 2 semn/logo_jh, 1 sageata |
+| `JocuriHorrorSky_y7lGqnObc3o` | **10RA, OHIO, TikTok, WELCOMET** | 1 bula, 3 semn/logo_jh, 1 sageata |
 
-## CE INSEAMNA ASTA PENTRU NOI (regula de aur a bossului)
-Cand facem un thumbnail pentru iZentric, **bula vine de aici**, cu unul din cuvintele lui
-(scurte, 1-2 cuvinte, gen FUGI! / AJUTOR / CE? / TATA? / MORI / FINAL), ajustata pe scena noastra.
-Nu scriem texte lungi, nu inventam fonturi: copiem semnul lui, il punem pe personajele noastre.
+## REGULA DE FOLOSIRE (cum le foloseste agentul mai tarziu)
+Cand facem un thumbnail pentru iZentric: alegem tema → luam dosarul lui cu cuvantul care se
+potriveste (FUGI! / AJUTOR / CE? / TATA? / MORI / FINAL / COPIL PROST / CE FACI?) → lipim
+**bula lui, cercul lui, sageata lui** peste scena noastra. Ajustam doar marimea si pozitia.
+Nu scriem text nou, nu desenam cercuri noi, nu regeneram semnele.
 
-## CUM IL LIPESTI
 ```bash
 python3 tools/thumb_brand.py SCENA.jpg --out THUMB.jpg \
-  --balon "elemente_brand/JH/BULA_FUGI!_BKt84I.png:300:150:430" \
-  --ntag iZentric:700:110 --ntag Mocivanu:1000:110 \
-  --cerc 664:500:130 --logo pokecity --test120
+  --balon "elemente_brand/JH/JocuriHorrorSky_8BxmOBKt84I/BULA_FUGI!.png:300:150:430" \
+  --pune   "elemente_brand/JH/JocuriHorrorSky_8BxmOBKt84I/SAGEATA_570x542.png:900:600:400" \
+  --pune   "elemente_brand/JH/JocuriHorrorSky_8BxmOBKt84I/CERC_324x224.png:640:400:230" \
+  --ntag iZentric:700:110 --logo pokecity --test120
 ```
-(`CALE:x:y:latime` — x,y = centrul bulii in cadrul 1280x720.)
 
-## CERCUL SI SAGEATA („ala de arata")
-| Fisier | Din | Marime |
-|---|---|---|
-| `CERC_Yx7Peo_177x406.png` | JocuriHorrorSky_2CSW8Yx7Peo.jpg | 239x219 |
-| `CERC_BKt84I_801x29.png` | JocuriHorrorSky_8BxmOBKt84I.jpg | 256x235 |
-| `CERC_BKt84I_324x224.png` | JocuriHorrorSky_8BxmOBKt84I.jpg | 216x182 |
-| `CERC_Q9yKHQ_1143x224.png` | JocuriHorrorSky_jWsJyQ9yKHQ.jpg | 138x187 |
-| `SAGEATA_-LVi6Q_114x70.png` | JocuriHorrorSky_74YDp-LVi6Q.jpg | 265x543 |
-| `SAGEATA_BKt84I_570x542.png` | JocuriHorrorSky_8BxmOBKt84I.jpg | 711x179 |
-| `SAGEATA_-wedWM_503x474.png` | JocuriHorrorSky_F2S4d-wedWM.jpg | 80x167 |
-| `SAGEATA_etwZKM_1210x364.png` | JocuriHorrorSky_MerQRetwZKM.jpg | 71x357 |
-| `SAGEATA_etwZKM_645x112.png` | JocuriHorrorSky_MerQRetwZKM.jpg | 73x185 |
-| `SAGEATA_Q4k-hI_832x630.png` | JocuriHorrorSky_auNYTQ4k-hI.jpg | 166x91 |
-| `SAGEATA_4-G_Wk_987x108.png` | JocuriHorrorSky_cP2H14-G_Wk.jpg | 67x173 |
-| `SAGEATA_Q9yKHQ_232x364.png` | JocuriHorrorSky_jWsJyQ9yKHQ.jpg | 866x357 |
-| `SAGEATA_qiMc0Q_810x120.png` | JocuriHorrorSky_rV5R3qiMc0Q.jpg | 230x121 |
-| `SAGEATA_qiMc0Q_412x317.png` | JocuriHorrorSky_rV5R3qiMc0Q.jpg | 64x255 |
-| `SAGEATA_ruR1MU_26x485.png` | JocuriHorrorSky_tvANsruR1MU.jpg | 324x136 |
-| `SAGEATA_W4UtCE_412x407.png` | JocuriHorrorSky_uDh7jW4UtCE.jpg | 71x314 |
-| `SAGEATA_nObc3o_6x499.png` | JocuriHorrorSky_y7lGqnObc3o.jpg | 556x222 |
-
-## CUM REFACI / EXTINZI LIBRARIA
+## CUM MAI SCOTI ALTELE (cand punem thumbnail-uri noi in biblioteca)
 ```bash
-python3 tools/extrage_elemente_jh.py                     # toate JocuriHorrorSky
-python3 tools/extrage_elemente_jh.py --canal dagar       # sau alt canal din biblioteca
-python3 tools/extrage_elemente_jh.py --fisier NUME.jpg   # unul singur
+python3 tools/extrage_elemente_jh.py                    # tot JocuriHorrorSky din biblioteca
+python3 tools/extrage_elemente_jh.py --canal dagar      # sau alt canal
+python3 tools/extrage_elemente_jh.py --fisier NUME.jpg  # unul singur
 ```
-Fiecare element e verificat prin OCR: daca OCR nu mai citeste cuvantul DUPA decupare,
-elementul e aruncat (nu livra gunoaie).

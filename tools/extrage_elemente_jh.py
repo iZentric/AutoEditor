@@ -113,6 +113,11 @@ def main():
     for nume in fisiere:
         cale = os.path.join(a.biblioteca, nume)
         img = Image.open(cale).convert('RGB').resize((1280, 720))
+        # fiecare thumbnail isi primeste propriul dosar: bula + cercul + sageata LUI,
+        # exact cum apar in acel thumbnail (nu unul refacut, nu unul „destul de bun")
+        dosar = os.path.join(a.iesire, nume[:-4])
+        os.makedirs(dosar, exist_ok=True)
+        Image.open(cale).convert('RGB').resize((1280, 720)).save(os.path.join(dosar, '_SURSA.jpg'))
         arr = np.asarray(img).astype(int)
         R, G, B = arr[..., 0], arr[..., 1], arr[..., 2]
 
@@ -144,15 +149,15 @@ def main():
             mare3 = fundal.resize((fundal.width * 3, fundal.height * 3), Image.LANCZOS)
             ok, _ = ocr(np.asarray(mare3))
             ramas = ' '.join(r[1] for r in (ok or []))
-            if curata(text).lower()[:4] not in curata(ramas).lower():
-                continue
+            confirmat = curata(text).lower()[:4] in curata(ramas).lower()
             semn = any(c in text.upper() for c in ('WELCOME', 'OHIO', 'TIKTOK', 'STRICT'))
             tip = 'SEMN/LOGO_JH' if semn else 'BULA'
             prefix = 'SEMN' if semn else 'BULA'
-            fisier = f'{prefix}_{curata(text)}_{nume[:-4][-6:]}.png'
-            marime = salveaza_png(sub, masca, os.path.join(a.iesire, fisier))
-            index.append([tip, fisier, nume, text, f'{x0},{y0},{x1},{y1}',
-                          f'{marime[0]}x{marime[1]}', round(float(scor), 2)])
+            fisier = f'{prefix}_{curata(text)}.png'
+            marime = salveaza_png(sub, masca, os.path.join(dosar, fisier))
+            index.append([tip, f'{nume[:-4]}/{fisier}', nume, text, f'{x0},{y0},{x1},{y1}',
+                          f'{marime[0]}x{marime[1]}', round(float(scor), 2),
+                          'DA' if confirmat else 'VERIFICA'])
 
         # --- ROȘU: CERC + SĂGEATĂ ---
         rosu = (R - G > 65) & (R - B > 65) & (R > 140)
@@ -174,23 +179,23 @@ def main():
             else:
                 continue
             gasite_rosu.append((arie, tip, x0, y0, x1, y1, m, umplere))
-        for arie, tip, x0, y0, x1, y1, m, umplere in gasite_rosu[:4]:
+        for arie, tip, x0, y0, x1, y1, m, umplere in sorted(gasite_rosu, reverse=True)[:3]:
             pad = 6
             sub = img.crop((max(0, x0 - pad), max(0, y0 - pad),
                             min(1280, x1 + pad), min(720, y1 + pad)))
             mm = m[max(0, y0 - pad):min(720, y1 + pad), max(0, x0 - pad):min(1280, x1 + pad)]
-            fisier = f'{tip}_{nume[:-4][-6:]}_{x0}x{y0}.png'
-            marime = salveaza_png(sub, dilata(mm, 1), os.path.join(a.iesire, fisier))
-            index.append([tip, fisier, nume, '', f'{x0},{y0},{x1},{y1}',
-                          f'{marime[0]}x{marime[1]}', round(umplere, 2)])
+            fisier = f'{tip}_{x0}x{y0}.png'
+            marime = salveaza_png(sub, dilata(mm, 1), os.path.join(dosar, fisier))
+            index.append([tip, f'{nume[:-4]}/{fisier}', nume, '', f'{x0},{y0},{x1},{y1}',
+                          f'{marime[0]}x{marime[1]}', round(umplere, 2), '-'])
 
     with open(os.path.join(a.iesire, 'INDEX.csv'), 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
-        w.writerow(['tip', 'fisier', 'sursa', 'cuvant', 'coordonate', 'marime', 'scor'])
+        w.writerow(['tip', 'fisier', 'sursa', 'cuvant', 'coordonate', 'marime', 'scor', 'ocr_ok'])
         w.writerows(index)
     print(f'GATA: {len(index)} elemente in {a.iesire}/ (vezi INDEX.csv)')
-    for tip, fisier, nume, cuvant, coord, marime, scor in index:
-        print(f'  {tip:14s} {fisier:42s} din {nume[:34]:34s} {cuvant or "":12s} {marime}')
+    for tip, fisier, nume, cuvant, coord, marime, scor, ok in index:
+        print(f'  {tip:14s} {fisier:44s} {cuvant or "":12s} {marime:9s} OCR={ok}')
 
 
 if __name__ == '__main__':
