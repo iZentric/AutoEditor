@@ -1,0 +1,143 @@
+{
+  "_sursa": "scanare automata a celor 5 modele JH reale + FORMULA JH (CITESTE din refs/JH_MODELE_REALE)",
+  "_regula": "coordonatele sunt fractii din latime/inaltime; le copiezi 1:1 pe orice thumbnail 16:9",
+  "layout_general": {
+    "personaj_principal": {
+      "zona": "stanga",
+      "x_fractie": [
+        0.02,
+        0.4
+      ],
+      "detalii": "fata zoom, expresie exagerata, contur alb"
+    },
+    "bula": {
+      "zona": "top, langa gura personajului",
+      "exemplu_real_jh": {
+        "x": [
+          0.34,
+          0.61
+        ],
+        "y": [
+          0.04,
+          0.3
+        ]
+      },
+      "coada": "direct spre gura"
+    },
+    "entitate + cerc + sageata": {
+      "zona": "dreapta-sus",
+      "exemplu_real_jh": {
+        "x": [
+          0.82,
+          0.99
+        ],
+        "y": [
+          0.0,
+          0.4
+        ]
+      },
+      "sageata": "din bula/personaj -> IN cerc"
+    },
+    "fundal": "locul episodului, saturat — ORIGINALUL ytarului neatins cand lucram pe baza lui"
+  },
+  "scanare_per_model": {
+    "-RewXGEMwL4": {
+      "dimensiune": "1280x720",
+      "bula": null,
+      "cerc": [
+        0.823,
+        0.0,
+        0.936,
+        0.265
+      ],
+      "sageata": [
+        0.823,
+        0.0,
+        0.936,
+        0.265
+      ]
+    },
+    "I0NiXn_YVCQ": {
+      "dimensiune": "1280x720",
+      "bula": null,
+      "cerc": [
+        0.829,
+        0.0,
+        0.988,
+        0.231
+      ],
+      "sageata": [
+        0.829,
+        0.0,
+        0.988,
+        0.231
+      ]
+    },
+    "UxEMWdam-YU": {
+      "dimensiune": "1280x720",
+      "bula": null,
+      "cerc": [
+        0.866,
+        0.2,
+        0.999,
+        0.393
+      ],
+      "sageata": [
+        0.866,
+        0.2,
+        0.999,
+        0.393
+      ]
+    },
+    "cjEItphF05U": {
+      "dimensiune": "1280x720",
+      "bula": [
+        0.341,
+        0.044,
+        0.615,
+        0.304
+      ],
+      "cerc": [
+        0.537,
+        0.089,
+        0.821,
+        0.475
+      ],
+      "sageata": [
+        0.537,
+        0.089,
+        0.821,
+        0.475
+      ]
+    },
+    "j6RH101Yxns": {
+      "dimensiune": "1280x720",
+      "bula": null,
+      "cerc": null,
+      "sageata": [
+        0.253,
+        0.082,
+        0.42,
+        0.832
+      ]
+    }
+  },
+  "calitate_HD": {
+    "umbre": "drop shadow moale (blur 4-6px, opacitate ~65%) pe TOATE elementele",
+    "margini": "LANCZOS la upscale, nu nearest",
+    "interzis": "stickere pixelate/plate; regenerarea elementelor JH"
+  },
+  "atmosfera_horror": {
+    "cand": "doar la thumb-urile HORROR (nu la baze colorate ca FAN LOCA)",
+    "reteta": "vigneta pe margini 25-35%, contrast +12%, saturatie -15%, tent rece umbre (#0a1420), highlight cald pastrat"
+  },
+  "ordine_straturi": [
+    "bula+text (FA fata)",
+    "nametag",
+    "sageata (sub text)",
+    "cerc",
+    "personaj",
+    "amenintare/entitate",
+    "fundal original"
+  ]
+}
