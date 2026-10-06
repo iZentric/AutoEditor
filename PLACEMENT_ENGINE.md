@@ -33,3 +33,12 @@
 □ coada bulei = pe gura personajului □ săgeata pornește din bulă/personaj □ săgeata intră în cerc
 □ cercul încadrează entitatea din midground □ umbra neagră la săgeată □ straturile 1-4 în ordine
 □ originalul neatins în afara personaj+brand (verificare 0 pixeli) □ nimic nu acoperă ochi/fețe cheie
+
+## 🚫 COLLISION & STACKING FIX (LEGE, 06-10, directivă boss)
+1. FĂRĂ SUPRAPUNERE între bulă/săgeată/cerc — minim 50px distanță între elementele de overlay.
+2. Bula se ancorează la personajul care VORBEȘTE/REACȚIONEAZĂ (cel speriat, stânga);
+   coada → gura LUI, niciodată spre monstru.
+3. Cercul DOAR pe amenințare (cuțit/fața stalk-erului ascuns). Săgeata PORNEȘTE în afara ariei
+   bulei → spre amenințare/cerc; corpul săgeții rămâne ÎN SPATE relativ la text (text 100% lizibil).
+4. Centru CURAT între personaje — acțiunea (cuțitul) se vede instant.
+   → Validat pe thumbnaili/THUMB_YTARI_FINAL_v6 (0 pixeli original modificați).
