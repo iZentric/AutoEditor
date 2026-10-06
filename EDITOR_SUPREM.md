@@ -35,3 +35,12 @@ WHISPER_MODEL: sandbox 2GB RAM = tiny; masina/Actions cu RAM = small (recomandat
 - calibrarea LUFS a repo-ului ajunge uneori -14.9 si QC (-14+-0.5) pică cu 0.4 — de aliniat
   tinta calibrului la -13.6 (marja QC) in produsie.
 - `pip install auto-editor faster-whisper imageio-ffmpeg` la orice mediu nou.
+
+## MINIATURI (a 2-a promisiune) — `miniaturi.py`
+Cadru REAL (non-AI, legea canalului) din vârful de energie + SĂGEATA roșie (4/4 la top DNA) +
+1-2 cuvinte max + logo serie doar la serie + checklist 8 legi BLOCANT + test 120px.
+```
+python miniaturi.py clip.mp4 --text "LAVA" --serie pokecity          # standard
+python miniaturi.py clip.mp4 --text "FUGI" --contact                 # vezi 3 cadre, alege --cadru 2
+python miniaturi.py clip.mp4 --text "AJUTOR" --t 42 --avatar av.png  # control total
+```
