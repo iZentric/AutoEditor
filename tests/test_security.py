@@ -55,6 +55,17 @@ class SecurityTests(unittest.TestCase):
             path.write_text(dummy)
             self.assertEqual(scan_paths([path]), [(str(path), 'google-refresh-token')])
 
+    def test_guard_skips_binary_assets_but_flags_large_text(self):
+        # Fonturile de brand sunt binare mari; fara regula asta gardul bloca CI-ul.
+        with tempfile.TemporaryDirectory() as temporary:
+            font = Path(temporary) / 'Monocraft.ttc'
+            font.write_bytes(b'\0' * (2 * 1024 * 1024 + 10))
+            self.assertEqual(scan_paths([font]), [])
+            dump = Path(temporary) / 'dump.txt'
+            dump.write_text('x' * (2 * 1024 * 1024 + 10))
+            self.assertEqual([label for _, label in scan_paths([dump])],
+                             ['text-too-large-for-guard'])
+
     def test_legacy_sound_organizer_no_longer_mutates_originals(self):
         with patch('autoeditor.os.remove') as delete, patch('autoeditor.subprocess.run') as render:
             autoeditor.aranjeaza_sunete_mele()
