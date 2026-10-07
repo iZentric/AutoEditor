@@ -50,3 +50,10 @@ THUMB_FUGI_PIKACHU.jpg (Pikachu + cerc + FUGI!) — se leagă de Pokémon
 ── LECȚIA SALVATĂ ─────────────────────────────────────────────
 1) Titlu = formulă JH dovedită (după views) 2) CU tema reală a clipului
 3) Înainte de orice titlu: UITĂ-TE la titlu+descriere+capitolele clipului
+
+════════════════════════════════════════════════════════════
+✅ DECIZIA BOSSULUI (06-10): VAR A CÂȘTIGĂ
+Miniatura FINALĂ: thumbnaili/THUMB_BOSS_POKECITY.jpg (VAR A — FUGI)
+Titlul FINAL: L-am BATUT pe BOSS pana a PLANS !
+VAR B (THUMB_BOSS_VS.jpg) = arhivă, backup pentru Test & Compare.
+════════════════════════════════════════════════════════════
