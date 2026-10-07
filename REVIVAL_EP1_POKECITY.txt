@@ -57,3 +57,13 @@ Miniatura FINALĂ: thumbnaili/THUMB_BOSS_POKECITY.jpg (VAR A — FUGI)
 Titlul FINAL: L-am BATUT pe BOSS pana a PLANS !
 VAR B (THUMB_BOSS_VS.jpg) = arhivă, backup pentru Test & Compare.
 ════════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════════
+✅ FINALĂ DEFINITIVĂ (06-10, după corecția bossului):
+Miniatura: thumbnaili/THUMB_VANATORE_FINAL.jpg (vânătoarea — momentul real)
+Bossul a confirmat: Pokémon legendar pe fundal + moment = VÂNĂTOAREA.
+Titlul rămâne VAR A: L-am BATUT pe BOSS pana a PLANS ! (finalul clipului)
+sau Variantă C mai potrivită temei: Am gasit POKEMONUL SECRET cu NOCIVANU !
+LECȚIE: bossul vede clipul — ÎNTREABĂ întotdeauna momentul/monstrul real
+înainte de a genera scena thumbnailului.
+════════════════════════════════════════════════════════════
