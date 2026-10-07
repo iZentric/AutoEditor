@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editor miniatură — așezare automată după reguli</title>
+<style>
+  body{background:#111;color:#eee;font-family:system-ui;margin:0;padding:16px}
+  h1{font-size:20px;margin:0 0 4px}
+  p.sub{color:#aaa;margin:0 0 14px;font-size:13px}
+  .wrap{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+  .scena{position:relative;border:2px solid #444;border-radius:8px;overflow:hidden;
+         background:#000;flex:0 0 auto;touch-action:none}
+  .scena img.base{display:block;width:960px;height:540px}
+  .el{position:absolute;cursor:grab;user-select:none}
+  .el.ales{outline:2px dashed #ffd400}
+  .el:active{cursor:grabbing}
+  .grid{position:absolute;inset:0;display:none;
+    background-image:linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px);
+    background-size:80px 80px;pointer-events:none}
+  .cap{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;
+       border:3px solid #00e676;background:rgba(0,230,118,.25);pointer-events:none}
+  .cap:after{content:attr(data-n);position:absolute;left:16px;top:-4px;color:#00e676;
+             font:bold 14px system-ui}
+  .panel{background:#1b1b1b;border:1px solid #333;border-radius:10px;padding:14px;min-width:300px;flex:1}
+  .panel h3{margin:0 0 10px;font-size:15px;color:#ff5a5f}
+  .rand{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:13px}
+  .rand label{width:74px;color:#aaa}
+  input[type=range]{flex:1}
+  button{background:#ed1c24;color:#fff;border:0;padding:8px 12px;border-radius:6px;cursor:pointer;
+         font-size:14px;margin-right:6px}
+  button.sec{background:#333}
+  button.auto{background:#00a651;font-size:16px;padding:12px 16px;width:100%;margin:0 0 8px}
+  button.auto.activ{background:#ffd400;color:#111}
+  select{background:#222;color:#eee;border:1px solid #444;padding:6px;border-radius:6px;max-width:240px}
+  .lista{max-height:230px;overflow:auto;border:1px solid #333;border-radius:6px;margin-bottom:10px}
+  .item{padding:7px 9px;border-bottom:1px solid #2a2a2a;cursor:pointer;font-size:13px}
+  .item.ales{background:#3a2020;color:#ffd400}
+  .coord{font-family:monospace;font-size:12px;color:#9a9a9a}
+  .stare{margin-top:10px;padding:9px;border-radius:6px;background:#222;font-size:13px}
+  .lege{background:#16241a;border:1px solid #2c5c3a;border-radius:8px;padding:10px;font-size:12.5px;
+        color:#bfe8cc;margin-bottom:12px;line-height:1.5}
+  a{color:#7ab7ff}
+</style>
+</head>
+<body>
+<h1>Editor miniatură — AUTO-AȘEZARE</h1>
+<p class="sub">Apasă <b>🎯 CAPUL PERSONAJULUI</b>, dă click pe cap și restul se așază singur după reguli.
+Apoi tragi ce nu-ți place și <b>SALVEAZĂ</b>. <a href="exact.html">← elementele EXACT de la Jocuri Horror</a></p>
+
+<div class="wrap">
+  <div class="scena" id="scena">
+    <img class="base" src="BASE.jpg" alt="scena">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div class="panel">
+    <button class="auto" id="bAuto">🎯 CAPUL PERSONAJULUI</button>
+    <button class="auto sec" id="bAuto2" style="background:#333">🎯 al doilea cap (Mocivanu)</button>
+
+    <div class="lege">
+      <b>LEGEA DE PLASARE</b> (se aplică singură la click):<br>
+      • <b>nametagul</b> — fix deasupra capului, centrat pe el<br>
+      • <b>bula</b> — LÂNGĂ cap, la nivelul feței, cu codița spre personaj<br>
+      • <b>cercul</b> — PE FAȚĂ / pe obiectul arătat<br>
+      • <b>săgeata</b> — din COLȚUL OPUST bulei, îndreptată spre subiect
+    </div>
+
+    <h3>Elemente (apasă ca să-l selectezi)</h3>
+    <div class="lista" id="lista"></div>
+
+    <div class="rand"><label>Mărime</label><input type="range" id="rMarime" min="40" max="900" value="200"></div>
+    <div class="rand"><label>Rotire</label><input type="range" id="rRot" min="-180" max="180" value="0"></div>
+    <div class="rand"><label>Întoarce</label><button class="sec" id="bFlip">stânga↔dreapta</button></div>
+    <div><button class="sec" id="bGrid">grilă</button>
+         <button class="sec" id="bCentru">centrează orizontal</button></div>
+
+    <h3 style="margin-top:16px">Schimbă bula</h3>
+    <select id="selBula"></select>
+
+    <h3 style="margin-top:16px">Adaugă element</h3>
+    <select id="selAdauga"></select>
+    <button class="sec" style="margin-top:8px" id="bAdauga">adaugă</button>
+
+    <div style="margin-top:16px">
+      <button id="bSalveaza">SALVEAZĂ POZIȚIILE</button>
+      <button class="sec" id="bSterge">șterge selectat</button>
+    </div>
+    <div class="stare" id="stare">Aștept: click pe <b>🎯 CAPUL PERSONAJULUI</b>, apoi pe capul personajului din poză.</div>
+    <div class="coord" id="coord"></div>
+  </div>
+</div>
+
+<script>
+const IMG = {w:1280, h:720};
+const AFIS = 960;
+const S = AFIS / IMG.w;
+const scena = document.getElementById('scena');
+
+const BULE = [
+  ['el/BULA_FUGI!.png','FUGI!'],['el/BULA_CE?.png','CE?'],['el/BULA_AJUTOR.png','AJUTOR'],
+  ['el/BULA_24.png','24'],['el/BULA_10RA.png','10RA'],['el/BULA_240RE.png','240RE'],
+  ['el/BULA_ORE.png','ORE'],['el/BULA_SCOALADIN.png','SCOALA DIN'],['el/BULA_GOLA.png','bulă vidă']
+];
+const ALTELE = [
+  ['el/CERC_2.png','cerc'],['el/SAGEATA_2.png','săgeată'],['el/SAGEATA_1.png','săgeată verticală'],
+  ['el/LOGO.png','logo POKECITY'],['el/INIMI.png','inimioare'],
+  ['el/NT_IZENTRIC.png','nametag iZentric'],['el/NT_MOCIVANU.png','nametag Mocivanu']
+];
+
+let elem = [
+  {id:'nt1', tip:'nametag iZentric', src:'el/NT_IZENTRIC.png', x:430, y:300, w:210, rot:0, flip:false},
+  {id:'bula', tip:'bulă', src:'el/BULA_FUGI!.png', x:300, y:170, w:430, rot:0, flip:false},
+  {id:'cerc', tip:'cerc', src:'el/CERC_2.png', x:664, y:520, w:230, rot:0, flip:false},
+  {id:'sag',  tip:'săgeată', src:'el/SAGEATA_2.png', x:900, y:600, w:430, rot:0, flip:false},
+  {id:'logo', tip:'logo', src:'el/LOGO.png', x:100, y:660, w:150, rot:0, flip:false}
+];
+let ales = 'bula';
+let cap1 = null, cap2 = null;
+let modAuto = 0;
+
+function deseneaza(){
+  document.querySelectorAll('.el').forEach(n=>n.remove());
+  document.querySelectorAll('.cap').forEach(n=>n.remove());
+  for(const e of elem){
+    const img = document.createElement('img');
+    img.className = 'el' + (e.id===ales ? ' ales' : '');
+    img.src = e.src; img.draggable = false;
+    img.style.width = (e.w*S)+'px';
+    img.style.transform = `translate(-50%,-50%) rotate(${e.rot}deg) scaleX(${e.flip?-1:1})`;
+    img.style.left = (e.x*S)+'px';
+    img.style.top  = (e.y*S)+'px';
+    img.dataset.id = e.id;
+    scena.appendChild(img);
+  }
+  [[cap1,'1'],[cap2,'2']].forEach(([c,n])=>{
+    if(!c) return;
+    const d = document.createElement('div');
+    d.className='cap'; d.dataset.n=n;
+    d.style.left=(c.x*S)+'px'; d.style.top=(c.y*S)+'px';
+    scena.appendChild(d);
+  });
+  lista(); coord();
+}
+function curent(){ return elem.find(e=>e.id===ales); }
+function lista(){
+  const l = document.getElementById('lista');
+  l.innerHTML = elem.map(e=>`<div class="item ${e.id===ales?'ales':''}" data-id="${e.id}">${e.tip}</div>`).join('');
+  l.querySelectorAll('.item').forEach(it=>it.onclick=()=>{ales=it.dataset.id; sync(); deseneaza();});
+}
+function coord(){
+  const e = curent();
+  document.getElementById('coord').textContent = e ?
+    `${e.tip}: x=${Math.round(e.x)} y=${Math.round(e.y)} lățime=${Math.round(e.w)} rot=${e.rot}°${e.flip?' ÎNTORS':''}` : '';
+}
+function sync(){ const e=curent(); if(!e) return;
+  document.getElementById('rMarime').value=e.w; document.getElementById('rRot').value=e.rot; }
+
+function aseaza(hx, hy, idx){
+  let nt = elem.find(e=>e.id===(idx===1?'nt1':'nt2'));
+  if(idx===2 && !nt){ nt={id:'nt2',tip:'nametag Mocivanu',src:'el/NT_MOCIVANU.png',w:220,rot:0,flip:false}; elem.push(nt); }
+  if(nt){ nt.x=hx; nt.y=Math.max(45, hy-115); nt.w=220; nt.rot=0; nt.flip=false; }
+  if(idx===2) return;
+  const bulaStanga = hx > IMG.w/2;
+  const b = elem.find(e=>e.id==='bula');
+  if(b){ b.x=hx+(bulaStanga?-245:245); b.y=Math.max(90, hy-10); b.w=430; b.rot=0; b.flip=bulaStanga; }
+  const c = elem.find(e=>e.id==='cerc');
+  if(c){ c.x=hx; c.y=hy+20; c.w=230; c.rot=0; c.flip=false; }
+  const s = elem.find(e=>e.id==='sag');
+  if(s){ const cx = bulaStanga ? IMG.w-100 : 100, cy = hy<360 ? 630 : 90;
+    s.x=Math.round((cx+hx)/2); s.y=Math.round((cy+hy)/2); s.w=430;
+    s.rot=Math.round(Math.atan2(hy-cy, hx-cx)*180/Math.PI); s.flip=false; }
+}
+
+let drag = null;
+scena.addEventListener('pointerdown', ev=>{
+  const t = ev.target.closest('.el');
+  if(modAuto && !t){
+    const r = scena.getBoundingClientRect();
+    const x = Math.round((ev.clientX-r.left)/S), y = Math.round((ev.clientY-r.top)/S);
+    if(modAuto===1){ cap1={x,y}; aseaza(x,y,1); modAuto=0;
+      document.getElementById('bAuto').classList.remove('activ');
+      stare('✔ Capul 1 la '+x+','+y+' — nametagul deasupra, bula lângă, cercul pe față, săgeata din colț.');
+    } else { cap2={x,y}; aseaza(x,y,2); modAuto=0;
+      document.getElementById('bAuto2').classList.remove('activ');
+      stare('✔ Capul 2 la '+x+','+y+' — nametagul lui Mocivanu e deasupra lui.');
+    }
+    deseneaza(); ev.preventDefault(); return;
+  }
+  if(!t) return;
+  ales = t.dataset.id; drag = {id:ales, px:ev.clientX, py:ev.clientY};
+  sync(); deseneaza(); ev.preventDefault();
+});
+window.addEventListener('pointermove', ev=>{
+  if(!drag) return;
+  const e = elem.find(x=>x.id===drag.id); if(!e) return;
+  e.x += (ev.clientX-drag.px)/S; e.y += (ev.clientY-drag.py)/S;
+  drag.px=ev.clientX; drag.py=ev.clientY;
+  e.x=Math.max(0,Math.min(IMG.w,e.x)); e.y=Math.max(0,Math.min(IMG.h,e.y));
+  const i = scena.querySelector(`.el[data-id="${e.id}"]`);
+  if(i){ i.style.left=(e.x*S)+'px'; i.style.top=(e.y*S)+'px'; }
+  coord();
+});
+window.addEventListener('pointerup', ()=>{ drag=null; });
+scena.addEventListener('wheel', ev=>{
+  const t=ev.target.closest('.el'); if(!t) return;
+  const e=elem.find(x=>x.id===t.dataset.id);
+  e.w=Math.max(30, e.w+(ev.deltaY<0?12:-12)); deseneaza(); coord(); ev.preventDefault();
+}, {passive:false});
+
+function stare(t){ const s=document.getElementById('stare'); s.style.display='block'; s.innerHTML=t; }
+
+document.getElementById('rMarime').oninput = ev=>{ const e=curent(); if(e){e.w=+ev.target.value; deseneaza();} };
+document.getElementById('rRot').oninput = ev=>{ const e=curent(); if(e){e.rot=+ev.target.value; deseneaza();} };
+document.getElementById('bFlip').onclick = ()=>{ const e=curent(); if(e){e.flip=!e.flip; deseneaza();} };
+document.getElementById('bGrid').onclick = ()=>{ const g=document.getElementById('grid');
+  g.style.display = g.style.display==='block' ? 'none':'block'; };
+document.getElementById('bCentru').onclick = ()=>{ const e=curent(); if(e){e.x=IMG.w/2; deseneaza();} };
+document.getElementById('bSterge').onclick = ()=>{ elem=elem.filter(e=>e.id!==ales);
+  ales=elem.length?elem[0].id:null; sync(); deseneaza(); };
+document.getElementById('bAuto').onclick = ()=>{ modAuto = modAuto===1?0:1;
+  document.getElementById('bAuto').classList.toggle('activ', modAuto===1);
+  stare(modAuto===1?'👉 Click pe <b>capul personajului</b> în poză.':'Mod auto oprit.'); };
+document.getElementById('bAuto2').onclick = ()=>{ modAuto = modAuto===2?0:2;
+  document.getElementById('bAuto2').classList.toggle('activ', modAuto===2);
+  stare(modAuto===2?'👉 Click pe <b>al doilea cap</b>.':'Mod auto oprit.'); };
+
+const sb = document.getElementById('selBula');
+sb.innerHTML = BULE.map(b=>`<option value="${b[0]}">${b[1]}</option>`).join('');
+sb.onchange = ()=>{ const e=elem.find(x=>x.id==='bula');
+  if(e){ e.src=sb.value; e.tip='bulă '+BULE.find(b=>b[0]===sb.value)[1]; deseneaza(); }
+  else { elem.push({id:'bula',tip:'bulă',src:sb.value,x:300,y:170,w:430,rot:0,flip:false}); deseneaza(); } };
+
+const sa = document.getElementById('selAdauga');
+sa.innerHTML = ALTELE.map(a=>`<option value="${a[0]}">${a[1]}</option>`).join('');
+document.getElementById('bAdauga').onclick = ()=>{
+  const id='x'+Date.now(); const a=ALTELE.find(x=>x[0]===sa.value);
+  elem.push({id, tip:a[1], src:sa.value, x:640, y:360, w:250, rot:0, flip:false});
+  ales=id; sync(); deseneaza();
+};
+
+document.getElementById('bSalveaza').onclick = async ()=>{
+  const payload = {imagine:'BASE.jpg', spatiu:[IMG.w,IMG.h], elemente:elem,
+                   cap1:cap1, cap2:cap2, salvat:new Date().toISOString()};
+  const r = await fetch('salveaza', {method:'POST', body:JSON.stringify(payload)});
+  stare(r.ok ? '✔ SALVAT. Zice-i agentului „am salvat” și îl coace exact așa.'
+             : '✖ Eroare — încearcă iar.');
+};
+deseneaza();
+</script>
+</body>
+</html>
