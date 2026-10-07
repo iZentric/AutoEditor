@@ -1,0 +1,66 @@
+name: Ia surse JH la calitate maximă
+# Sandboxul are rețea pe allowlist (doar PyPI + GitHub) — i.ytimg.com e BLOCAT.
+# Runnerul de Actions are internet, deci sursele la calitate maximă (maxresdefault
+# 1920x1080) se descarcă AICI și se comit în repo.
+#
+# Cum pornește:
+#   1. automat: orice push care modifică declansa/surse.txt
+#   2. manual:  gh workflow run ia_surse_jh.yml  (după ce ajunge pe main)
+on:
+  push:
+    paths:
+      - declansa/surse.txt
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Descarcă thumbnailurile la calitate maximă
+        run: |
+          set -e
+          mkdir -p refs/surse_jh
+          tr -d '\r' < declansa/surse.txt | grep -oE '[A-Za-z0-9_-]{11}' | sort -u > /tmp/ids.txt
+          echo "── $(wc -l < /tmp/ids.txt) iduri de descărcat ──"
+          : > /tmp/raport.txt
+          while read -r id; do
+            ok=0
+            for q in maxresdefault maxres1 maxres2 hq720 sddefault hqdefault; do
+              if curl -fsSL --max-time 45 -o "/tmp/$id.jpg" "https://i.ytimg.com/vi/$id/$q.jpg"; then
+                s=$(stat -c%s "/tmp/$id.jpg")
+                if [ "$s" -gt 20000 ]; then
+                  cp "/tmp/$id.jpg" "refs/surse_jh/JocuriHorrorSky_$id.jpg"
+                  dim=$(python3 -c "from PIL import Image;print(Image.open('refs/surse_jh/JocuriHorrorSky_$id.jpg').size)" 2>/dev/null || echo "?")
+                  echo "OK   $id  $q  $s bytes  $dim"
+                  echo "OK   $id  $q  $s bytes  $dim" >> /tmp/raport.txt
+                  ok=1
+                  break
+                fi
+              fi
+            done
+            [ "$ok" = "1" ] || { echo "ESEC $id"; echo "ESEC $id" >> /tmp/raport.txt; }
+          done < /tmp/ids.txt
+          echo
+          echo "── RAPORT ──"; cat /tmp/raport.txt
+          ls -la refs/surse_jh
+
+      - name: Comite sursele în branch
+        run: |
+          git config user.name "demiurg-bot"
+          git config user.email "demiurg@izentric.local"
+          git add -f refs/surse_jh
+          if git diff --cached --quiet; then
+            echo "nimic nou de comis"
+          else
+            git commit -m "surse JH la calitate maxima (maxresdefault) — de aici se taie elementele 1:1"
+            git push origin "HEAD:${{ github.ref_name }}"
+            echo "IMPINS pe ${{ github.ref_name }}"
+          fi
