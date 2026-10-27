@@ -1,0 +1,30 @@
+================================================================
+SHORT 26: SHORT_BOSS_FURAT.mp4 (16s, 1080x1920@30, -14.4 LUFS, QC 8/8)
+Moment NOU: RAPIREA (boss-ul fură Pokémonul, urmărire, cușca spartă,
+boss-ul fuge plângând) — NU e in REGISTRU = zero duplicare.
+Livrat pe GitHub RELEASE "short-26" (impreuna cu acest kit).
+POSTARE: dupa SHORT 25 (maine), 18:00-20:00, 1/zi.
+================================================================
+
+TITLU — ALEGE UNUL (formula JH: pers. I + actiune caps):
+A ⭐: Boss-ul mi-a FURAT POKEMONUL din POKECITY !
+B:    BOSS-ul ia RAPIT pe PIKACHU si A FUGIT PLANGAND !
+C:    Am SPART cusca BOSS-ului ca sa-mi salvez POKEMONUL !
+
+DESCRIERE (copy-paste):
+BOSS-ul mi-a furat POKEMONUL noaptea! ⚡ L-am urmarit, mi-a pus Pikachu
+in CUSCA... asa ca am spart tot! Unde sa fuga boss-ul? Scrii mai jos 👇
+#shorts #minecraft #pokecity #pokemon #pikachu #gamingromania
+
+TAGS: pokecity, minecraft, pokemon, pikachu, boss fight, minecraft shorts,
+minecraft romania, gaming romania, nocivanu, izentric, pokemon furat
+
+STRUCTURA:
+0.0-2.8  HOOK: bossul fuge cu Pokeball-ul (furat!) + "MI-A FURAT POKEMONUL!"
+2.8-5.2  urmele uriase in padurea intunecata
+5.2-7.3  ochii lui in bezna (urmarirea)
+7.3-9.6  Pikachu in CUSCA (miza!)
+9.6-12.4 EXPLOZIE: cusca sparta cu thunderbolt (riser+boom)
+12.4-16  PAYOFF: bossul fuge PLANGAND (pop-out "A FUGIT!") + fist-bump Pikachu
+
+DUPA 48h: "viewed vs swiped" <60% → schimbi primele 2s (L13 re-hook).
