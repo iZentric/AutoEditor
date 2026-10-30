@@ -31,6 +31,10 @@ python sunete_referinta.py URL --no-web-search
 
 Căutarea automată YouTube citește doar titluri și linkuri prin `yt-dlp`; nu descarcă fișierele rezultate.
 
+## Rulează din GitHub folosind Secrets
+
+În `Actions` alege workflow-ul **Analiză sunete video**, apasă **Run workflow**, pune linkul direct în `video_url` și pornește manual rularea. Workflow-ul folosește secretul repository-ului `GEMINI_API_KEY`; `AUDD_API_TOKEN` este opțional pentru identificarea melodiilor. Raportul apare în sumarul rulării și ca artifact descărcabil (păstrat 14 zile). Acest workflow nu se declanșează automat la release-uri și nu publică/încarcă videoclipuri.
+
 ## Configurare pentru identificare
 
 1. **Etichete audio / efecte:** setează `GEMINI_API_KEY` local, în variabila de mediu sau în fișierul `.env` ignorat de Git. Se poate configura `GEMINI_AUDIO_MODEL`; în lipsă sunt folosite modelele din `GEMINI_MODEL`.

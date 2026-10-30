@@ -53,10 +53,11 @@ For larger tasks, give a short plan. Never promise perfection or unmeasured spee
   YT_CLIENT_ID/YT_CLIENT_SECRET/YT_REFRESH_TOKEN from Actions Secrets.
 - `preflight.py`: checks configuration presence only, NOT actual API authentication.
 - `invata_trending.py`, `cunoastere/`: channel context and editorial memory.
-- `sunete_referinta.py`: optional reference-audio report. Gemini labels sound events,
-  AudD can identify known songs, local fingerprints compare supplied SFX libraries,
-  and search results are links only. It does not download replacement effects or
-  verify licenses. See `docs/SUNETE_REFERINTA.md`; never run a real VOD in sandbox.
+- `sunete_referinta.py` + `.github/workflows/sunete-referinta.yml`: manual-only
+  reference-audio report. Gemini labels sound events, AudD can identify known songs,
+  local fingerprints compare supplied SFX libraries, and search results are links only.
+  It does not download replacement effects or verify licenses. See `docs/SUNETE_REFERINTA.md`;
+  never run a real VOD in sandbox.
 
 <<<<<<< HEAD
 Local legacy CLI scripts remain for compatibility. They are not the primary

@@ -18,7 +18,7 @@ pe GitHub Actions; livrarea este in Releases.
 
 ## Analizeaza sunetele unui video de referinta
 
-Ruleaza `python sunete_referinta.py "https://www.youtube.com/watch?v=..."` pentru un raport cu sunete/meme-uri, posibile melodii, potriviri cu biblioteca locala si cautari pe YouTube/Freesound/Pixabay. Pentru numele exact al pieselor e necesar un token AudD optional; detalii, configurare si limite: [docs/SUNETE_REFERINTA.md](docs/SUNETE_REFERINTA.md). Nu descarca automat efecte si nu verifica licentele rezultatelor.
+Din GitHub: **Actions → Analiză sunete video → Run workflow**, apoi introdu linkul YouTube. Raportul apare în sumarul rulării și ca artifact descărcabil. Local poți rula `python sunete_referinta.py "https://www.youtube.com/watch?v=..."`. Analiza folosește secretul `GEMINI_API_KEY`; pentru recunoașterea exactă a melodiilor este opțional `AUDD_API_TOKEN`. Detalii și limite: [docs/SUNETE_REFERINTA.md](docs/SUNETE_REFERINTA.md). Nu descarcă automat efecte și nu verifică licențele rezultatelor.
 
 AI-ul poate gresi. Prima livrare trebuie vizionata si ascultata pentru calibrare;
 nu promitem editare perfecta sau timpi de procesare nemasurati.

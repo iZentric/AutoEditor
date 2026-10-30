@@ -1118,3 +1118,17 @@
   identificării pe un video real rămân de confirmat după configurarea locală a cheilor și
   acceptul creatorului pentru o probă pe un link real. Muzica foarte joasă sub voce poate
   fi ratată; niciun rezultat de pe net nu este automat licențiat pentru reutilizare.
+
+## 30.10.2026 — Workflow manual pentru raportul audio
+- Adăugat `.github/workflows/sunete-referinta.yml`, declanșat numai manual, cu input URL
+  YouTube. Leagă `secrets.GEMINI_API_KEY` la script și `secrets.AUDD_API_TOKEN` opțional;
+  arată raportul în sumar și îl atașează ca artifact 14 zile. Nu am lansat workflow-ul și
+  nu am analizat niciun VOD real.
+- Creatorul a indicat că `GEMINI_API_KEY` este deja în Secrets. Conținutul Secrets nu poate
+  fi citit de integrarea curentă (`gh secret list` a întors 403), dar numele este mapat.
+- Creatorul a lipit o cheie API în conversație; valoarea nu a fost folosită, copiată sau
+  salvată. I-am recomandat revocare/rotire și actualizarea Secretului, fără să ceară cheia
+  nouă în chat.
+- Ultimul workflow CI din branch nu a putut porni: GitHub a raportat problemă de billing /
+  spending limit la cont, nu eșec de cod. Validarea locală rămâne sursa testată până când
+  Actions poate lansa runnerul.

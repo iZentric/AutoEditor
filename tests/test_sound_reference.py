@@ -22,6 +22,14 @@ class FakeResponse:
 
 
 class SoundReferenceTests(unittest.TestCase):
+    def test_manual_workflow_uses_named_secrets_without_auto_trigger(self):
+        root = Path(__file__).resolve().parents[1]
+        workflow = (root / '.github' / 'workflows' / 'sunete-referinta.yml').read_text(encoding='utf-8')
+        self.assertIn('workflow_dispatch:', workflow)
+        self.assertNotIn('\n  push:', workflow)
+        self.assertIn('GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}', workflow)
+        self.assertIn('AUDD_API_TOKEN: ${{ secrets.AUDD_API_TOKEN }}', workflow)
+
     def test_parses_youtube_video_url_shapes_and_rejects_lookalikes(self):
         video_id = 'AbCdEfGhI_1'
         self.assertEqual(sounds.youtube_video_id(f'https://www.youtube.com/watch?v={video_id}&list=PL123'), video_id)

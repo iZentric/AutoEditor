@@ -1,0 +1,72 @@
+name: Analiză sunete video
+
+on:
+  workflow_dispatch:
+    inputs:
+      video_url:
+        description: Link direct către un videoclip YouTube public
+        required: true
+        type: string
+      max_ai_chunks:
+        description: Număr maxim de fragmente analizate de Gemini
+        required: false
+        default: 180
+        type: number
+      max_music_checks:
+        description: Număr maxim de probe pentru recunoașterea melodiilor
+        required: false
+        default: 120
+        type: number
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-sounds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Verifică secretul Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "::error::Lipsește secretul GEMINI_API_KEY din repository."
+            exit 1
+          fi
+          echo "GEMINI_API_KEY este configurată (valoarea nu este afișată)."
+
+      - name: Instalează uneltele audio
+        run: python -m pip install --disable-pip-version-check yt-dlp imageio-ffmpeg numpy
+
+      - name: Analizează audio-ul și caută surse
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          AUDD_API_TOKEN: ${{ secrets.AUDD_API_TOKEN }}
+          REFERENCE_VIDEO_URL: ${{ inputs.video_url }}
+          MAX_AI_CHUNKS: ${{ inputs.max_ai_chunks }}
+          MAX_MUSIC_CHECKS: ${{ inputs.max_music_checks }}
+        run: |
+          set -euo pipefail
+          mkdir -p episodes
+          python sunete_referinta.py "$REFERENCE_VIDEO_URL" \
+            --output episodes/SUNETE_REFERINTA.md \
+            --max-ai-chunks "$MAX_AI_CHUNKS" \
+            --max-music-checks "$MAX_MUSIC_CHECKS"
+
+      - name: Afișează raportul în sumarul rulării
+        run: cat episodes/SUNETE_REFERINTA.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Atașează raportul pentru descărcare
+        uses: actions/upload-artifact@v4
+        with:
+          name: raport-sunete-${{ github.run_id }}
+          path: episodes/SUNETE_REFERINTA.md
+          if-no-files-found: error
+          retention-days: 14
