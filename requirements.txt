@@ -3,6 +3,7 @@
 yt-dlp
 pillow
 imageio-ffmpeg
+numpy
 faster-whisper
 scenedetect
 gdown

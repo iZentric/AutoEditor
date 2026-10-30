@@ -16,6 +16,10 @@ pe GitHub Actions; livrarea este in Releases.
 - Export 2K, audio verificat; fara watermark, confetti sau zoom-uri aleatorii.
 - Fara episoade neverificate doar ca sa existe o livrare.
 
+## Analizeaza sunetele unui video de referinta
+
+Din GitHub: **Actions → Analiză sunete video → Run workflow**, apoi introdu linkul YouTube. Raportul apare în sumarul rulării și ca artifact descărcabil. Local poți rula `python sunete_referinta.py "https://www.youtube.com/watch?v=..."`. Analiza folosește secretul `GEMINI_API_KEY`; pentru recunoașterea exactă a melodiilor este opțional `AUDD_API_TOKEN`. Detalii și limite: [docs/SUNETE_REFERINTA.md](docs/SUNETE_REFERINTA.md). Nu descarcă automat efecte și nu verifică licențele rezultatelor.
+
 AI-ul poate gresi. Prima livrare trebuie vizionata si ascultata pentru calibrare;
 nu promitem editare perfecta sau timpi de procesare nemasurati.
 
@@ -33,6 +37,7 @@ Incarcarea privata pe YouTube este separata de editare si necesita activare expl
 | Folder / fisier | Rol |
 |---|---|
 | `sunete_mele/` | Originalele tale + regulile din `catalog.json`; nu se sterg sau modifica automat |
+| `sunete_referinta.py` | Analizeaza audio dintr-un link/fisier si cauta piese/SFX similare fara sa descarce efecte |
 | `assets/` | Elemente optionale; nimic nou nu se descarca automat ca efect |
 | `cunoastere/` | Stilul canalului, transcripte, reguli si istoric editorial |
 | `episodes/` | Rezultate generate — nu se comit in Git |

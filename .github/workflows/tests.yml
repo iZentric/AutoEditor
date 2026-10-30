@@ -11,6 +11,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install audio fingerprint test dependency
+        run: python -m pip install numpy
       - name: Guard against accidentally committed credentials
         run: python tools/check_secrets.py
       - name: Test editorial decisions without media or API credentials
