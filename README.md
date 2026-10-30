@@ -16,6 +16,10 @@ pe GitHub Actions; livrarea este in Releases.
 - Export 2K, audio verificat; fara watermark, confetti sau zoom-uri aleatorii.
 - Fara episoade neverificate doar ca sa existe o livrare.
 
+## Analizeaza sunetele unui video de referinta
+
+Ruleaza `python sunete_referinta.py "https://www.youtube.com/watch?v=..."` pentru un raport cu sunete/meme-uri, posibile melodii, potriviri cu biblioteca locala si cautari pe YouTube/Freesound/Pixabay. Pentru numele exact al pieselor e necesar un token AudD optional; detalii, configurare si limite: [docs/SUNETE_REFERINTA.md](docs/SUNETE_REFERINTA.md). Nu descarca automat efecte si nu verifica licentele rezultatelor.
+
 AI-ul poate gresi. Prima livrare trebuie vizionata si ascultata pentru calibrare;
 nu promitem editare perfecta sau timpi de procesare nemasurati.
 
@@ -33,6 +37,7 @@ Incarcarea privata pe YouTube este separata de editare si necesita activare expl
 | Folder / fisier | Rol |
 |---|---|
 | `sunete_mele/` | Originalele tale + regulile din `catalog.json`; nu se sterg sau modifica automat |
+| `sunete_referinta.py` | Analizeaza audio dintr-un link/fisier si cauta piese/SFX similare fara sa descarce efecte |
 | `assets/` | Elemente optionale; nimic nou nu se descarca automat ca efect |
 | `cunoastere/` | Stilul canalului, transcripte, reguli si istoric editorial |
 | `episodes/` | Rezultate generate — nu se comit in Git |

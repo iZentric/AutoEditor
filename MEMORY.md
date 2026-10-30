@@ -1091,3 +1091,30 @@
 - Semnal #1 Shorts: SWIPE-RATE in 1-3s (>=75% viewed); avg viewed >60% distribuție, >80% shelf; REWATCH=loop cel mai tare; Shorts intrate in SEARCH (ian 2026).
 - Cod (main): scrie_ass_pops short MarginV 180->340 (safe-zone jos 320px); shorts.py badge y30->170/margin40 (safe-zone sus 160px); NOU autoeditor.filmstrip() (plansa cadre - te uiti la material inainte sa tai) + NOU autoeditor.verifica_hook() (prima secunda statica = refuz livrare).
 - Testate pe LEU V2: filmstrip OK, hook dif=26.49 (actiune), MarginV 340 confirmat.
+
+## 30.10.2026 — Analiză sunete din video de referință
+- Creat `sunete_referinta.py`: primește link direct la un video YouTube sau fișier local,
+  ia doar pista audio într-un director temporar, normalizează pentru a scoate în evidență
+  pasaje liniștite, împarte audio în ferestre și cere Gemini să inventarieze muzică,
+  SFX, meme-uri și ambianță cu timpi aproximați.
+- Recunoașterea pieselor este opțională prin `AUDD_API_TOKEN` (probe de 20s); fără token,
+  raportul nu pretinde că știe titlul exact. `yt-dlp` caută doar metadate/titluri, apoi
+  raportul oferă rezultate YouTube și pagini de căutare Freesound/Pixabay/Spotify/Apple.
+  Nu descarcă efecte noi și nu verifică licențe.
+- Adăugată comparație acustică orientativă pentru evenimente SFX/meme cu biblioteca locală
+  existentă; potrivirile sunt candidate pentru ascultare umană, nu certitudine universală.
+  `numpy` explicit în requirements. Ghid: `docs/SUNETE_REFERINTA.md`.
+- 17 teste noi pentru parsarea linkurilor, ferestre, timpi, gruparea pieselor, upload API
+  simulat fără chei reale, căutare YouTube simulată, amprente și raport; workflow-ul de teste
+  instalează separat NumPy (fără a instala întregul stack video). Corectat un test
+  existent care compara ID-urile S001... cu nume de fișiere. Guard-ul de secrete a semnalat
+  fontul TTC binar deja existent; `.ttf/.ttc/.otf` adăugate la media ignorată și acoperite
+  cu test.
+- Validare locală: 80 teste trecute în `.venv` (cu numpy), `compileall`, `--help`,
+  `git diff --check` și `python tools/check_secrets.py` verzi. Conversia FFmpeg verificată
+  pe un ton WAV sintetic de 1s; nu s-a descărcat/procesat niciun VOD real și nu s-au apelat
+  Gemini, AudD sau căutări web reale.
+- Limită importantă: încărcarea providerilor, modele Gemini audio disponibile și calitatea
+  identificării pe un video real rămân de confirmat după configurarea locală a cheilor și
+  acceptul creatorului pentru o probă pe un link real. Muzica foarte joasă sub voce poate
+  fi ratată; niciun rezultat de pe net nu este automat licențiat pentru reutilizare.

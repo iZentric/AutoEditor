@@ -55,6 +55,12 @@ class SecurityTests(unittest.TestCase):
             path.write_text(dummy)
             self.assertEqual(scan_paths([path]), [(str(path), 'google-refresh-token')])
 
+    def test_guard_skips_binary_font_assets(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / 'font.ttc'
+            path.write_bytes(b'x' * (2 * 1024 * 1024 + 1))
+            self.assertEqual(scan_paths([path]), [])
+
     def test_legacy_sound_organizer_no_longer_mutates_originals(self):
         with patch('autoeditor.os.remove') as delete, patch('autoeditor.subprocess.run') as render:
             autoeditor.aranjeaza_sunete_mele()

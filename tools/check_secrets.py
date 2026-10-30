@@ -12,7 +12,7 @@ PATTERNS = {
     'private-key': re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'),
 }
 MEDIA = {'.mp3', '.mp4', '.wav', '.ogg', '.m4a', '.flac', '.aac', '.opus',
-         '.webm', '.png', '.jpg', '.jpeg', '.gif', '.zip'}
+         '.webm', '.png', '.jpg', '.jpeg', '.gif', '.zip', '.ttf', '.ttc', '.otf'}
 
 
 def scan_paths(paths):

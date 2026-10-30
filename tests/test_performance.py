@@ -164,7 +164,7 @@ class SoundAndPreflightTests(unittest.TestCase):
         # 30.09: creatorul a extins biblioteca (18 sunete) -> testul cere ACELEASI 10 DE BAZA,
         # nu un numar fix (altfel orice sunet nou adaugat rupe CI-ul aiurea).
         baza = {'pumm.mp3', 'faaa.mp3', 'bonk', 'wow', 'boom', 'Awkward', 'pop_7e9Is8L', 'basina'}
-        nume = {key.rsplit('/', 1)[-1] for key in catalogue}
+        nume = {sound['name'] for sound in catalogue.values()}
         for piesa in baza:
             self.assertTrue(any(piesa in n for n in nume), f'lipsa {piesa} din catalog')
         self.assertTrue(all(sound['events'] and sound['sha256'] for sound in catalogue.values()))
