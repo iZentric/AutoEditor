@@ -1132,3 +1132,10 @@
 - Ultimul workflow CI din branch nu a putut porni: GitHub a raportat problemă de billing /
   spending limit la cont, nu eșec de cod. Validarea locală rămâne sursa testată până când
   Actions poate lansa runnerul.
+- Workflow/documentația/testul static au fost commit-uite și împinse pe branch în `e1a415e`.
+  PR #5 către `main` este deschis: https://github.com/iZentric/AutoEditor/pull/5 (ne-merge-uit).
+  Workflow-ul manual încă nu apare în lista GitHub Actions cât timp fișierul nu este în
+  branch-ul implicit; nu îl dispatch-ui și nu procesa un VOD până când PR-ul nu este integrat
+  și utilizatorul nu furnizează URL-ul.
+- După push, run-ul de teste `41081019536` n-a pornit din nou din cauza billing/spending
+  limit GitHub. Local au trecut 81/81 teste, compilarea, secret guard-ul și YAML parse.
