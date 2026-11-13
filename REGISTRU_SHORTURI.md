@@ -41,3 +41,6 @@
 ## UPDATE 28 oct: SHORT 25 = "L-am BATUT pe BOSS pana a PLANS!" (SHORT_BOSS_PLANS.mp4,
 16s, scene POV AI + voce umana, brand EP.1) — IN ASTEPTAREA POSTARII. NU reface momentul
 boss-battle kill pana se posteaza acesta! Build reproducibil: SHORT_BOSS_build.py + SHORT_BOSS/.
+### SHORT 27 (REAL) = "M-am ASCUNS de FIGURI in cladirea SECRETA!" (SHORT_27_REAL_ASCUND.mp4,
+18.6s, sursa = LIVE 02:03 Roblox, vocea reala, fara logo — legea v5, release short-27)
+— IN ASTEPTAREA POSTARII (ziua 3). Moment: ASCUNDEAEA+BUSIT. NU reface!
