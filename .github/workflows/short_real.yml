@@ -18,6 +18,10 @@ on:
         description: 'titlu pt kit (opitional)'
         required: false
         default: ''
+      src_release:
+        description: 'release cu sursa deja descarcata (ex: src-ep2). Gol = incearca YouTube'
+        required: false
+        default: ''
 permissions:
   contents: write
 jobs:
@@ -39,23 +43,26 @@ jobs:
         run: |
           curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/tmp/deno sh -s -- -y
           echo "/tmp/deno/bin" >> "$GITHUB_PATH"
-      - name: Provider PO-token (bgutil)
-        run: |
-          npx -y bgutil-ytdlp-pot-provider &
-          sleep 6
-          curl -s http://127.0.0.1:4416/ping && echo " <- provider LIVE"
-      - name: Descarca video din canal
+      - name: Ia sursa (release local SAU YouTube)
         run: |
           VID="${{ inputs.video_id }}"
           FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
-          pip install -q bgutil-ytdlp-pot-provider
-          yt-dlp --cookies /tmp/cookies.txt --js-runtimes deno --remote-components ejs:github \
-            --ffmpeg-location "$FF" --retries 3 \
-            --extractor-args "youtube:player_client=web,web_safari,mweb" \
-            -f "bv*[height<=1080]+ba/bv*+ba/b/18" \
-            --merge-output-format mp4 -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID" || \
-          yt-dlp --cookies /tmp/cookies.txt --js-runtimes deno --remote-components ejs:github \
-            --ffmpeg-location "$FF" -f "18/b" -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID"
+          if [ -n "${{ inputs.src_release }}" ]; then
+            echo "sursa din release ${{ inputs.src_release }}"
+            gh release download "${{ inputs.src_release }}" -p "*.mp4" -O /tmp/src.mp4 --clobber
+          else
+            curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/tmp/deno sh -s -- -y
+            echo "/tmp/deno/bin" >> "$GITHUB_PATH"
+            yt-dlp --cookies /tmp/cookies.txt --js-runtimes deno --remote-components ejs:github \
+              --ffmpeg-location "$FF" --retries 3 \
+              --extractor-args "youtube:player_client=web_safari,mweb,web" \
+              -f "18/b" -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID" || \
+            yt-dlp --cookies /tmp/cookies.txt --js-runtimes deno --remote-components ejs:github \
+              --ffmpeg-location "$FF" --retries 3 \
+              --extractor-args "youtube:player_client=web,web_safari,mweb" \
+              -f "bv*[height<=1080]+ba/bv*+ba/b/18" \
+              --merge-output-format mp4 -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID"
+          fi
           ls -la /tmp/src.mp4
       - name: Montaj short (fereastra energie + whisper uman + SFX + LUFS)
         run: python tools/short_real_build.py /tmp/src.mp4 --window "${{ inputs.window }}" --tag "${{ inputs.tag }}" --titlu "${{ inputs.titlu }}"
