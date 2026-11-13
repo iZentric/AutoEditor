@@ -1,0 +1,58 @@
+name: SHORT REAL (video canal -> montaj -> release)
+on:
+  workflow_dispatch:
+    inputs:
+      video_id:
+        description: 'ID YouTube (ex: A_tsPVKuGaA)'
+        required: true
+        default: 'A_tsPVKuGaA'
+      window:
+        description: 'fereastra "mm:ss-mm:ss" (gol = automat dupa energie)'
+        required: false
+        default: ''
+      tag:
+        description: 'tag release (ex: short-27)'
+        required: true
+        default: 'short-27'
+      titlu:
+        description: 'titlu pt kit (opitional)'
+        required: false
+        default: ''
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Dependente
+        run: pip install yt-dlp faster-whisper auto-editor imageio-ffmpeg pillow numpy
+      - name: Cookies din secret
+        run: |
+          printf '%s' "${{ secrets.YT_COOKIES }}" > /tmp/cookies.txt
+          head -c 40 /tmp/cookies.txt || true
+      - name: Descarca video din canal
+        run: |
+          VID="${{ inputs.video_id }}"
+          yt-dlp --cookies /tmp/cookies.txt --retries 3 \
+            --extractor-args "youtube:player_client=mweb,web_safari,web,tv" \
+            -f "bv*[height<=1080]+ba/bv*+ba/b/18" \
+            --merge-output-format mp4 -o /tmp/src.mp4 \
+            "https://www.youtube.com/watch?v=$VID" || \
+          yt-dlp --cookies /tmp/cookies.txt --retries 3 -f "18/b" -o /tmp/src.mp4 \
+            "https://www.youtube.com/watch?v=$VID"
+          ls -la /tmp/src.mp4
+      - name: Montaj short (fereastra energie + whisper uman + SFX + LUFS)
+        run: python tools/short_real_build.py /tmp/src.mp4 --window "${{ inputs.window }}" --tag "${{ inputs.tag }}" --titlu "${{ inputs.titlu }}"
+      - name: Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ inputs.tag }}" out/SHORT_REAL.mp4 out/KIT_SHORT_REAL.txt \
+            --title "SHORT REAL — ${{ inputs.tag }}" \
+            --notes "Montaj pe GitHub: fereastra de energie maxima, captions karaoke pe vocea reala (whisper), auto-editor anti-goluri, SFX, LUFS -14. Postare: 18:00-20:00." || \
+          gh release upload "${{ inputs.tag }}" out/SHORT_REAL.mp4 out/KIT_SHORT_REAL.txt --clobber
