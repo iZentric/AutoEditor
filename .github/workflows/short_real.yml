@@ -74,10 +74,11 @@ jobs:
           ls -la /tmp/src.mp4
       - name: Montaj short (fereastra energie + whisper uman + SFX + LUFS)
         run: |
-          EXTRA=""
-          [ -f /tmp/subs.json3 ] && EXTRA="--subs /tmp/subs.json3"
-          [ -n "${{ inputs.hook }}" ] && EXTRA="$EXTRA --hook '${{ inputs.hook }}'"
-          python tools/short_real_build.py /tmp/src.mp4 --window "${{ inputs.window }}" --tag "${{ inputs.tag }}" --titlu "${{ inputs.titlu }}" $EXTRA
+          OPTS="--window '${{ inputs.window }}' --tag '${{ inputs.tag }}'"
+          if [ -n "${{ inputs.titlu }}" ]; then OPTS="$OPTS --titlu '${{ inputs.titlu }}'"; fi
+          if [ -n "${{ inputs.hook }}" ]; then OPTS="$OPTS --hook '${{ inputs.hook }}'"; fi
+          if [ -f /tmp/subs.json3 ]; then OPTS="$OPTS --subs /tmp/subs.json3"; fi
+          eval python tools/short_real_build.py /tmp/src.mp4 $OPTS
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
