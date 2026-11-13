@@ -12,6 +12,8 @@ ap.add_argument('src')
 ap.add_argument('--window', default='')
 ap.add_argument('--tag', default='short-real')
 ap.add_argument('--titlu', default='')
+ap.add_argument('--subs', default='', help='json3 oficial YouTube (captions Google, calitate > whisper)')
+ap.add_argument('--hook', default='')
 a = ap.parse_args()
 
 def _ff():
@@ -63,11 +65,45 @@ else:
     t0, t1 = ep.find_best_window(a.src, win=16.0)
 print('[FEREASTRA] %.1fs -> %.1fs' % (t0, t1))
 
-dummy = [{'w': 'povestea', 's': 0.0, 'e': 0.2}]
-total = ep.build(a.src, '/tmp/_short_raw.mp4', dummy,
-                 trim=(t0, min(t1, t0 + 16.0)), compress=True,
-                 series='pokecity', logo_path=logo, bg_t=1.0,
-                 outdir='/tmp/_pro_real')
+DIAC = str.maketrans('ăâîșțĂÂÎȘȚşţŞŢ', 'aaiistAAIISTsTSsT')
+def _fara_diac(x):
+    return x.translate(DIAC)
+
+words_sub = []
+if a.subs and os.path.exists(a.subs):
+    import json as _json
+    dd = _json.load(open(a.subs))
+    for ev in dd.get('events', []):
+        if 'segs' not in ev: continue
+        tt = ev.get('tStartMs', 0) / 1000.0
+        for sg in ev['segs']:
+            ww = (sg.get('utf8') or '').strip()
+            ww = ww.replace('>>', ' ').strip(' ,.!?…').strip()
+            if not ww or len(ww) < 2: continue
+            st = tt + (sg.get('tOffsetMs') or 0) / 1000.0
+            if t0 - 0.2 <= st <= t0 + 16.5:
+                words_sub.append({'w': _fara_diac(ww), 's': round(st - t0, 2),
+                                  'e': round(st - t0 + 0.45, 2)})
+    # merge secvente identice consecutive
+    merged = []
+    for w in words_sub:
+        if merged and merged[-1]['w'] == w['w'] and w['s'] - merged[-1]['e'] < 0.5:
+            merged[-1]['e'] = w['e']; continue
+        merged.append(w)
+    words_sub = merged
+    print('[SUBS OFICIALE] %d cuvinte in fereastra (calitate Google ASR)' % len(words_sub))
+
+if words_sub:
+    total = ep.build(a.src, '/tmp/_short_raw.mp4', words_sub,
+                     trim=(t0, t0 + 16.0), compress=False,
+                     hook_text=(a.hook or None), series='pokecity', logo_path=logo,
+                     bg_t=1.0, outdir='/tmp/_pro_real')
+else:
+    dummy = [{'w': 'povestea', 's': 0.0, 'e': 0.2}]
+    total = ep.build(a.src, '/tmp/_short_raw.mp4', dummy,
+                     trim=(t0, min(t1, t0 + 16.0)), compress=True,
+                     hook_text=(a.hook or None), series='pokecity', logo_path=logo,
+                     bg_t=1.0, outdir='/tmp/_pro_real')
 print('[BUILD] %.2fs montate (auto-editor + whisper real)' % total)
 
 subprocess.run([FF, '-y', '-loglevel', 'error', '-i', '/tmp/_short_raw.mp4', '-t', '16.0',

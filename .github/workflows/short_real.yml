@@ -18,6 +18,10 @@ on:
         description: 'titlu pt kit (opitional)'
         required: false
         default: ''
+      hook:
+        description: 'text hook pe ecran (gol = auto din primele cuvinte)'
+        required: false
+        default: ''
       src_release:
         description: 'release cu sursa deja descarcata (ex: src-ep2). Gol = incearca YouTube'
         required: false
@@ -51,7 +55,9 @@ jobs:
           FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
           if [ -n "${{ inputs.src_release }}" ]; then
             echo "sursa din release ${{ inputs.src_release }}"
-            gh release download "${{ inputs.src_release }}" -p "*.mp4" -O /tmp/src.mp4 --clobber
+            gh release download "${{ inputs.src_release }}" -p "*.mp4" -O /tmp/src.mp4 --clobber || true
+            gh release download "${{ inputs.src_release }}" -p "*.json3" -O /tmp/subs.json3 --clobber || true
+            ls -la /tmp/src.mp4 /tmp/subs.json3 2>/dev/null || true
           else
             curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/tmp/deno sh -s -- -y
             echo "/tmp/deno/bin" >> "$GITHUB_PATH"
@@ -67,7 +73,11 @@ jobs:
           fi
           ls -la /tmp/src.mp4
       - name: Montaj short (fereastra energie + whisper uman + SFX + LUFS)
-        run: python tools/short_real_build.py /tmp/src.mp4 --window "${{ inputs.window }}" --tag "${{ inputs.tag }}" --titlu "${{ inputs.titlu }}"
+        run: |
+          EXTRA=""
+          [ -f /tmp/subs.json3 ] && EXTRA="--subs /tmp/subs.json3"
+          [ -n "${{ inputs.hook }}" ] && EXTRA="$EXTRA --hook '${{ inputs.hook }}'"
+          python tools/short_real_build.py /tmp/src.mp4 --window "${{ inputs.window }}" --tag "${{ inputs.tag }}" --titlu "${{ inputs.titlu }}" $EXTRA
       - name: Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
