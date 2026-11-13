@@ -39,14 +39,23 @@ jobs:
         run: |
           curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/tmp/deno sh -s -- -y
           echo "/tmp/deno/bin" >> "$GITHUB_PATH"
+      - name: Provider PO-token (bgutil)
+        run: |
+          npx -y bgutil-ytdlp-pot-provider &
+          sleep 6
+          curl -s http://127.0.0.1:4416/ping && echo " <- provider LIVE"
       - name: Descarca video din canal
         run: |
           VID="${{ inputs.video_id }}"
           FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          pip install -q bgutil-ytdlp-pot-provider
           yt-dlp --cookies /tmp/cookies.txt --js-runtimes deno --remote-components ejs:github \
             --ffmpeg-location "$FF" --retries 3 \
-            --extractor-args "youtube:player_client=web_safari,mweb,web" \
-            -f "18/b" -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID"
+            --extractor-args "youtube:player_client=web,web_safari,mweb" \
+            -f "bv*[height<=1080]+ba/bv*+ba/b/18" \
+            --merge-output-format mp4 -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID" || \
+          yt-dlp --cookies /tmp/cookies.txt --js-runtimes deno --remote-components ejs:github \
+            --ffmpeg-location "$FF" -f "18/b" -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID"
           ls -la /tmp/src.mp4
       - name: Montaj short (fereastra energie + whisper uman + SFX + LUFS)
         run: python tools/short_real_build.py /tmp/src.mp4 --window "${{ inputs.window }}" --tag "${{ inputs.tag }}" --titlu "${{ inputs.titlu }}"
