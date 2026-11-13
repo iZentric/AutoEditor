@@ -31,6 +31,17 @@ if not os.path.exists(os.path.join(ep.PRO, 'boom.wav')):
         ep.PRO = alt
 print('[PRO SFX]', ep.PRO)
 
+# upscale inteligent daca sursa e sub 720p (360p -> 720p lanczos + sharpen)
+ei = subprocess.run([FF, '-i', a.src], capture_output=True, text=True).stderr
+hm = re.search(r'Stream #0:0.*?(\d{3,5})x(\d{2,5})', ei)
+if hm and int(hm.group(2)) < 720:
+    print('[SURA]', hm.group(1), 'x', hm.group(2), '-> 720p + sharpen')
+    subprocess.run([FF, '-y', '-loglevel', 'error', '-i', a.src,
+        '-vf', 'scale=1280:720:flags=lanczos,unsharp=5:5:0.8:5:5:0.4',
+        '-c:v', 'libx264', '-crf', '18', '-preset', 'fast', '-c:a', 'aac', '-b:a', '192k',
+        '/tmp/src_hd.mp4'], check=True)
+    a.src = '/tmp/src_hd.mp4'
+
 logo = os.path.join(REPO, 'assets', 'logo_pokecity.png')
 if not os.path.exists(logo):
     logo = None

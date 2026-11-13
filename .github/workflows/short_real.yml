@@ -35,16 +35,18 @@ jobs:
         run: |
           printf '%s' "${{ secrets.YT_COOKIES }}" > /tmp/cookies.txt
           head -c 40 /tmp/cookies.txt || true
+      - name: Instaleaza deno (runtime JS pt PO tokens)
+        run: |
+          curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/tmp/deno sh -s -- -y
+          echo "/tmp/deno/bin" >> "$GITHUB_PATH"
       - name: Descarca video din canal
         run: |
           VID="${{ inputs.video_id }}"
-          yt-dlp --cookies /tmp/cookies.txt --retries 3 \
-            --extractor-args "youtube:player_client=mweb,web_safari,web,tv" \
-            -f "bv*[height<=1080]+ba/bv*+ba/b/18" \
-            --merge-output-format mp4 -o /tmp/src.mp4 \
-            "https://www.youtube.com/watch?v=$VID" || \
-          yt-dlp --cookies /tmp/cookies.txt --retries 3 -f "18/b" -o /tmp/src.mp4 \
-            "https://www.youtube.com/watch?v=$VID"
+          FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          yt-dlp --cookies /tmp/cookies.txt --js-runtimes deno --remote-components ejs:github \
+            --ffmpeg-location "$FF" --retries 3 \
+            --extractor-args "youtube:player_client=web_safari,mweb,web" \
+            -f "18/b" -o /tmp/src.mp4 "https://www.youtube.com/watch?v=$VID"
           ls -la /tmp/src.mp4
       - name: Montaj short (fereastra energie + whisper uman + SFX + LUFS)
         run: python tools/short_real_build.py /tmp/src.mp4 --window "${{ inputs.window }}" --tag "${{ inputs.tag }}" --titlu "${{ inputs.titlu }}"
