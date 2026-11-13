@@ -44,6 +44,8 @@ jobs:
           curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/tmp/deno sh -s -- -y
           echo "/tmp/deno/bin" >> "$GITHUB_PATH"
       - name: Ia sursa (release local SAU YouTube)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VID="${{ inputs.video_id }}"
           FF=$(python3 -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
