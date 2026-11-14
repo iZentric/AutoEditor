@@ -44,3 +44,7 @@ boss-battle kill pana se posteaza acesta! Build reproducibil: SHORT_BOSS_build.p
 ### SHORT 27 (REAL) = "M-am ASCUNS de FIGURI in cladirea SECRETA!" (SHORT_27_REAL_ASCUND.mp4,
 18.6s, sursa = LIVE 02:03 Roblox, vocea reala, fara logo — legea v5, release short-27)
 — IN ASTEPTAREA POSTARII (ziua 3). Moment: ASCUNDEAEA+BUSIT. NU reface!
+### SHORT 27 = "L-am GASIT pe NOCIVANU BARBASANU in POKECITY !" (SHORT27_NOCIVANU.mp4, 16.00s,
+release short-27) — PRIMUL short din GAMEPLAY REAL montat integral pe GitHub Actions (EP.2 @21:11,
+captions = vocea reala din subtitrari oficiale). IN ASTEPTAREA POSTARII (ziua 3). Pipeline:
+workflow short_real.yml (sursa din release src-ep2). NU reface momentul pana se posteaza!
