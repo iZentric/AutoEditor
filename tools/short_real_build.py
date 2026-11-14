@@ -14,6 +14,8 @@ ap.add_argument('--tag', default='short-real')
 ap.add_argument('--titlu', default='')
 ap.add_argument('--subs', default='', help='json3 oficial YouTube (captions Google, calitate > whisper)')
 ap.add_argument('--hook', default='')
+ap.add_argument('--big', default='', help='cuvantul pt pop-out mare (gol = auto)')
+ap.add_argument('--punch', default='', help='cuvinte-putere separate prin virgula')
 a = ap.parse_args()
 
 def _ff():
@@ -33,16 +35,10 @@ if not os.path.exists(os.path.join(ep.PRO, 'boom.wav')):
         ep.PRO = alt
 print('[PRO SFX]', ep.PRO)
 
-# upscale inteligent daca sursa e sub 720p (360p -> 720p lanczos + sharpen)
-ei = subprocess.run([FF, '-i', a.src], capture_output=True, text=True).stderr
-hm = re.search(r'Stream #0:0.*?(\d{3,5})x(\d{2,5})', ei)
-if hm and int(hm.group(2)) < 720:
-    print('[SURA]', hm.group(1), 'x', hm.group(2), '-> 720p + sharpen')
-    subprocess.run([FF, '-y', '-loglevel', 'error', '-i', a.src,
-        '-vf', 'scale=1280:720:flags=lanczos,unsharp=5:5:0.8:5:5:0.4',
-        '-c:v', 'libx264', '-crf', '18', '-preset', 'fast', '-c:a', 'aac', '-b:a', '192k',
-        '/tmp/src_hd.mp4'], check=True)
-    a.src = '/tmp/src_hd.mp4'
+# fereastra se decide pe sursa originala (audio), apoi upscale DOAR pe bucati
+def _src_dims():
+    ei = subprocess.run([FF, '-i', a.src], capture_output=True, text=True).stderr
+    return re.search(r'Stream #0:0.*?(\d{3,5})x(\d{2,5})', ei)
 
 logo = os.path.join(REPO, 'assets', 'logo_pokecity.png')
 if not os.path.exists(logo):
@@ -65,7 +61,20 @@ else:
     t0, t1 = ep.find_best_window(a.src, win=16.0)
 print('[FEREASTRA] %.1fs -> %.1fs' % (t0, t1))
 
-DIAC = str.maketrans('ăâîșțĂÂÎȘȚşţŞŢ', 'aaiistAAIISTsTSsT')
+# upscale inteligent DOAR pe fereastra (360p -> 720p lanczos + sharpen)
+W0 = t0   # inceputul ferestrei in timpul SURSEI (subs se parseeaza pe sursa)
+hm = _src_dims()
+if hm and int(hm.group(2)) < 720:
+    print('[SURA]', hm.group(1), 'x', hm.group(2), '-> 720p + sharpen (doar fereastra)')
+    subprocess.run([FF, '-y', '-loglevel', 'error', '-ss', str(t0), '-t', str(t1 - t0 + 1), '-i', a.src,
+        '-vf', 'scale=1280:720:flags=lanczos,unsharp=5:5:0.8:5:5:0.4',
+        '-c:v', 'libx264', '-crf', '18', '-preset', 'fast', '-c:a', 'aac', '-b:a', '192k',
+        '/tmp/src_hd.mp4'], check=True)
+    a.src = '/tmp/src_hd.mp4'
+    t1 = t1 - t0
+    t0 = 0.0
+
+DIAC = str.maketrans({'ă':'a','â':'a','î':'i','ș':'s','ț':'t','Ă':'A','Â':'A','Î':'I','Ș':'S','Ț':'T','ş':'s','ţ':'t','Ş':'S','Ţ':'T'})
 def _fara_diac(x):
     return x.translate(DIAC)
 
@@ -81,9 +90,9 @@ if a.subs and os.path.exists(a.subs):
             ww = ww.replace('>>', ' ').strip(' ,.!?…').strip()
             if not ww or len(ww) < 2: continue
             st = tt + (sg.get('tOffsetMs') or 0) / 1000.0
-            if t0 - 0.2 <= st <= t0 + 16.5:
-                words_sub.append({'w': _fara_diac(ww), 's': round(st - t0, 2),
-                                  'e': round(st - t0 + 0.45, 2)})
+            if W0 - 0.2 <= st <= W0 + 16.5:
+                words_sub.append({'w': _fara_diac(ww), 's': round(st - W0, 2),
+                                  'e': round(st - W0 + 0.45, 2)})
     # merge secvente identice consecutive
     merged = []
     for w in words_sub:
@@ -93,16 +102,27 @@ if a.subs and os.path.exists(a.subs):
     words_sub = merged
     print('[SUBS OFICIALE] %d cuvinte in fereastra (calitate Google ASR)' % len(words_sub))
 
+big_finale = None
+if a.big and words_sub:
+    for w in words_sub:
+        if w['w'].lower() == a.big.lower():
+            big_finale = (a.big.upper(), max(0.0, w['s'] - 0.05), min(16.0, w['e'] + 0.9))
+            break
+    print('[BIG]', big_finale)
+punch_args = tuple(x.strip().lower() for x in a.punch.split(',') if x.strip())
+
 if words_sub:
     total = ep.build(a.src, '/tmp/_short_raw.mp4', words_sub,
                      trim=(t0, t0 + 16.0), compress=False,
-                     hook_text=(a.hook or None), series='pokecity', logo_path=logo,
+                     hook_text=(a.hook or None), punch_words=punch_args,
+                     big_finale=big_finale, series='pokecity', logo_path=logo,
                      bg_t=1.0, outdir='/tmp/_pro_real')
 else:
     dummy = [{'w': 'povestea', 's': 0.0, 'e': 0.2}]
     total = ep.build(a.src, '/tmp/_short_raw.mp4', dummy,
                      trim=(t0, min(t1, t0 + 16.0)), compress=True,
-                     hook_text=(a.hook or None), series='pokecity', logo_path=logo,
+                     hook_text=(a.hook or None), punch_words=punch_args,
+                     series='pokecity', logo_path=logo,
                      bg_t=1.0, outdir='/tmp/_pro_real')
 print('[BUILD] %.2fs montate (auto-editor + whisper real)' % total)
 
